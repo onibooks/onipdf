@@ -1,0 +1,40 @@
+{
+  "name": "@onipdf/core",
+  "version": "1.0.0",
+  "main": "./dist/onipdf-core.mjs",
+  "type": "module",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/onipdf-core.es.js",
+      "require": "./dist/onipdf-core.umd.js",
+      "types": "./types/index.d.ts"
+    }
+  },
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsc && NODE_ENV=development vite build --mode development --watch",
+    "build": "tsc && vite build"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18.3.1",
+    "cross-env": "^7.0.3",
+    "mupdf": "^0.2.2",
+    "typescript": "latest",
+    "vite": "^5.2.11"
+  },
+  "dependencies": {
+    "@emotion/css": "^11.11.2",
+    "clsx": "^2.1.1",
+    "eventemitter3": "^5.0.1",
+    "preact": "^10.22.0",
+    "zustand": "^4.5.2"
+  },
+  "peerDependencies": {
+    "mupdf": "^0.2.2"
+  }
+}
