@@ -5,8 +5,8 @@ import { embedMuPDF } from './commands/embedMuPDF'
 
 program
   .command('embed-mupdf')
-  .description('MuPDF.js의 빌드된 버전을 원하는 경로에 배포합니다. @onipdf/core 패키지에서 사용합니다.')
-  .option('-p, --path <path>', '복사할 폴더의 경로를 지정해주세요')
+  .description('MuPDF.js의 빌드된 버전을 원하는 경로로 가져옵니다.')
+  .option('-p, --path <path>', '폴더의 경로를 지정해주세요')
   .action(async (options) => {
     try {
       await embedMuPDF(options)
