@@ -9,7 +9,7 @@ pnpm add @onipdf/core
 
 ## MuPDF 가져오기
 
-OniPDF를 사용하기 위해서는 [MuPDF](https://github.com/ArtifexSoftware/mupdf.js)의 빌드된 스태틱 파일이 필요합니다. 빠른 시작을 위해 @onipdf/cli 패키지를 사용할 수 있습니다.
+OniPDF를 사용하기 위해서는 [MuPDF](https://github.com/ArtifexSoftware/mupdf.js)의 빌드된 스태틱 파일이 필요합니다. 빠른 시작을 위해 ```@onipdf/cli``` 패키지를 사용할 수 있습니다.
 ```bash
 npx @onipdf/cli embed-mupdf -p <path>
 ```
