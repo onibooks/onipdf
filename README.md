@@ -23,3 +23,6 @@ const oniPDF = createBook({
   muPDFSrc: 'path/to/your/mupdf.js'
 })
 ```
+
+## 확인 사항
+OniPDF는 프라이빗 저장소인 [onibooks](https://github.com/onibooks/onibooks)에서 서브모듈로 사용됩니다. 이 저장소를 클론하여 실행하기 위해선, 접근 권한이 필요할 수 있습니다.
