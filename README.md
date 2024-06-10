@@ -13,3 +13,13 @@ OniPDF를 사용하기 위해서는 [MuPDF](https://github.com/ArtifexSoftware/m
 ```bash
 npx @onipdf/cli embed-mupdf -p <path>
 ```
+
+## 실행하기
+```ts
+import { createBook } from '@onipdf/core'
+
+const oniPDF = createBook({
+  // MuPDF의 빌드된 파일이 저장된 경로를 지정하세요.
+  muPDFSrc: 'path/to/your/mupdf.js'
+})
+```
