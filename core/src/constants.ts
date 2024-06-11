@@ -1,1 +1,0 @@
-export const WORKER_SRC = './worker.ts'

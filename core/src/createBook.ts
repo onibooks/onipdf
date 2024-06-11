@@ -5,6 +5,8 @@ export type Options = {
 export const createBook = async ({
   muPDFSrc
 }: Options) => {
-  const worker = new Worker(new URL('./worker', import.meta.url), { type: 'module'})
+  const worker = new Worker(new URL('./worker', import.meta.url), { type: 'module' })
   worker.postMessage({ type: 'init', muPDFSrc })
+
+  console.log(worker)
 }

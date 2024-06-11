@@ -5,7 +5,8 @@ self.onmessage = async (event) => {
   if (type === 'init') {
     try {
       const mupdf: typeof MuPDF = await import(muPDFSrc)
+      console.log(mupdf)
     } catch (error) {
     }
   }
-};
+}
