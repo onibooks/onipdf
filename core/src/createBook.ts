@@ -28,7 +28,7 @@ export const createBook = async ({
     /**
      * ※ 혼동 주의:
      * prototype 으로 들어가게 해놓지만, 일반적인 인스턴스와 달리 실제로 함수를 공유하지는 않음.
-     * 단순, 고수준 API와 저수준 API를 나누기 위한 용도로 사용할 것임.
+     * 단순, 고수준 API와 저수준 API를 나누기 위한 용도로 사용합니다.
      */
   }, {
     version,
