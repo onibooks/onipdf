@@ -1,9 +1,9 @@
 import { createContext } from './provider'
 import { createSangte } from './sangte'
 import { createWorker } from './workers'
+import { createCommands } from './commands/createCommands'
 import { version } from '.'
 import { warn } from './helpers'
-import { createCommands } from './commands/commands'
 
 export type Options = {
   muPDFSrc: string
@@ -23,7 +23,7 @@ export const createBook = async ({
 }: Options) => {
   const context = createContext()
   context.sangte = createSangte()
-  context.worker = createWorker()
+  context.worker = createWorker(muPDFSrc)
 
   const instance: BookInstance = (context.instance = createObject({
     /**
@@ -41,8 +41,6 @@ export const createBook = async ({
       warn(`worker는 변경할 수 없습니다.`)
     }
   }))
-
-  context.worker.postMessage
 
   return instance
 }
