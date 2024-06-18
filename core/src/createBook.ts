@@ -3,6 +3,7 @@ import { createSangte } from './sangte'
 import { createWorker } from './workers'
 import { version } from '.'
 import { warn } from './helpers'
+import { createCommands } from './commands/commands'
 
 export type Options = {
   muPDFSrc: string
@@ -21,8 +22,8 @@ export const createBook = async ({
   muPDFSrc
 }: Options) => {
   const context = createContext()
-  context.worker = createWorker()
   context.sangte = createSangte()
+  context.worker = createWorker()
 
   const instance: BookInstance = (context.instance = createObject({
     /**
@@ -30,6 +31,7 @@ export const createBook = async ({
      * prototype 으로 들어가게 해놓지만, 일반적인 인스턴스와 달리 실제로 함수를 공유하지는 않음.
      * 단순, 고수준 API와 저수준 API를 나누기 위한 용도로 사용합니다.
      */
+    ...createCommands()
   }, {
     version,
     get worker () {
@@ -39,6 +41,8 @@ export const createBook = async ({
       warn(`worker는 변경할 수 없습니다.`)
     }
   }))
+
+  context.worker.postMessage
 
   return instance
 }
