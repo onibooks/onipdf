@@ -6,6 +6,7 @@
 import type { BookInstance } from './createBook';
 import type { Sangte } from './sangte';
 export type GlobalContext = {
+    uid: number;
     instance: BookInstance;
     worker: Worker;
     sangte: Sangte;

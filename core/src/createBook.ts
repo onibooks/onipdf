@@ -1,7 +1,7 @@
 import { createContext } from './provider'
 import { createSangte } from './sangte'
 import { createWorker } from './workers'
-import { createCommands } from './commands/createCommands'
+import { createCommands, type Commands } from './commands/createCommands'
 import { version } from '.'
 import { warn } from './helpers'
 
@@ -9,7 +9,7 @@ export type Options = {
   muPDFSrc: string
 }
 
-export type BookInstance = {}
+export type BookInstance = Commands & {}
 
 export const createObject = <T extends object, P extends object>(
   proto: T,

@@ -1,1 +1,1 @@
-export declare const createWorker: () => Worker;
+export declare const createWorker: (muPDFSrc: string, muPDFId: number) => Worker;
