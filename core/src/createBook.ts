@@ -2,7 +2,6 @@ import { createContext } from './provider'
 import { createSangte } from './sangte'
 import { createWorker } from './workers'
 import { createCommands, type Commands } from './commands/createCommands'
-import { version } from '.'
 import { warn } from './helpers'
 
 export type Options = {
@@ -23,19 +22,17 @@ export const createBook = async ({
 }: Options) => {
   const context = createContext()
   context.sangte = createSangte()
-
-  const muPDFId = context.uid
-  context.worker = createWorker(muPDFSrc, muPDFId)
+  context.worker = createWorker(muPDFSrc)
 
   const instance: BookInstance = (context.instance = createObject({
     /**
      * ※ 혼동 주의:
-     * prototype 으로 들어가게 해놓지만, 일반적인 인스턴스와 달리 실제로 함수를 공유하지는 않음.
+     * prototype 으로 들어가게 해놨지만, 일반적인 인스턴스와 달리 실제로 함수를 공유하지는 않음.
      * 단순, 고수준 API와 저수준 API를 나누기 위한 용도로 사용합니다.
      */
     ...createCommands()
   }, {
-    version,
+    version: __VERSION__,
     get worker () {
       return context.worker
     },

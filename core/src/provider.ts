@@ -19,10 +19,10 @@ const globalContext = new Map<number, GlobalContext>()
 
 export const createContext = () => {
   const context: GlobalContext = {
-    uid,
     instance: null as any,
     worker: null as any,
-    sangte: null as any
+    sangte: null as any,
+    uid,
   }
 
   globalContext.set(uid++, context)

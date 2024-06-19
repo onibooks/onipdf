@@ -1,3 +1,5 @@
-import type { GlobalContext } from '../provider'
+import { provider, type GlobalContext } from '../provider'
 
-export const open = (context: GlobalContext) => () => {}
+export const open = (context: GlobalContext) => () => {
+  
+}
