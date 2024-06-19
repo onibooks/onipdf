@@ -23,7 +23,9 @@ export const createBook = async ({
 }: Options) => {
   const context = createContext()
   context.sangte = createSangte()
-  context.worker = createWorker(muPDFSrc)
+
+  const muPDFId = context.uid
+  context.worker = createWorker(muPDFSrc, muPDFId)
 
   const instance: BookInstance = (context.instance = createObject({
     /**

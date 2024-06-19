@@ -1,24 +1,23 @@
+import * as commands from './commands.js'
+
 import type * as MuPDF from 'mupdf'
 
 let mupdf: typeof MuPDF
 
-let uid = 0
+const onInstall = async (event: MessageEvent) => {
+  if (mupdf) {
+    return
+  }
 
-const worker = self
-
-const documents = new Map<number, MuPDF.Document>()
-
-const commands = {
-  install: async (muPDFSrc: string) => {
-    if (!mupdf) {
-      mupdf = await import(/* @vite-ignore */ muPDFSrc)
-    }
+  const { muPDFSrc } = event.data
+  try {
+    mupdf = await commands.install(muPDFSrc)
+  } catch (error) {
+    console.error('worker install:', error)
   }
 }
 
-worker.onmessage = async (
-  event: MessageEvent
-) => {
+const onCommands = async (event: MessageEvent) => {
   const { type, ...args } = event.data
   const command = commands[type]
   if (!command) {
@@ -26,9 +25,21 @@ worker.onmessage = async (
   }
 
   try {
-    // command가 항상 async 함수인건 아니지만, 단순히 코드의 간결함을 위해 아래와 같이 처리합니다.
-    await command(...Object.values(args))
+    command(...Object.values(args))
   } catch (error) {
     console.error('worker command:', error)
   }
 }
+
+const onMessage = async (event: MessageEvent) => {
+  const { type } = event.data
+  switch (type) {
+    case 'install':
+      onInstall(event)
+      break
+    default:
+      onCommands(event)
+  }
+}
+
+self.addEventListener('message', onMessage)

@@ -7,6 +7,7 @@ import type { BookInstance } from './createBook'
 import type { Sangte } from './sangte'
 
 export type GlobalContext = {
+  uid: number
   instance: BookInstance
   worker: Worker
   sangte: Sangte
@@ -18,6 +19,7 @@ const globalContext = new Map<number, GlobalContext>()
 
 export const createContext = () => {
   const context: GlobalContext = {
+    uid,
     instance: null as any,
     worker: null as any,
     sangte: null as any
