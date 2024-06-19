@@ -51,7 +51,7 @@ export default defineConfig({
         assetFileNames: `assets/onipdf-worker-${version}.js`,
         entryFileNames: `assets/onipdf-worker-${version}.js`,        
       }
-    },
+    }
   },
   define: {
     __VERSION__: JSON.stringify(version),
