@@ -1,12 +1,15 @@
 import * as commands from './commands.js'
 
-import type * as MuPDF from 'mupdf'
+// @ts-ignore
+import * as MuPDF from 'mupdf'
 
 export type Commands = {
   [Key in keyof typeof commands]: ReturnType<typeof commands[Key]>
 }
 
-type WorkerContext = {
+export type WorkerContext = {
+  mupdf: typeof MuPDF
+  document: MuPDF.Document
   commands: Commands
 }
 
@@ -14,7 +17,7 @@ let mupdf: typeof MuPDF
 
 const workerContext = new Map<number, WorkerContext>()
 
-const createCommands = (context) => (
+const createCommands = (context: WorkerContext) => (
   Object.entries(commands).reduce((commandSet, [commandKey, commandFn]) => {
     if (typeof commandFn === 'function') {
       (commandSet as any)[commandKey] = commandFn(context)
@@ -24,7 +27,7 @@ const createCommands = (context) => (
   }, {})  
 )
 
-const createContext = (contextId) => {
+const createContext = (contextId: number) => {
   const context = {
     mupdf,
     commands: null as any,
@@ -46,7 +49,7 @@ const onSetup = async (event: MessageEvent) => {
     mupdf = await import(/* @vite-ignore */ muPDFSrc)
 
     const context = createContext(contextId)
-    context.commands = createCommands(context)
+    context.commands = createCommands(context) as Commands
 
     postMessage({ 
       type: 'setup',
@@ -60,7 +63,7 @@ const onSetup = async (event: MessageEvent) => {
 const onCommands = async (event: MessageEvent) => {
   const { type, contextId, promisesId, ...args } = event.data
   const context = workerContext.get(contextId) as WorkerContext
-  const command = context.commands[type]
+  const command = (context.commands as any)[type]
   if (!command) {
     return
   }

@@ -1,2 +1,2 @@
-export * from './open';
+export * from './openDocument';
 export * from './render';

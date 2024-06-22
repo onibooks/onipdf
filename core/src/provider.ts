@@ -5,11 +5,12 @@
  */
 import type { BookInstance } from './createBook'
 import type { Sangte } from './sangte'
+import type { MuPDFWorker } from './workers/createWorker'
 
 export type GlobalContext = {
   uid: number
   instance: BookInstance
-  worker: Worker
+  worker: MuPDFWorker
   sangte: Sangte
 }
 

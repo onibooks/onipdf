@@ -3,6 +3,6 @@
     "moduleResolution": "nodenext",
     "module": "nodenext",
     "strictFunctionTypes": true,
-    "strictNullChecks": true    
+    "strictNullChecks": true
   }
 }

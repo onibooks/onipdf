@@ -1,19 +1,18 @@
 import { provider } from '../provider.js'
 import * as commands from './commands.js'
 
-type ExtendedWorker = Worker & {
-  [Key in keyof typeof commands]?: ReturnType<typeof commands[Key]>
+export type MuPDFWorker = Worker & {
+  [Key in keyof typeof commands]: ReturnType<typeof commands[Key]>
 }
 
 const promises = new Map<number, { resolve: Function, rejected: Function }>()
 let promisesId = 0
 
 const onSetup = (event: MessageEvent, contextId: number) => {
-  const worker = event.currentTarget as ExtendedWorker
+  const worker = event.currentTarget as MuPDFWorker
   const { commands } = event.data
-
-  commands.forEach((command) => {
-    worker[command] = (...args: any[]) => (
+  commands.forEach((command: string) => {
+    (worker as any)[command] = (...args: any[]) => (
       new Promise((resolve, rejected) => {
         worker.postMessage({
           type: command,
@@ -34,9 +33,9 @@ const onCommands = (event: MessageEvent) => {
   promise.resolve(value)
 }
 
-export const createWorker = (muPDFSrc: string): Promise<ExtendedWorker> => provider((context) => {
+export const createWorker = (muPDFSrc: string): Promise<MuPDFWorker> => provider((context) => {
   return new Promise((resolve, rejected) => {
-    const worker: ExtendedWorker = new Worker(new URL('./worker', import.meta.url), { type: 'module' })
+    const worker = new Worker(new URL('./worker', import.meta.url), { type: 'module' })
     worker.onmessage = (event: MessageEvent) => {
       const { type } = event.data
       switch (type) {
@@ -47,7 +46,7 @@ export const createWorker = (muPDFSrc: string): Promise<ExtendedWorker> => provi
           onCommands(event)
       }
 
-      resolve(worker)
+      resolve(worker as MuPDFWorker)
     }
 
     worker.postMessage({ type: 'setup', muPDFSrc, contextId: context.uid })

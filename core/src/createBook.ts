@@ -41,7 +41,5 @@ export const createBook = async ({
     }
   }))
 
-  console.log(context.worker)
-
   return instance
 }

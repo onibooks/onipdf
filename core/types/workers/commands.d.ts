@@ -1,3 +1,2 @@
-export declare const openDocument: ({ mupdf }: {
-    mupdf: any;
-}) => () => void;
+import type { WorkerContext } from './worker.js';
+export declare const openDocument: (context: WorkerContext) => () => number;

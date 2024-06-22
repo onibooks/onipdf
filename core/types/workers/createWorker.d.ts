@@ -1,6 +1,5 @@
 import * as commands from './commands.js';
-type ExtendedWorker = Worker & {
-    [Key in keyof typeof commands]?: ReturnType<typeof commands[Key]>;
+export type MuPDFWorker = Worker & {
+    [Key in keyof typeof commands]: ReturnType<typeof commands[Key]>;
 };
-export declare const createWorker: (muPDFSrc: string) => Promise<ExtendedWorker>;
-export {};
+export declare const createWorker: (muPDFSrc: string) => Promise<MuPDFWorker>;
