@@ -1,3 +1,3 @@
-export const install = async (muPDFSrc: string) => (
-  await import(/* @vite-ignore */ muPDFSrc)
-)
+export const openDocument = (context) => (a) => {
+  return 1
+}

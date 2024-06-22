@@ -22,7 +22,7 @@ export const createBook = async ({
 }: Options) => {
   const context = createContext()
   context.sangte = createSangte()
-  context.worker = createWorker(muPDFSrc)
+  context.worker = await createWorker(muPDFSrc)
 
   const instance: BookInstance = (context.instance = createObject({
     /**
@@ -40,6 +40,8 @@ export const createBook = async ({
       warn(`worker는 변경할 수 없습니다.`)
     }
   }))
+
+  console.log(await context.worker.openDocument())
 
   return instance
 }
