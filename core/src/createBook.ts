@@ -41,7 +41,7 @@ export const createBook = async ({
     }
   }))
 
-  console.log(await context.worker.openDocument())
+  console.log(context.worker)
 
   return instance
 }

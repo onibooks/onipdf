@@ -12,8 +12,6 @@ type WorkerContext = {
 
 let mupdf: typeof MuPDF
 
-let uid = 0
-
 const workerContext = new Map<number, WorkerContext>()
 
 const createCommands = (context) => (
@@ -26,44 +24,42 @@ const createCommands = (context) => (
   }, {})  
 )
 
-const createContext = () => {
+const createContext = (contextId) => {
   const context = {
-    uid,
     mupdf,
     commands: null as any,
     document: null as any,
   }
 
-  workerContext.set(uid++, context)
+  workerContext.set(contextId, context)
 
   return context
 }
 
-const onReady = async (event: MessageEvent) => {
+const onSetup = async (event: MessageEvent) => {
   if (mupdf) {
     return
   }
 
-  const { muPDFSrc } = event.data
+  const { muPDFSrc, contextId } = event.data
   try {
     mupdf = await import(/* @vite-ignore */ muPDFSrc)
 
-    const context = createContext()
+    const context = createContext(contextId)
     context.commands = createCommands(context)
 
-    self.postMessage({
-      type: 'ready',
-      uid: context.uid,
+    postMessage({ 
+      type: 'setup',
       commands: Object.keys(commands)
     })
   } catch (error) {
-    console.error('worker ready:', error)
+    console.error('worker setup:', error)
   }
 }
 
 const onCommands = async (event: MessageEvent) => {
-  const { type, uid, ...args } = event.data
-  const context = workerContext.get(uid) as WorkerContext
+  const { type, contextId, promisesId, ...args } = event.data
+  const context = workerContext.get(contextId) as WorkerContext
   const command = context.commands[type]
   if (!command) {
     return
@@ -71,8 +67,9 @@ const onCommands = async (event: MessageEvent) => {
 
   try {
     const value = command(...Object.values(args))
-    self.postMessage({
+    postMessage({
       type: 'command',
+      promisesId,
       value
     })
   } catch (error) {
@@ -83,8 +80,8 @@ const onCommands = async (event: MessageEvent) => {
 const onMessage = async (event: MessageEvent) => {
   const { type } = event.data
   switch (type) {
-    case 'ready':
-      onReady(event)
+    case 'setup':
+      onSetup(event)
       break
     default:
       onCommands(event)
