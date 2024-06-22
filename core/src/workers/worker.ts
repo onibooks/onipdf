@@ -70,13 +70,9 @@ const onCommands = async (event: MessageEvent) => {
 
   try {
     const value = command(...Object.values(args))
-    postMessage({
-      type: 'command',
-      promisesId,
-      value
-    })
+    postMessage({ type: 'command', promisesId, value })
   } catch (error) {
-    console.error('worker command:', error)
+    postMessage({ type: 'command', promisesId, error })
   }
 }
 

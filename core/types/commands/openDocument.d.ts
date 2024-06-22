@@ -1,2 +1,2 @@
 import type { GlobalContext } from '../provider';
-export declare const openDocument: (context: GlobalContext) => () => Promise<void>;
+export declare const openDocument: (context: GlobalContext) => () => void;

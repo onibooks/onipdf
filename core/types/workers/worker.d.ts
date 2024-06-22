@@ -5,5 +5,6 @@ export type Commands = {
 };
 export type WorkerContext = {
     mupdf: typeof MuPDF;
+    document: MuPDF.Document;
     commands: Commands;
 };

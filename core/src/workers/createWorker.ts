@@ -5,7 +5,7 @@ export type MuPDFWorker = Worker & {
   [Key in keyof typeof commands]: ReturnType<typeof commands[Key]>
 }
 
-const promises = new Map<number, { resolve: Function, rejected: Function }>()
+const promises = new Map<number, { resolve: Function, reject: Function }>()
 let promisesId = 0
 
 const onSetup = (event: MessageEvent, contextId: number) => {
@@ -13,7 +13,7 @@ const onSetup = (event: MessageEvent, contextId: number) => {
   const { commands } = event.data
   commands.forEach((command: string) => {
     (worker as any)[command] = (...args: any[]) => (
-      new Promise((resolve, rejected) => {
+      new Promise((resolve, reject) => {
         worker.postMessage({
           type: command,
           contextId,
@@ -21,16 +21,22 @@ const onSetup = (event: MessageEvent, contextId: number) => {
           ...args
         })
 
-        promises.set(promisesId++, { resolve, rejected })
+        promises.set(promisesId++, { resolve, reject })
       })
     )
   })
 }
 
 const onCommands = (event: MessageEvent) => {
-  const { value, promisesId } = event.data
+  const { value, error, promisesId } = event.data
   const promise = promises.get(promisesId)!
-  promise.resolve(value)
+  promises.delete(promisesId)
+
+  if (error) {
+    promise.reject(error)
+  } else {
+    promise.resolve(value)
+  }
 }
 
 export const createWorker = (muPDFSrc: string): Promise<MuPDFWorker> => provider((context) => {
