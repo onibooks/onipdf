@@ -1,11 +1,8 @@
-import * as commands from './commands.js'
+import * as commands from './commands/index.js'
+import { createCommands, type Commands } from './commands/createCommands.js'
 
 // @ts-ignore
 import * as MuPDF from 'mupdf'
-
-export type Commands = {
-  [Key in keyof typeof commands]: ReturnType<typeof commands[Key]>
-}
 
 export type WorkerContext = {
   mupdf: typeof MuPDF
@@ -16,16 +13,6 @@ export type WorkerContext = {
 let mupdf: typeof MuPDF
 
 const workerContext = new Map<number, WorkerContext>()
-
-const createCommands = (context: WorkerContext) => (
-  Object.entries(commands).reduce((commandSet, [commandKey, commandFn]) => {
-    if (typeof commandFn === 'function') {
-      (commandSet as any)[commandKey] = commandFn(context)
-    }
-
-    return commandSet
-  }, {})  
-)
 
 const createContext = (contextId: number) => {
   const context = {
