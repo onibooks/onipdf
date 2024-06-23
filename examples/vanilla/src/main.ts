@@ -1,6 +1,6 @@
 import './style.css'
 
-import { createBook } from '@onipdf/core'
+import { createBook, EVENTS } from '@onipdf/core'
 
 ;(async () => {
   const oniPDF = await createBook({
@@ -13,10 +13,15 @@ import { createBook } from '@onipdf/core'
     const file = target.files && target.files[0]
     if (file) {
       await oniPDF.openDocument(await file.arrayBuffer())
-
-      const metadata = await oniPDF.getMetaData()
-      const totalPages = await oniPDF.getTotalPages()
-      console.log(metadata, totalPages)
     }
+  })
+
+  oniPDF.on(EVENTS.OPEN, async () => {
+    console.log('Document opened')
+
+    const metadata = await oniPDF.getMetaData()
+    const totalPages = await oniPDF.getTotalPages()
+    console.log('metadata:', metadata)
+    console.log('metadata:', totalPages)
   })
 })()
