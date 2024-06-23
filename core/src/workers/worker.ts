@@ -1,5 +1,6 @@
 import { createCommands, type Commands } from './commands/createCommands.js'
 
+// @ts-ignore
 import * as MuPDF from 'mupdf'
 
 export type WorkerContext = {
@@ -47,7 +48,7 @@ const onSetup = async (event: MessageEvent) => {
 const onCommands = async (event: MessageEvent) => {
   const { type, contextId, promisesId, ...args } = event.data
   const context = workerContext.get(contextId) as WorkerContext
-  const command = (context.commands as any)[type]
+  const command = (context.commands as Record<string, Function>)[type]
   if (!command) {
     return
   }

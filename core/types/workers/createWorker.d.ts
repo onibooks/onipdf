@@ -1,4 +1,4 @@
-import * as commands from './commands.js';
+import * as commands from './commands/index.js';
 export type MuPDFWorker = Worker & {
     [Key in keyof typeof commands]: ReturnType<typeof commands[Key]>;
 };

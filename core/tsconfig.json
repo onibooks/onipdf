@@ -20,9 +20,9 @@
     "../../global.d.ts"
   ],
   "exclude": [
+    "src/workers/**/*",
     "node_modules",
     "dist",
-    "**/*.spec.ts",
-    "src/workers/**/*"
+    "**/*.spec.ts"
   ]
 }

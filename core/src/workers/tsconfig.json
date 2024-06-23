@@ -4,5 +4,8 @@
     "moduleResolution": "nodenext",
     "strictFunctionTypes": true,
     "strictNullChecks": true
-  }
+  },
+  "include": [
+    "**/*"
+  ]
 }
