@@ -1,7 +1,5 @@
-import * as commands from './commands/index.js'
 import { createCommands, type Commands } from './commands/createCommands.js'
 
-// @ts-ignore
 import * as MuPDF from 'mupdf'
 
 export type WorkerContext = {
@@ -14,12 +12,13 @@ let mupdf: typeof MuPDF
 
 const workerContext = new Map<number, WorkerContext>()
 
-const createContext = (contextId: number) => {
+const createContext = (contextId: number): WorkerContext => {
   const context = {
     mupdf,
     commands: null as any,
     document: null as any,
   }
+  context.commands = createCommands(context)
 
   workerContext.set(contextId, context)
 
@@ -34,13 +33,11 @@ const onSetup = async (event: MessageEvent) => {
   const { muPDFSrc, contextId } = event.data
   try {
     mupdf = await import(/* @vite-ignore */ muPDFSrc)
-
     const context = createContext(contextId)
-    context.commands = createCommands(context) as Commands
 
-    postMessage({ 
+    postMessage({
       type: 'setup',
-      commands: Object.keys(commands)
+      commands: Object.keys(context.commands)
     })
   } catch (error) {
     console.error('worker setup:', error)
