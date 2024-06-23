@@ -9,7 +9,7 @@ import type { MuPDFWorker } from './workers/createWorker'
 
 export type GlobalContext = {
   uid: number
-  instance: Book
+  book: Book
   worker: MuPDFWorker
   sangte: Sangte
 }
@@ -20,7 +20,7 @@ const globalContext = new Map<number, GlobalContext>()
 
 export const createContext = () => {
   const context: GlobalContext = {
-    instance: null as any,
+    book: null as any,
     worker: null as any,
     sangte: null as any,
     uid,

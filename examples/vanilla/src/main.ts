@@ -3,7 +3,7 @@ import './style.css'
 import { createBook, EVENTS } from '@onipdf/core'
 
 ;(async () => {
-  const oniPDF = await createBook({
+  const book = await createBook({
     muPDFSrc: '/lib/mupdf/mupdf.js'
   })
 
@@ -12,15 +12,15 @@ import { createBook, EVENTS } from '@onipdf/core'
     const target = event.target as HTMLInputElement
     const file = target.files && target.files[0]
     if (file) {
-      await oniPDF.openDocument(await file.arrayBuffer())
+      await book.openDocument(await file.arrayBuffer())
     }
   })
 
-  oniPDF.on(EVENTS.OPEN, async () => {
+  book.on(EVENTS.OPEN, async () => {
     console.log('Document opened')
 
-    const metadata = await oniPDF.getMetaData()
-    const totalPages = await oniPDF.getTotalPages()
+    const metadata = await book.getMetaData()
+    const totalPages = await book.getTotalPages()
     console.log('metadata:', metadata)
     console.log('metadata:', totalPages)
   })

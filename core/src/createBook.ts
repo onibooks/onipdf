@@ -25,7 +25,7 @@ export const createBook = async ({
   context.sangte = createSangte()
   context.worker = await createWorker(muPDFSrc)
 
-  const instance: Book = (context.instance = createObject({
+  const book: Book = (context.book = createObject({
     /**
      * ※ 혼동 주의:
      * prototype 으로 들어가게 해놨지만, 일반적인 인스턴스와 달리 실제로 함수를 공유하지는 않음.
@@ -43,5 +43,5 @@ export const createBook = async ({
     }
   }))
 
-  return instance
+  return book
 }
