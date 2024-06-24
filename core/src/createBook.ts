@@ -9,7 +9,7 @@ export type Options = {
   muPDFSrc: string
 }
 
-export type Book = Commands & Events & {}
+export type OniPDF = Commands & Events & {}
 
 export const createObject = <T extends object, P extends object>(
   proto: T,
@@ -20,12 +20,12 @@ export const createObject = <T extends object, P extends object>(
 
 export const createBook = async ({
   muPDFSrc
-}: Options): Promise<Book> => {
+}: Options): Promise<OniPDF> => {
   const context = createContext()
   context.sangte = createSangte()
   context.worker = await createWorker(muPDFSrc)
 
-  const book: Book = (context.book = createObject({
+  const oniPDF: OniPDF = (context.oniPDF = createObject({
     /**
      * ※ 혼동 주의:
      * prototype 으로 들어가게 해놨지만, 일반적인 인스턴스와 달리 실제로 함수를 공유하지는 않음.
@@ -43,5 +43,5 @@ export const createBook = async ({
     }
   }))
 
-  return book
+  return oniPDF
 }

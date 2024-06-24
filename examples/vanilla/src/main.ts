@@ -17,11 +17,11 @@ import { createBook, EVENTS } from '@onipdf/core'
   })
 
   book.on(EVENTS.OPEN, async () => {
-    console.log('Document opened')
+    console.log('Document opened;')
 
     const metadata = await book.getMetaData()
     const totalPages = await book.getTotalPages()
     console.log('metadata:', metadata)
-    console.log('metadata:', totalPages)
+    console.log('totalPages:', totalPages)
   })
 })()
