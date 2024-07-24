@@ -36,7 +36,7 @@ const onSetup = async (event: MessageEvent) => {
     mupdf = await import(/* @vite-ignore */ muPDFSrc)
     const context = createContext(contextId)
 
-    postMessage({
+    self.postMessage({
       type: 'setup',
       commands: Object.keys(context.commands)
     })
@@ -55,9 +55,9 @@ const onCommands = async (event: MessageEvent) => {
 
   try {
     const value = command(...Object.values(args))
-    postMessage({ type: 'command', promisesId, value })
+    self.postMessage({ type: 'command', promisesId, value })
   } catch (error) {
-    postMessage({ type: 'command', promisesId, error })
+    self.postMessage({ type: 'command', promisesId, error })
   }
 }
 
