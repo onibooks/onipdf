@@ -11,6 +11,7 @@ import { createBook, EVENTS } from '@onipdf/core'
   fileInput?.addEventListener('change', async (event: Event) => {
     const target = event.target as HTMLInputElement
     const file = target.files && target.files[0]
+    
     if (file) {
       await book.openDocument(await file.arrayBuffer())
     }
@@ -19,9 +20,9 @@ import { createBook, EVENTS } from '@onipdf/core'
   book.on(EVENTS.OPEN, async () => {
     console.log('Document opened;')
 
-    const metadata = await book.getMetaData()
-    const totalPages = await book.getTotalPages()
-    console.log('metadata:', metadata)
-    console.log('totalPages:', totalPages)
+    // const metadata = await book.getMetaData()
+    // const totalPages = await book.getTotalPages()
+    // console.log('metadata:', metadata)
+    // console.log('totalPages:', totalPages)
   })
 })()

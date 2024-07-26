@@ -11,6 +11,7 @@ export const createCommands = () => provider((context) => (
     if (typeof commandFn === 'function') {
       (commandSet as any)[commandKey] = commandFn(context)
     }
+    console.log('context', context)
 
     return commandSet
   }, {})

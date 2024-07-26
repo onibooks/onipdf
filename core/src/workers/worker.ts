@@ -46,7 +46,7 @@ const onSetup = async (event: MessageEvent) => {
 }
 
 const onCommands = async (event: MessageEvent) => {
-  
+  console.log('onCommands: ', event)
 }
 
 const onMessage = async (event: MessageEvent) => {

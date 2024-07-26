@@ -13,4 +13,9 @@ export type GlobalContext = {
     sangte: Sangte;
 };
 export declare const createContext: () => GlobalContext;
+/**
+ * consumer라는 함수는 context라는 매개변수를 가지는데 context의 타입은 GlobalContext
+ * 전역에 있는 uid로 전역에 있는 globalContext에서 현재 context를 구해주고
+ * consumer의 매개변수로 context를 넣어주면 현재 context를 return하게된다.
+ */
 export declare const provider: <T>(consumer: (context: GlobalContext) => T) => T;
