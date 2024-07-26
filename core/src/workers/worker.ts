@@ -46,19 +46,7 @@ const onSetup = async (event: MessageEvent) => {
 }
 
 const onCommands = async (event: MessageEvent) => {
-  const { type, contextId, promisesId, ...args } = event.data
-  const context = workerContext.get(contextId) as WorkerContext
-  const command = (context.commands as Record<string, Function>)[type]
-  if (!command) {
-    return
-  }
-
-  try {
-    const value = command(...Object.values(args))
-    self.postMessage({ type: 'command', promisesId, value })
-  } catch (error) {
-    self.postMessage({ type: 'command', promisesId, error })
-  }
+  
 }
 
 const onMessage = async (event: MessageEvent) => {
