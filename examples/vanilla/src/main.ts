@@ -11,7 +11,6 @@ import { createBook, EVENTS } from '@onipdf/core'
   fileInput?.addEventListener('change', async (event: Event) => {
     const target = event.target as HTMLInputElement
     const file = target.files && target.files[0]
-    
     if (file) {
       await book.openDocument(await file.arrayBuffer())
     }

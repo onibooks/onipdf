@@ -1,2 +1,2 @@
 import type { GlobalContext } from '../provider';
-export declare const getMetaData: (context: GlobalContext) => () => Promise<{}>;
+export declare const getMetaData: (context: GlobalContext) => () => Promise<void>;
