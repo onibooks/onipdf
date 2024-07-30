@@ -1,2 +1,2 @@
-import type { WorkerContext } from '../workers/worker';
-export declare const getTotalPages: (context: WorkerContext) => () => void;
+import type { GlobalContext } from '../provider';
+export declare const getTotalPages: (context: GlobalContext) => () => Promise<void>;

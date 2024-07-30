@@ -1,0 +1,1 @@
+// startPinch, updatePinch, endPinch, getCurrentScale, setScale
