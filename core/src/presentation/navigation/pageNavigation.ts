@@ -1,0 +1,1 @@
+// goToPage, nextPage, prevPage, getCurrentPage

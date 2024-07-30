@@ -1,0 +1,1 @@
+// addHighlight, removeHighlight, getHighlights

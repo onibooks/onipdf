@@ -1,0 +1,1 @@
+// renderPageToCanvas, clearCanvas

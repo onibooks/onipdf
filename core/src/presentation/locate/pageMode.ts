@@ -1,0 +1,1 @@
+// setPageMode, getPageMode
