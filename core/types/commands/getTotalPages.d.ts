@@ -1,2 +1,2 @@
 import type { GlobalContext } from '../provider';
-export declare const getTotalPages: (context: GlobalContext) => () => Promise<void>;
+export declare const getTotalPages: (context: GlobalContext) => () => Promise<any>;

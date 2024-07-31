@@ -23,5 +23,18 @@ import { createBook, EVENTS } from '@onipdf/core'
     const totalPages = await book.getTotalPages()
     console.log('metadata:', metadata)
     console.log('totalPages:', totalPages)
+
+    await book.render(0)
+  })
+  
+  book.on(EVENTS.LOAD, async ({ blobPng }) => {
+    const container = document.getElementById('container') as HTMLDivElement
+    const image = new Image()
+
+    image.src = URL.createObjectURL(new Blob([blobPng], { type: 'image/png' }))
+    image.onload = function () {
+      image.style.width = image.width / window.devicePixelRatio + 'px'
+      container.appendChild(image)
+    }
   })
 })()

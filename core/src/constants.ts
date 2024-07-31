@@ -1,3 +1,4 @@
 export const EVENTS = {
-  OPEN: 'open'
+  OPEN: 'open',
+  LOAD: 'load',
 }

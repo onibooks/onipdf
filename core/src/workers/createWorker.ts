@@ -9,8 +9,6 @@ export type MuPDFWorker = Worker & {
 let promisesId = 0
 const promises = new Map<number, { resolve: Function, reject: Function }>()
 
-
-
 const onSetup = (event: MessageEvent, contextId: number) => {
   const mainWorker = event.currentTarget as MuPDFWorker
   const { commands } = event.data

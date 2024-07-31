@@ -1,3 +1,6 @@
 export * from './openDocument'
 export * from './getMetaData'
 export * from './getTotalPages'
+// export * from './locate'
+// export * from './layout'
+export * from './render'
