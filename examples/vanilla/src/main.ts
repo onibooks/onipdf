@@ -6,6 +6,7 @@ import { createBook, EVENTS } from '@onipdf/core'
   const book = await createBook({
     muPDFSrc: '/lib/mupdf/mupdf.js'
   })
+  let index = 0
 
   const fileInput = document.getElementById('file') as HTMLInputElement
   fileInput?.addEventListener('change', async (event: Event) => {
@@ -24,10 +25,11 @@ import { createBook, EVENTS } from '@onipdf/core'
     console.log('metadata:', metadata)
     console.log('totalPages:', totalPages)
 
-    await book.render(0)
+    await book.render(index)
   })
   
   book.on(EVENTS.LOAD, async ({ blobPng }) => {
+    console.log('RENDER PAGE', index + 1)
     const container = document.getElementById('container') as HTMLDivElement
     const image = new Image()
 
