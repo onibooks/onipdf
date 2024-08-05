@@ -1,2 +1,11 @@
 import type { WorkerContext } from '../worker.js';
-export declare const loadPage: (context: WorkerContext) => (transform?: number[], index?: number) => any;
+export declare const loadPage: (context: WorkerContext) => (devicePixelRatio: any, index?: number) => {
+    page: any;
+    pageSize: {
+        width: number;
+        height: number;
+    };
+    pageText: any;
+    pageLinks: any;
+    pixmap: any;
+};

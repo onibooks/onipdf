@@ -6,11 +6,22 @@
 import type { OniPDF } from './createBook';
 import type { Sangte } from './sangte';
 import type { MuPDFWorker } from './workers/createWorker';
+export type PagesType = {
+    page: any;
+    pageSize: {
+        width: number;
+        height: number;
+    };
+    pageText: any;
+    pageLinks: any;
+    pixmap: any;
+};
 export type GlobalContext = {
     uid: number;
     oniPDF: OniPDF;
     worker: MuPDFWorker;
     sangte: Sangte;
+    pages: PagesType[];
 };
 export declare const createContext: () => GlobalContext;
 /**

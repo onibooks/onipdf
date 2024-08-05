@@ -7,11 +7,23 @@ import type { OniPDF } from './createBook'
 import type { Sangte } from './sangte'
 import type { MuPDFWorker } from './workers/createWorker'
 
+export type PagesType = {
+  page: any
+  pageSize: {
+    width: number
+    height: number
+  }
+  pageText: any
+  pageLinks: any
+  pixmap: any
+}
+
 export type GlobalContext = {
   uid: number
   oniPDF: OniPDF
   worker: MuPDFWorker
   sangte: Sangte
+  pages: PagesType[]
 }
 
 let uid = 0
@@ -23,6 +35,7 @@ export const createContext = () => {
     oniPDF: null as any,
     worker: null as any,
     sangte: null as any,
+    pages: [],
     uid,
   }
 
