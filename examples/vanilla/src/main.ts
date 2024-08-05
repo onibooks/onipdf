@@ -3,40 +3,35 @@ import './style.css'
 import { createBook, EVENTS } from '@onipdf/core'
 
 ;(async () => {
-  const book = await createBook({
+  const oniPdf = await createBook('/books/179489140.pdf', {
     muPDFSrc: '/lib/mupdf/mupdf.js'
   })
-  let index = 0
-
-  const fileInput = document.getElementById('file') as HTMLInputElement
-  fileInput?.addEventListener('change', async (event: Event) => {
-    const target = event.target as HTMLInputElement
-    const file = target.files && target.files[0]
-    if (file) {
-      await book.openDocument(await file.arrayBuffer())
-    }
-  })
-
-  book.on(EVENTS.OPEN, async () => {
+  const index = 0
+  
+  oniPdf.on(EVENTS.OPEN, async () => {
     console.log('Document opened;')
 
-    const metadata = await book.getMetaData()
-    const totalPages = await book.getTotalPages()
-    console.log('metadata:', metadata)
-    console.log('totalPages:', totalPages)
+    const metadata = await oniPdf.getMetaData()
+    const totalPages = await oniPdf.getTotalPages()
+    console.log(metadata, totalPages)
+    
+    await oniPdf.loadPage(index)
 
-    await book.render(index)
+    // oniPdf.render(document.getElementById('app')!, {
+    //   type: 'image'
+    // })
   })
-  
-  book.on(EVENTS.LOAD, async ({ blobPng }) => {
-    console.log('RENDER PAGE', index + 1)
-    const container = document.getElementById('container') as HTMLDivElement
-    const image = new Image()
 
-    image.src = URL.createObjectURL(new Blob([blobPng], { type: 'image/png' }))
-    image.onload = function () {
-      image.style.width = image.width / window.devicePixelRatio + 'px'
-      container.appendChild(image)
-    }
-  })
+  oniPdf.on(EVENTS.LOAD, async ({ data }) => {
+    console.log('LOAD PAGE', data)
+
+    // const container = document.getElementById('container') as HTMLDivElement
+    // const image = new Image()
+
+    // image.src = URL.createObjectURL(new Blob([data.blobPng], { type: 'image/png' }))
+    // image.onload = function () {
+    //   image.style.width = image.width / window.devicePixelRatio + 'px'
+    //   container.appendChild(image)
+    // }
+  })  
 })()
