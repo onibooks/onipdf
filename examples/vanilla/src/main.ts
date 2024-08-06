@@ -16,27 +16,19 @@ import { createBook, EVENTS } from '@onipdf/core'
     console.log(metadata, totalPages)
 
     await oniPdf.loadPage(index)
-    await oniPdf.render(document.getElementById('app')!)
+    await oniPdf.render(document.getElementById('app')!, {
+      type: 'canvas'
+    })
   })
   
   oniPdf.on(EVENTS.LOAD, async ({ data }) => {
     console.log('LOAD PAGE', data)
   })
 
-  // oniPdf.on(EVENTS.RENDERED, ({ drawPromise }) => {
-  //   console.log('RENDERED', drawPromise)
+  // oniPdf.on(EVENTS.RENDERED, () => {
+  //   console.log('RENDERED')
   // })
 
   // @ts-ignore
   window.oniPdf = oniPdf
 })()
-
-
-// const container = document.getElementById('container') as HTMLDivElement
-// const image = new Image()
-
-// image.src = URL.createObjectURL(new Blob([data.blobPng], { type: 'image/png' }))
-// image.onload = function () {
-//   image.style.width = image.width / window.devicePixelRatio + 'px'
-//   container.appendChild(image)
-// }

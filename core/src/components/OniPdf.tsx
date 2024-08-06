@@ -1,9 +1,8 @@
 import clsx from 'clsx'
-import { useRef, useState, useMemo } from 'preact/hooks'
+import { useRef, useState, useEffect, useMemo } from 'preact/hooks'
 
 import type { GlobalContext } from '../provider'
 import type { Emotion } from '@emotion/css/types/create-instance'
-import { useEffect } from 'react'
 
 type OniPdfProps = {
   context: GlobalContext
@@ -14,28 +13,34 @@ const OniPdf = ({
 }: OniPdfProps) => {
   const { options } = context
   const [currentPage, setCurrentPage] = useState<number>(0)
+  const spineRef = useRef<HTMLDivElement>(null)
+  const pageRef = useRef<HTMLDivElement>(null)
+  const classes = useMemo(() => createClasses(context.emotion.css), [])
 
   useEffect(() => {
-    setCurrentPage(options.page!)
+    const renderContent = async () => {
+      let renderedElement
 
-    switch (options.type) {
-      case 'image' :
-        context.oniPDF.renderToImage()
-        break
-      case 'svg' :
-        context.oniPDF.renderToSvg()
-        break
-      default :
-        context.oniPDF.renderToCanvas()
-        break
+      switch (options.type) {
+        case 'image':
+          renderedElement = await context.oniPDF.renderToImage()
+          break
+        case 'svg':
+          renderedElement = await context.oniPDF.renderToSvg()
+          break
+        default:
+          renderedElement = await context.oniPDF.renderToCanvas()
+          break
+      }
+
+      if (pageRef.current && renderedElement) {
+        pageRef.current.innerHTML = ''
+        pageRef.current.appendChild(renderedElement)
+      }
     }
-  }, [options])
-  
-  const spineRef = useRef<HTMLDivElement>(null)
-  
-  const classes = useMemo(() => 
-    createClasses(context.emotion.css),
-  [])
+
+    renderContent()
+  }, [options.type, context.oniPDF])
 
   return (
     <div class={clsx(classes.Scrolling)}>
@@ -43,7 +48,7 @@ const OniPdf = ({
         class={clsx(classes.Spine)}
         ref={spineRef}
       >
-        spineRef
+        <div ref={pageRef}></div>
       </div>
     </div>
   )
