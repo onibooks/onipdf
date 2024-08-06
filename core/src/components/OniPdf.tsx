@@ -1,8 +1,9 @@
 import clsx from 'clsx'
-import { useEffect } from 'preact/hooks'
+import { useRef, useState, useMemo } from 'preact/hooks'
 
 import type { GlobalContext } from '../provider'
 import type { Emotion } from '@emotion/css/types/create-instance'
+import { useEffect } from 'react'
 
 type OniPdfProps = {
   context: GlobalContext
@@ -11,14 +12,40 @@ type OniPdfProps = {
 const OniPdf = ({
   context
 }: OniPdfProps) => {
-  console.log(context)
+  const { options } = context
+  const [currentPage, setCurrentPage] = useState<number>(0)
 
   useEffect(() => {
-    console.log(123)
-  }, [])
+    setCurrentPage(options.page!)
+
+    switch (options.type) {
+      case 'image' :
+        context.oniPDF.renderToImage()
+        break
+      case 'svg' :
+        context.oniPDF.renderToSvg()
+        break
+      default :
+        context.oniPDF.renderToCanvas()
+        break
+    }
+  }, [options])
+  
+  const spineRef = useRef<HTMLDivElement>(null)
+  
+  const classes = useMemo(() => 
+    createClasses(context.emotion.css),
+  [])
 
   return (
-    <div></div>
+    <div class={clsx(classes.Scrolling)}>
+      <div 
+        class={clsx(classes.Spine)}
+        ref={spineRef}
+      >
+        spineRef
+      </div>
+    </div>
   )
 }
 
@@ -34,6 +61,16 @@ const createClasses = (
     touch-action: pan-x pan-y;
     overscroll-behavior-y: contain;
   `,
+
+  Scrolling: css`
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+  `,
+  
+  Spine: css``
 })
 
 export default OniPdf

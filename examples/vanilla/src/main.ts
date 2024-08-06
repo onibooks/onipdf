@@ -14,24 +14,29 @@ import { createBook, EVENTS } from '@onipdf/core'
     const metadata = await oniPdf.getMetaData()
     const totalPages = await oniPdf.getTotalPages()
     console.log(metadata, totalPages)
-    
+
     await oniPdf.loadPage(index)
-
-    // oniPdf.render(document.getElementById('app')!, {
-    //   type: 'image'
-    // })
+    await oniPdf.render(document.getElementById('app')!)
   })
-
+  
   oniPdf.on(EVENTS.LOAD, async ({ data }) => {
     console.log('LOAD PAGE', data)
+  })
 
-    // const container = document.getElementById('container') as HTMLDivElement
-    // const image = new Image()
+  // oniPdf.on(EVENTS.RENDERED, ({ drawPromise }) => {
+  //   console.log('RENDERED', drawPromise)
+  // })
 
-    // image.src = URL.createObjectURL(new Blob([data.blobPng], { type: 'image/png' }))
-    // image.onload = function () {
-    //   image.style.width = image.width / window.devicePixelRatio + 'px'
-    //   container.appendChild(image)
-    // }
-  })  
+  // @ts-ignore
+  window.oniPdf = oniPdf
 })()
+
+
+// const container = document.getElementById('container') as HTMLDivElement
+// const image = new Image()
+
+// image.src = URL.createObjectURL(new Blob([data.blobPng], { type: 'image/png' }))
+// image.onload = function () {
+//   image.style.width = image.width / window.devicePixelRatio + 'px'
+//   container.appendChild(image)
+// }

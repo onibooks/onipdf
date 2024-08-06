@@ -42,6 +42,10 @@ export const createBook = async (
     },
     set worker (v) {
       warn(`worker는 변경할 수 없습니다.`)
+    },
+    get mupdf () {
+      return options.muPDFSrc
+      
     }
   }))
 

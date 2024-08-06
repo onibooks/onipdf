@@ -1,2 +1,6 @@
 import type { GlobalContext } from '../provider';
-export declare const render: (context: GlobalContext) => (index?: number) => Promise<void>;
+export type Options = {
+    type?: 'image' | 'canvas' | 'svg';
+    page?: number;
+};
+export declare const render: (context: GlobalContext) => (element: HTMLElement, options?: Options) => Promise<void>;

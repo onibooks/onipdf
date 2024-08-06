@@ -4,26 +4,30 @@
  * 'Provider', 'Context'와 같은 용어는 React의 Context API를 연상시키지만, React와는 관련이 없습니다.
  */
 import type { OniPDF } from './createBook'
+import type { Emotion } from '@emotion/css/create-instance'
 import type { Sangte } from './sangte'
 import type { MuPDFWorker } from './workers/createWorker'
+import type { Options } from './commands/render'
 
 export type PagesType = {
   page: any
-  pageSize: {
+  size: {
     width: number
     height: number
   }
-  pageText: any
-  pageLinks: any
-  pixmap: any
+  textData: any
+  linkData: any
 }
 
 export type GlobalContext = {
-  uid: number
   oniPDF: OniPDF
   worker: MuPDFWorker
   sangte: Sangte
+  emotion: Emotion
+  rootElement: HTMLElement
+  options: Options
   pages: PagesType[]
+  uid: number
 }
 
 let uid = 0
@@ -35,6 +39,9 @@ export const createContext = () => {
     oniPDF: null as any,
     worker: null as any,
     sangte: null as any,
+    emotion: null as any,
+    rootElement: null as any,
+    options: null as any,
     pages: [],
     uid,
   }

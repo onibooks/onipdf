@@ -3,3 +3,6 @@ export * from './getMetaData';
 export * from './getTotalPages';
 export * from './loadPage';
 export * from './render';
+export * from './renderToImage';
+export * from './renderToSvg';
+export * from './renderToCanvas';
