@@ -16,7 +16,7 @@ import { createBook, EVENTS } from '@onipdf/core'
     console.log(metadata, totalPages)
 
     await oniPdf.loadPage(index)
-    await oniPdf.render(document.getElementById('app')!, {
+    await oniPdf.render(document.getElementById('reader')!, {
       type: 'canvas'
     })
   })
@@ -24,10 +24,6 @@ import { createBook, EVENTS } from '@onipdf/core'
   oniPdf.on(EVENTS.LOAD, async ({ data }) => {
     console.log('LOAD PAGE', data)
   })
-
-  // oniPdf.on(EVENTS.RENDERED, () => {
-  //   console.log('RENDERED')
-  // })
 
   // @ts-ignore
   window.oniPdf = oniPdf

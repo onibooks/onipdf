@@ -8,7 +8,8 @@ export const renderToImage = (context: GlobalContext) => async (index: number = 
   const image = new Image()
   image.src = URL.createObjectURL(new Blob([png], { type: 'image/png' }))
   
-  context.oniPDF.emit(EVENTS.RENDERED)
+  context.oniPDF.emit(EVENTS.RENDERED, image)
   
   return image
+  
 }

@@ -6,7 +6,37 @@
     <title>OniPDF Example</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <main class="main">
+        <div class="sidebar">
+          <a class="exit" href="#">
+            <svg width="18px" height="18px" stroke-width="1.5" viewBox="0 0 24 24" fill="none" color="currentColor"><path d="M10.25 4.75l-3.5 3.5 3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.75 8.25h6a4 4 0 014 4v7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            Exit
+          </a>
+          <nav class="nav">
+            <ul>
+              <li id="layoutRadio" class="radio">
+                <input class="radio-input" type="radio" id="scrollMode" value="scrollMode" name="locate" checked />
+                <label class="radio-label" for="scrollMode">스크롤모드</label>
+                <input class="radio-input" type="radio" id="pageMode" value="pageMode" name="locate" />
+                <label class="radio-label" for="pageMode">페이지모드</label>
+              </li>
+  
+              <li id="locateRadio" class="radio">
+                <input class="radio-input" type="radio" id="singleMode" value="singleMode" name="layout" checked />
+                <label class="radio-label" for="singleMode">한쪽보기</label>
+                <input class="radio-input" type="radio" id="doubleMode" value="doubleMode" name="layout" />
+                <label class="radio-label" for="doubleMode">두쪽보기</label>
+                <input class="radio-input" type="radio" id="coverMode" value="coverMode" name="layout" />
+                <label class="radio-label" for="coverMode">표지보기</label>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        <div id="reader" class="reader"></div>
+      </main>
+    </div>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

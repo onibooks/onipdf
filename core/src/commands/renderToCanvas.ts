@@ -2,7 +2,7 @@ import { EVENTS } from '../constants'
 import type { GlobalContext } from '../provider'
 
 export const renderToCanvas = (context: GlobalContext) => async (index: number = 0) => {
-  const zoom = 100
+  const zoom = 96
   const dpi = zoom * window.devicePixelRatio
 
   const imageData = await context.worker.renderToCanvas(dpi, index)
@@ -14,7 +14,7 @@ export const renderToCanvas = (context: GlobalContext) => async (index: number =
   canvasNode.height = imageData.height
   canvasCtx?.putImageData(imageData, 0, 0)
   
-  context.oniPDF.emit(EVENTS.RENDERED)
+  context.oniPDF.emit(EVENTS.RENDERED, canvasNode)
 
   return canvasNode
 }

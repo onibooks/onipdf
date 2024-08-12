@@ -10,13 +10,12 @@ import type { MuPDFWorker } from './workers/createWorker';
 import type { Options } from './commands/render';
 export type PagesType = {
     page: any;
-    pageSize: {
+    size: {
         width: number;
         height: number;
     };
-    pageText: any;
-    pageLinks: any;
-    pixmap: any;
+    textData: any;
+    linkData: any;
 };
 export type GlobalContext = {
     oniPDF: OniPDF;

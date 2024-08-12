@@ -1,6 +1,6 @@
 import type { WorkerContext } from '../worker.js'
 
-export const loadPage = (context: WorkerContext) => (devicePixelRatio: any, index: number = 0) => {
+export const loadPage = (context: WorkerContext) => (index: number = 0) => {
   const page = context.document.loadPage(index)
   
   // pageSize
@@ -16,6 +16,7 @@ export const loadPage = (context: WorkerContext) => (devicePixelRatio: any, inde
 
   // pageLinks
   const links = page.getLinks()
+  console.log(page, links)
   const pageLinks = links.map((link: any) => {
     const [x0, y0, x1, y1] = link.getBounds()
     let href

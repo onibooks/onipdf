@@ -29,7 +29,7 @@ export const render = (context: GlobalContext) => {
     
     context.rootElement = element
     context.emotion = createEmotion({
-      key: `onipdf`,
+      key: `onipdff`,
       container: element,
     })
     context.options = {

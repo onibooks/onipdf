@@ -3,6 +3,7 @@ import { useRef, useState, useEffect, useMemo } from 'preact/hooks'
 
 import type { GlobalContext } from '../provider'
 import type { Emotion } from '@emotion/css/types/create-instance'
+import { EVENTS } from '../constants'
 
 type OniPdfProps = {
   context: GlobalContext
@@ -11,8 +12,8 @@ type OniPdfProps = {
 const OniPdf = ({
   context
 }: OniPdfProps) => {
-  const { options } = context
-  const [currentPage, setCurrentPage] = useState<number>(0)
+  const { oniPDF, options } = context
+  const [isRendered, setIsRendered] = useState<boolean>(false)
   const spineRef = useRef<HTMLDivElement>(null)
   const pageRef = useRef<HTMLDivElement>(null)
   const classes = useMemo(() => createClasses(context.emotion.css), [])
@@ -23,13 +24,13 @@ const OniPdf = ({
 
       switch (options.type) {
         case 'image':
-          renderedElement = await context.oniPDF.renderToImage()
+          renderedElement = await oniPDF.renderToImage()
           break
         case 'svg':
-          renderedElement = await context.oniPDF.renderToSvg()
+          renderedElement = await oniPDF.renderToSvg()
           break
         default:
-          renderedElement = await context.oniPDF.renderToCanvas()
+          renderedElement = await oniPDF.renderToCanvas()
           break
       }
 
@@ -40,7 +41,21 @@ const OniPdf = ({
     }
 
     renderContent()
-  }, [options.type, context.oniPDF])
+  }, [options.type, oniPDF])
+
+  useEffect(() => {
+    oniPDF.on(EVENTS.RENDERED, (data: HTMLImageElement | HTMLCanvasElement) => {
+      setIsRendered(true)
+  
+      if (data instanceof HTMLImageElement) {
+        
+        console.log("Image element:", data)
+      } else if (data instanceof HTMLCanvasElement) {
+        
+        console.log("Canvas element:", data)
+      }
+    })
+  }, [])
 
   return (
     <div class={clsx(classes.Scrolling)}>
@@ -48,7 +63,7 @@ const OniPdf = ({
         class={clsx(classes.Spine)}
         ref={spineRef}
       >
-        <div ref={pageRef}></div>
+        {isRendered&& <div ref={pageRef}></div>}
       </div>
     </div>
   )
