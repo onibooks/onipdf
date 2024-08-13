@@ -46,7 +46,7 @@ body {
   height: 100%;
   overflow-x: hidden;
   background-image: var(--backgroundGradient);
-  transition: width 0.3s ease;
+  transition: width .1s ease;
 }
 
 .resizer {
@@ -58,23 +58,18 @@ body {
   background-color: var(--border);
   cursor: col-resize;
   z-index: 10;
-  /* 의사 요소보다 앞에 위치하도록 z-index 설정 */
 }
 
 .resizer::before {
   content: '';
   position: absolute;
   width: 15px;
-  /* 드래그 가능 영역을 더 넓게 설정 */
   height: 100%;
   left: -7px;
-  /* 왼쪽으로 7px 늘림 */
   right: -7px;
-  /* 오른쪽으로 7px 늘림 */
   background-color: transparent;
   cursor: col-resize;
   z-index: 5;
-  /* .resizer 뒤에 위치하도록 낮은 z-index 설정 */
 }
 
 .header {

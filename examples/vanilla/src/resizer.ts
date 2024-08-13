@@ -24,9 +24,17 @@
     if (completeWidth < 700) {
       sidebar.style.width = `${completeWidth}px`
     }
+    
+    if (completeWidth < 280) {
+      sidebar.style.width = `0px`
+    }
   }
 
   const onMouseUpHandler = (): void => {
+    if (sidebar.style.width <= '0px') {
+      open.style.zIndex = '10'
+    }
+
     document.removeEventListener('mouseup', onMouseUpHandler)
     document.removeEventListener('mousemove', onMouseMoveHandler)
   }
