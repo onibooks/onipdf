@@ -7,8 +7,21 @@
   </head>
   <body>
     <div id="app">
-      <main class="main">
+      <button type="button" class="button open">
+        <svg width="28px" height="28px" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M3 5H21" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 12H21" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 19H21" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </button>
+
+      <div class="aside">
         <div class="sidebar">
+          <div class="resizer"></div>
+          
+          <div class="header">
+            <h2 class="logo">ONIBOOKS</h2>
+            <button type="button" class="button close">
+              <svg width="28px" height="28px" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M6.75827 17.2426L12.0009 12M17.2435 6.75736L12.0009 12M12.0009 12L6.75827 6.75736M12.0009 12L17.2435 17.2426" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+           </div>
+           
           <a class="exit" href="#">
             <svg width="18px" height="18px" stroke-width="1.5" viewBox="0 0 24 24" fill="none" color="currentColor"><path d="M10.25 4.75l-3.5 3.5 3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.75 8.25h6a4 4 0 014 4v7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             Exit
@@ -33,9 +46,11 @@
             </ul>
           </nav>
         </div>
+     </div>
 
+     <div class="content">
         <div id="reader" class="reader"></div>
-      </main>
+     </div>
     </div>
 
     <script type="module" src="/src/main.ts"></script>

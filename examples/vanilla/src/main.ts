@@ -1,4 +1,5 @@
 import './style.css'
+import './resizer'
 
 import { createBook, EVENTS } from '@onipdf/core'
 
