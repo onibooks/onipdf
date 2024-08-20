@@ -1,6 +1,6 @@
 import createEmotion from '@emotion/css/create-instance'
-import OniPdf from '../components/OniPdf'
 import { h, render as prender } from 'preact'
+import OniPdf from '../components/OniPdf'
 import { warn } from '../helpers'
 
 import type { GlobalContext } from '../provider'
@@ -8,6 +8,7 @@ import type { GlobalContext } from '../provider'
 export type Options = {
   type?: 'image' | 'canvas' | 'svg'
   page?: number
+  zoom?: number
 }
 
 export const render = (context: GlobalContext) => {
@@ -25,7 +26,7 @@ export const render = (context: GlobalContext) => {
     }
     rendered = true
 
-    const { type = 'canvas', page = 0 } = options || {}
+    const { type = 'canvas', page = 0, zoom = 96 } = options || {}
     
     context.rootElement = element
     context.emotion = createEmotion({
@@ -36,9 +37,10 @@ export const render = (context: GlobalContext) => {
       ...options,
       page,
       type,
+      zoom
     }
 
-    if (context.pages.length === 0) {
+    if (!context.loaded) {
       await context.oniPDF.loadPage(page)
     }
 

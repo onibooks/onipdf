@@ -8,15 +8,6 @@ import type { Emotion } from '@emotion/css/create-instance';
 import type { Sangte } from './sangte';
 import type { MuPDFWorker } from './workers/createWorker';
 import type { Options } from './commands/render';
-export type PagesType = {
-    page: any;
-    size: {
-        width: number;
-        height: number;
-    };
-    textData: any;
-    linkData: any;
-};
 export type GlobalContext = {
     oniPDF: OniPDF;
     worker: MuPDFWorker;
@@ -24,7 +15,7 @@ export type GlobalContext = {
     emotion: Emotion;
     rootElement: HTMLElement;
     options: Options;
-    pages: PagesType[];
+    loaded: boolean;
     uid: number;
 };
 export declare const createContext: () => GlobalContext;

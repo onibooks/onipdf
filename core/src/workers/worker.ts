@@ -7,6 +7,7 @@ export type WorkerContext = {
   mupdf: typeof MuPDF
   document: MuPDF.Document
   commands: Commands
+  PDFPages: any[]
 }
 
 let mupdf: typeof MuPDF
@@ -18,6 +19,7 @@ const createContext = (contextId: number): WorkerContext => {
     mupdf,
     commands: null as any,
     document: null as any,
+    PDFPages: []
   }
   context.commands = createCommands(context)
 

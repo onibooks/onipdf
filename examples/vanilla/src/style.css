@@ -2,6 +2,7 @@
   --white: #ffffff;
   --color: #222222;
   --background: #d0d8d0;
+  --skeleton: #959b95;
   --border: #475547;
   --backgroundGradient: linear-gradient(to bottom, var(--white), var(--background));
 }
@@ -18,12 +19,18 @@ body {
   height: 100%;
 }
 
+@keyframes fade {
+  100% {
+    opacity: 1;
+  }
+}
+
 #app {
   width: 100%;
   height: 100%;
   user-select: none;
-  display: flex;
   background: var(--background);
+  overflow-y: scroll;
 }
 
 .button {
@@ -166,24 +173,7 @@ nav ul li {
   color: #FFF;
 }
 
-
-@keyframes fade {
-  100% {
-    opacity: 1;
-  }
-}
-
 .content {
   position: relative;
-  flex-grow: 1;
-  background-image: var(--backgroundGradient);
-  overflow-y: scroll;
-}
-
-.reader {
-  height: 100vh;
-}
-
-canvas {
-  width: 100%;
+  font-size: 0;
 }

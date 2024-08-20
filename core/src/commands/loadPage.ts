@@ -2,9 +2,12 @@ import { EVENTS } from '../constants'
 
 import type { GlobalContext } from '../provider'
 
+// context.pages[index] = data
 export const loadPage = (context: GlobalContext) => async (index: number = 0) => {
-  const data = await context.worker.loadPage(index)
-  context.pages[index] = data
+  if (context.loaded) return
 
-  context.oniPDF.emit(EVENTS.LOAD, { data })
+  const loaded = await context.worker.loadPage(index)
+  context.loaded = loaded
+
+  context.oniPDF.emit(EVENTS.LOAD, { loaded: context.loaded })
 }

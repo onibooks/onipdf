@@ -1,5 +1,5 @@
 import './style.css'
-import './resizer'
+// import './resizer'
 
 import { createBook, EVENTS } from '@onipdf/core'
 
@@ -18,12 +18,13 @@ import { createBook, EVENTS } from '@onipdf/core'
 
     await oniPdf.loadPage(index)
     await oniPdf.render(document.getElementById('reader')!, {
-      type: 'canvas'
+      type: 'canvas',
+      // zoom: 96
     })
   })
   
-  oniPdf.on(EVENTS.LOAD, async ({ data }) => {
-    console.log('LOAD PAGE', data)
+  oniPdf.on(EVENTS.LOAD, async ({ loaded }) => {
+    console.log('LOAD PAGE', loaded)
   })
 
   // @ts-ignore

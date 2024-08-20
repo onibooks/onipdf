@@ -1,9 +1,9 @@
 import clsx from 'clsx'
 import { useRef, useState, useEffect, useMemo } from 'preact/hooks'
+import { EVENTS } from '../constants'
 
 import type { GlobalContext } from '../provider'
 import type { Emotion } from '@emotion/css/types/create-instance'
-import { EVENTS } from '../constants'
 
 type OniPdfProps = {
   context: GlobalContext
@@ -17,6 +17,7 @@ const OniPdf = ({
   const spineRef = useRef<HTMLDivElement>(null)
   const pageRef = useRef<HTMLDivElement>(null)
   const classes = useMemo(() => createClasses(context.emotion.css), [])
+  const [pageSize, setPageSize] = useState<{ width: number, height: number }>({ width: 0, height: 0 })
 
   useEffect(() => {
     const renderContent = async () => {
@@ -26,11 +27,9 @@ const OniPdf = ({
         case 'image':
           renderedElement = await oniPDF.renderToImage()
           break
-        case 'svg':
-          renderedElement = await oniPDF.renderToSvg()
-          break
         default:
           renderedElement = await oniPDF.renderToCanvas()
+
           break
       }
 
@@ -48,14 +47,27 @@ const OniPdf = ({
       setIsRendered(true)
   
       if (data instanceof HTMLImageElement) {
-        
         console.log("Image element:", data)
       } else if (data instanceof HTMLCanvasElement) {
-        
         console.log("Canvas element:", data)
       }
     })
   }, [])
+
+  useEffect(() => {
+    if (isRendered) {
+      const updateSizes = async () => {
+        const { width, height } = await oniPDF.updateSize(options.page)
+
+        setPageSize({
+          width,
+          height
+        })
+      }
+  
+      updateSizes()
+    }
+  }, [isRendered])
 
   return (
     <div class={clsx(classes.Scrolling)}>
@@ -63,7 +75,16 @@ const OniPdf = ({
         class={clsx(classes.Spine)}
         ref={spineRef}
       >
-        {isRendered&& <div ref={pageRef}></div>}
+        {isRendered && 
+          <div
+            style={{
+              width:`${pageSize?.width}px`, 
+              height:`${pageSize?.height}px`
+            }}
+            ref={pageRef}
+          >
+          </div>
+        }
       </div>
     </div>
   )
@@ -83,14 +104,12 @@ const createClasses = (
   `,
 
   Scrolling: css`
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
+    position: relative;
   `,
   
-  Spine: css``
+  Spine: css``,
+
+  Page: css``
 })
 
 export default OniPdf

@@ -9,16 +9,6 @@ import type { Sangte } from './sangte'
 import type { MuPDFWorker } from './workers/createWorker'
 import type { Options } from './commands/render'
 
-export type PagesType = {
-  page: any
-  size: {
-    width: number
-    height: number
-  }
-  textData: any
-  linkData: any
-}
-
 export type GlobalContext = {
   oniPDF: OniPDF
   worker: MuPDFWorker
@@ -26,7 +16,7 @@ export type GlobalContext = {
   emotion: Emotion
   rootElement: HTMLElement
   options: Options
-  pages: PagesType[]
+  loaded: boolean
   uid: number
 }
 
@@ -42,7 +32,7 @@ export const createContext = () => {
     emotion: null as any,
     rootElement: null as any,
     options: null as any,
-    pages: [],
+    loaded: false as boolean,
     uid,
   }
 

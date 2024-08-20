@@ -4,3 +4,8 @@ export * from './getTotalPages.js';
 export * from './loadPage.js';
 export * from './renderToCanvas.js';
 export * from './renderToImage.js';
+export * from './getBounds.js';
+export * from './getTransform.js';
+export * from './getPageSize.js';
+export * from './getPageText.js';
+export * from './getPageLinks.js';

@@ -12,7 +12,7 @@ const promises = new Map<number, { resolve: Function, reject: Function }>()
 const onSetup = (event: MessageEvent, contextId: number) => {
   const mainWorker = event.currentTarget as MuPDFWorker
   const { commands } = event.data
-  
+
   commands.forEach((command: string) => {
     (mainWorker as any)[command] = (...args: any[]) => (
       // 워커 스레드에서 불려진 함수가 언제 끝날지 모르니 메인 스레드에서 순서를 보장하기 위해서 promise로 한번 감싸준다.

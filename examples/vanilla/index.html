@@ -7,11 +7,37 @@
   </head>
   <body>
     <div id="app">
-      <button type="button" class="button open">
-        <svg width="28px" height="28px" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M3 5H21" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 12H21" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 19H21" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-      </button>
+      <!-- <input
+        style="display: none"
+        id="open-file-input"
+        type="file"
+        accept=".pdf,application/pdf"
+        onchange="open_document_from_file(event.target.files[0])"
+      >
 
-      <div class="aside">
+      <header id="menu">
+        <ul>
+          <li id="file">File</li>
+          <li id="edit">Edit</li>
+          <li id="view">
+            <span>View</span>
+            <ul>
+              <li onclick="zoom_to(48)">50%
+              <li onclick="zoom_to(72)">75% (72 dpi)
+              <li onclick="zoom_to(96)">100% (96 dpi)
+              <li onclick="zoom_to(120)">125%
+              <li onclick="zoom_to(144)">150%
+              <li onclick="zoom_to(192)">200%
+            </ul>
+          </li>
+        </ul>
+      </header> -->
+
+      <!-- <button type="button" class="button open">
+        <svg width="28px" height="28px" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M3 5H21" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 12H21" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 19H21" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </button> -->
+
+      <!-- <div class="aside">
         <div class="sidebar">
           <div class="resizer"></div>
           
@@ -46,7 +72,7 @@
             </ul>
           </nav>
         </div>
-     </div>
+     </div> -->
 
      <div class="content">
         <div id="reader" class="reader"></div>
