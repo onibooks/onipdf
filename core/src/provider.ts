@@ -17,6 +17,7 @@ export type GlobalContext = {
   rootElement: HTMLElement
   options: Options
   loaded: boolean
+  zoom: number
   uid: number
 }
 
@@ -33,6 +34,7 @@ export const createContext = () => {
     rootElement: null as any,
     options: null as any,
     loaded: false as boolean,
+    zoom: 96 as number,
     uid,
   }
 

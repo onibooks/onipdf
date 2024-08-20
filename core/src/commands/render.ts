@@ -8,7 +8,6 @@ import type { GlobalContext } from '../provider'
 export type Options = {
   type?: 'image' | 'canvas' | 'svg'
   page?: number
-  zoom?: number
 }
 
 export const render = (context: GlobalContext) => {
@@ -26,7 +25,7 @@ export const render = (context: GlobalContext) => {
     }
     rendered = true
 
-    const { type = 'canvas', page = 0, zoom = 96 } = options || {}
+    const { type = 'canvas', page = 0 } = options || {}
     
     context.rootElement = element
     context.emotion = createEmotion({
@@ -36,8 +35,7 @@ export const render = (context: GlobalContext) => {
     context.options = {
       ...options,
       page,
-      type,
-      zoom
+      type
     }
 
     if (!context.loaded) {

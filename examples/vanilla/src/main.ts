@@ -18,8 +18,7 @@ import { createBook, EVENTS } from '@onipdf/core'
 
     await oniPdf.loadPage(index)
     await oniPdf.render(document.getElementById('reader')!, {
-      type: 'canvas',
-      // zoom: 96
+      type: 'image'
     })
   })
   

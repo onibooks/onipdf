@@ -2,7 +2,7 @@ import { EVENTS } from '../constants'
 import type { GlobalContext } from '../provider'
 
 export const renderToCanvas = (context: GlobalContext) => async (index: number = 0) => {
-  const zoom = context.options.zoom ?? 96
+  const zoom = context.zoom ?? 96
   const canvas = await context.worker.getCanvasPixels(index, zoom * devicePixelRatio)
   
   const canvasNode = document.createElement('canvas') as HTMLCanvasElement
