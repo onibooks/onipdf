@@ -1,7 +1,7 @@
 import createEmotion from '@emotion/css/create-instance'
 import { h, render as prender } from 'preact'
-import OniPdf from '../components/OniPdf'
 import { warn } from '../helpers'
+import OniPdf from '../components/OniPdf'
 
 import type { GlobalContext } from '../provider'
 
@@ -29,7 +29,7 @@ export const render = (context: GlobalContext) => {
     
     context.rootElement = element
     context.emotion = createEmotion({
-      key: `onipdff`,
+      key: `onipdf`,
       container: element,
     })
     context.options = {
@@ -38,9 +38,7 @@ export const render = (context: GlobalContext) => {
       type
     }
 
-    if (!context.loaded) {
-      await context.oniPDF.loadPage(page)
-    }
+    await Promise.all(context.pageViews.map((pageView) => pageView.load()))
 
     const fragment = document.createElement('div')
     const Component = h(OniPdf, { context })

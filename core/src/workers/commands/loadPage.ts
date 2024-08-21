@@ -7,10 +7,10 @@ export const loadPage = (context: WorkerContext) => (index: number = 0) => {
     const page = context.document.loadPage(index)
     context.PDFPages[index] = page
 
-    return true
+    return context.PDFPages[index]
   } catch (error) {
     console.error(`ERROR loadPage: ${error}`)
 
-    return false
+    return null
   }
 }

@@ -5,18 +5,20 @@
  */
 import type { OniPDF } from './createBook'
 import type { Emotion } from '@emotion/css/create-instance'
+import type { StoreApi } from 'zustand/vanilla'
 import type { Sangte } from './sangte'
 import type { MuPDFWorker } from './workers/createWorker'
 import type { Options } from './commands/render'
+import type { PageView } from './documents/createPageView'
 
 export type GlobalContext = {
   oniPDF: OniPDF
   worker: MuPDFWorker
-  sangte: Sangte
+  sangte: StoreApi<Sangte>
   emotion: Emotion
   rootElement: HTMLElement
   options: Options
-  loaded: boolean
+  pageViews: PageView[]
   zoom: number
   uid: number
 }
@@ -33,7 +35,7 @@ export const createContext = () => {
     emotion: null as any,
     rootElement: null as any,
     options: null as any,
-    loaded: false as boolean,
+    pageViews: [] as PageView[],
     zoom: 96 as number,
     uid,
   }

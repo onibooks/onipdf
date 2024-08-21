@@ -3,7 +3,8 @@ import { EVENTS } from '../constants'
 import type { GlobalContext } from '../provider'
 
 export const openDocument = (context: GlobalContext) => async (buffer: Buffer | ArrayBuffer) => {
-  const doc = await context.worker.openDocument(buffer)
+  const document = await context.worker.openDocument(buffer)
+  context.oniPDF.emit(EVENTS.OPEN, { document })
 
-  context.oniPDF.emit(EVENTS.OPEN, { document: doc })
+  return document
 }

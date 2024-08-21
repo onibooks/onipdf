@@ -5,3 +5,5 @@ export * from './loadPage';
 export * from './render';
 export * from './renderToImage';
 export * from './renderToCanvas';
+export * from './getPDFPage';
+export * from './updateSize';

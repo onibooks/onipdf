@@ -12,7 +12,7 @@ type OniPdfProps = {
 const OniPdf = ({
   context
 }: OniPdfProps) => {
-  const { oniPDF, options } = context
+  const { oniPDF, options, sangte } = context
   const [isRendered, setIsRendered] = useState<boolean>(false)
   const spineRef = useRef<HTMLDivElement>(null)
   const pageRef = useRef<HTMLDivElement>(null)
@@ -28,8 +28,7 @@ const OniPdf = ({
           renderedElement = await oniPDF.renderToImage()
           break
         default:
-          renderedElement = await oniPDF.renderToCanvas()
-
+          renderedElement = await oniPDF.renderToCanvas(0)
           break
       }
 
@@ -70,13 +69,14 @@ const OniPdf = ({
   }, [isRendered])
 
   return (
-    <div class={clsx(classes.Scrolling)}>
+    <div class={clsx('scrolling', classes.Scrolling)}>
       <div 
-        class={clsx(classes.Spine)}
+        class={clsx('spine', classes.Spine)}
         ref={spineRef}
       >
         {isRendered && 
           <div
+            class={clsx('page')}
             style={{
               width:`${pageSize?.width}px`, 
               height:`${pageSize?.height}px`
