@@ -1,2 +1,2 @@
 import type { GlobalContext } from '../provider';
-export declare const renderToCanvas: (context: GlobalContext) => (index: number) => Promise<HTMLCanvasElement>;
+export declare const renderToCanvas: (context: GlobalContext) => (index?: number) => Promise<HTMLCanvasElement>;

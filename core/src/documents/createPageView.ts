@@ -1,9 +1,10 @@
 import { EVENTS } from '../constants'
-import { type GlobalContext, provider } from '../provider'
+import { provider, type GlobalContext } from '../provider'
 
 export class PageView {
   static context: GlobalContext
   public index: number
+  public rootNode: HTMLDivElement
   public isLoad = false
 
   constructor (index: number) {
@@ -12,6 +13,10 @@ export class PageView {
 
   get context () {
     return PageView.context
+  }
+
+  get pageNumber () {
+    return this.index + 1
   }
 
   async load () {
@@ -27,8 +32,8 @@ export class PageView {
     return this
   }
 
-  async size (index: number): Promise<{ width: number, height: number}> {
-    return await this.context.worker.getPageSize(index)
+  async getPageSize (): Promise<{ width: number, height: number}> {
+    return await this.context.worker.getPageSize(this.index)
   }
 
   async renderToCanvas () {
@@ -44,8 +49,10 @@ export class PageView {
     canvasContext?.putImageData(canvas, 0, 0)
     
     const pageSize = await this.context.worker.getPageSize(page)
-    canvasNode.style.width = `${(pageSize.width * zoom) / 72 | 0}px`
-    canvasNode.style.height = `${(pageSize.height * zoom) / 72 | 0}px`
+    // canvasNode.style.width = `${(pageSize.width * zoom) / 72 | 0}px`
+    // canvasNode.style.height = `${(pageSize.height * zoom) / 72 | 0}px`
+    canvasNode.style.width = `${(pageSize.width)}px`
+    canvasNode.style.height = `${(pageSize.height)}px`
 
     this.context.oniPDF.emit(EVENTS.RENDERED, canvasNode)
 

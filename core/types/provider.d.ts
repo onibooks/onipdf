@@ -16,6 +16,7 @@ export type GlobalContext = {
     sangte: StoreApi<Sangte>;
     emotion: Emotion;
     rootElement: HTMLElement;
+    scrollingElement: HTMLElement;
     options: Options;
     pageViews: PageView[];
     zoom: number;

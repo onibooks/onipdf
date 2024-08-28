@@ -1,9 +1,10 @@
 import clsx from 'clsx'
 import { useRef, useState, useEffect, useMemo } from 'preact/hooks'
-import { EVENTS } from '../constants'
 
-import type { GlobalContext } from '../provider'
+import OniPage from './OniPage'
+
 import type { Emotion } from '@emotion/css/types/create-instance'
+import type { GlobalContext } from '../provider'
 
 type OniPdfProps = {
   context: GlobalContext
@@ -12,80 +13,61 @@ type OniPdfProps = {
 const OniPdf = ({
   context
 }: OniPdfProps) => {
-  const { oniPDF, options, sangte } = context
-  const [isRendered, setIsRendered] = useState<boolean>(false)
-  const spineRef = useRef<HTMLDivElement>(null)
-  const pageRef = useRef<HTMLDivElement>(null)
+  const { oniPDF, pageViews, options, scrollingElement } = context
   const classes = useMemo(() => createClasses(context.emotion.css), [])
-  const [pageSize, setPageSize] = useState<{ width: number, height: number }>({ width: 0, height: 0 })
+  const pageRefs = useRef<Array<HTMLDivElement | null>>(new Array(pageViews.length).fill(null))
+  const scrollingRef = useRef<HTMLDivElement>(null)
+
+  const [isShow, setIsShow] = useState(false)
+  
+  const onReady = async () => {
+    const totalPages = await oniPDF.getTotalPages()
+    
+    if (totalPages === pageViews.length) {
+      console.log('뼈대 완성')
+
+      const page = options.page!
+      await goToPage(page)
+      const canvasNode = await oniPDF.renderToCanvas(page)
+      pageRefs.current[page]?.appendChild(canvasNode)
+    }
+  }
+
+  const goToPage = async (page: number) => {
+    if (scrollingRef.current) {
+      const pageSize = await pageViews[page].getPageSize()
+      scrollingRef.current.scrollTop = page * Math.floor(pageSize.height)
+      console.log(scrollingRef.current.scrollTop)
+    }
+  }
 
   useEffect(() => {
-    const renderContent = async () => {
-      let renderedElement
-
-      switch (options.type) {
-        case 'image':
-          renderedElement = await oniPDF.renderToImage()
-          break
-        default:
-          renderedElement = await oniPDF.renderToCanvas(0)
-          break
-      }
-
-      if (pageRef.current && renderedElement) {
-        pageRef.current.innerHTML = ''
-        pageRef.current.appendChild(renderedElement)
-      }
+    if (scrollingRef.current) {
+      context.scrollingElement = scrollingRef.current
     }
 
-    renderContent()
-  }, [options.type, oniPDF])
+    onReady()
+  }, [pageViews])
 
   useEffect(() => {
-    oniPDF.on(EVENTS.RENDERED, (data: HTMLImageElement | HTMLCanvasElement) => {
-      setIsRendered(true)
-  
-      if (data instanceof HTMLImageElement) {
-        console.log("Image element:", data)
-      } else if (data instanceof HTMLCanvasElement) {
-        console.log("Canvas element:", data)
-      }
-    })
+    const rootElement = document.documentElement
+    rootElement.classList.add(classes.root)
   }, [])
 
-  useEffect(() => {
-    if (isRendered) {
-      const updateSizes = async () => {
-        const { width, height } = await oniPDF.updateSize(options.page)
-
-        setPageSize({
-          width,
-          height
-        })
-      }
-  
-      updateSizes()
-    }
-  }, [isRendered])
-
   return (
-    <div class={clsx('scrolling', classes.Scrolling)}>
-      <div 
-        class={clsx('spine', classes.Spine)}
-        ref={spineRef}
-      >
-        {isRendered && 
-          <div
-            class={clsx('page')}
-            style={{
-              width:`${pageSize?.width}px`, 
-              height:`${pageSize?.height}px`
-            }}
-            ref={pageRef}
-          >
-          </div>
-        }
-      </div>
+    <div class={clsx('scrolling', classes.Scrolling)} ref={scrollingRef}>
+      {pageViews &&
+        <div class={clsx('pages')}>
+          {context.pageViews.map((_, index) => 
+            <OniPage 
+              key={index}
+              index={index}
+              context={context}
+              ref={(el: HTMLDivElement | null) => (pageRefs.current[index] = el)}
+            />
+          )}
+        </div>
+      }
     </div>
   )
 }

@@ -8,6 +8,8 @@ import { createBook, EVENTS } from '@onipdf/core'
     muPDFSrc: '/lib/mupdf/mupdf.js'
   })
 
+  const index = 2
+
   oniPdf.on(EVENTS.OPEN, async () => {
     console.log('Document opened;')
 
@@ -15,15 +17,15 @@ import { createBook, EVENTS } from '@onipdf/core'
     const totalPages = await oniPdf.getTotalPages()
     console.log(metadata, totalPages)
 
-    await oniPdf.loadPage(0)
-    await oniPdf.renderToCanvas(0)
+    // 부분 페이지 렌더링
+    // await oniPdf.loadPage(0)
+    // await oniPdf.renderToCanvas(0)
 
     // 전체 페이지 렌더링
-    // 전체 페이지에 대한 로드를 해준다.
-    // await oniPdf.render(document.getElementById('reader')!, {
-    //   type: 'canvas',
-    //   page: index
-    // })
+    await oniPdf.render(document.getElementById('reader')!, {
+      type: 'canvas',
+      page: index
+    })
   })
   
   oniPdf.on(EVENTS.LOAD, async () => {
