@@ -5,6 +5,8 @@ import OniPage from './OniPage'
 
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
+import { useState } from 'react'
+import { EVENTS } from '../constants'
 
 type OniPdfProps = {
   context: GlobalContext
@@ -13,10 +15,19 @@ type OniPdfProps = {
 const OniPdf = ({
   context
 }: OniPdfProps) => {
-  const { oniPDF, pageViews, options, scrollingElement } = context
+  const { oniPDF, pageViews, options } = context
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   const pageRefs = useRef<Array<HTMLDivElement | null>>(new Array(pageViews.length).fill(null))
   const scrollingRef = useRef<HTMLDivElement>(null)
+
+  const [isRendered, setIsRendered] = useState(false)
+
+  const goToPage = async (page: number) => {
+    if (scrollingRef.current) {
+      const pageSize = await pageViews[page].getPageSize()
+      context.scrollingElement.scrollTop = page * Math.floor(pageSize.height)
+    }
+  }
   
   const onReady = async () => {
     const totalPages = await oniPDF.getTotalPages()
@@ -28,13 +39,8 @@ const OniPdf = ({
       await goToPage(page)
       const canvasNode = await oniPDF.renderToCanvas(page)
       pageRefs.current[page]?.appendChild(canvasNode)
-    }
-  }
 
-  const goToPage = async (page: number) => {
-    if (scrollingRef.current) {
-      const pageSize = await pageViews[page].getPageSize()
-      context.scrollingElement.scrollTop = page * Math.floor(pageSize.height)
+      oniPDF.emit(EVENTS.FIRSTRENDERED)
     }
   }
 
@@ -42,7 +48,7 @@ const OniPdf = ({
     if (scrollingRef.current) {
       context.scrollingElement = scrollingRef.current
     }
-
+    
     onReady()
   }, [pageViews])
 
