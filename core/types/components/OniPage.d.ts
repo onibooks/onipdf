@@ -3,5 +3,7 @@ type OniPageProps = {
     context: GlobalContext;
     index: number;
 };
-declare const OniPage: ({ context, index }: OniPageProps) => import("preact").JSX.Element;
+declare const OniPage: import("preact").FunctionalComponent<import("preact/compat").PropsWithoutRef<OniPageProps> & {
+    ref?: import("preact").Ref<HTMLDivElement> | undefined;
+}>;
 export default OniPage;

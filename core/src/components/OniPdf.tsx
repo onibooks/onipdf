@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useRef, useState, useEffect, useMemo } from 'preact/hooks'
+import { useRef, useEffect, useMemo } from 'preact/hooks'
 
 import OniPage from './OniPage'
 
@@ -17,8 +17,6 @@ const OniPdf = ({
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   const pageRefs = useRef<Array<HTMLDivElement | null>>(new Array(pageViews.length).fill(null))
   const scrollingRef = useRef<HTMLDivElement>(null)
-
-  const [isShow, setIsShow] = useState(false)
   
   const onReady = async () => {
     const totalPages = await oniPDF.getTotalPages()
@@ -36,8 +34,7 @@ const OniPdf = ({
   const goToPage = async (page: number) => {
     if (scrollingRef.current) {
       const pageSize = await pageViews[page].getPageSize()
-      scrollingRef.current.scrollTop = page * Math.floor(pageSize.height)
-      console.log(scrollingRef.current.scrollTop)
+      context.scrollingElement.scrollTop = page * Math.floor(pageSize.height)
     }
   }
 
@@ -87,6 +84,9 @@ const createClasses = (
 
   Scrolling: css`
     position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow-y: scroll;
   `,
   
   Spine: css``,

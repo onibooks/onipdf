@@ -26,11 +26,8 @@ body {
 }
 
 #app {
-  width: 100%;
-  height: 100%;
   user-select: none;
   background: var(--background);
-  overflow-y: scroll;
 }
 
 .button {
