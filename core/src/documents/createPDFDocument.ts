@@ -1,3 +1,4 @@
+import { EVENTS } from '../constants'
 import { provider } from '../provider'
 import { createPageView } from './createPageView'
 
@@ -20,22 +21,25 @@ const fetchFileFromURL = async (url: string): Promise<File> => {
   return file
 }
 
-const initPageView = () => provider(async (context) => {
+export const initPageView = () => provider(async (context) => {
   const totalPages = await context.oniPDF.getTotalPages()
-  const pageViews = Array(totalPages)
+  const pageViews = Promise.all(Array(totalPages)
   .fill(null)
-  .map((_, index) => createPageView(index))
+  .map((_, index) => createPageView(index)))
 
-  context.pageViews = pageViews
+  context.pageViews = await pageViews
 })
 
 export const createPDFDocument = (url: string) => provider(async (context) => {
   try {
     const file = await fetchFileFromURL(url)
     const arrayBuffer = await file.arrayBuffer()
-
+    
     context.oniPDF.openDocument(arrayBuffer)
-    .then(() => initPageView())
+      .then(async () => {
+        await initPageView()
+        context.oniPDF.emit(EVENTS.OPEN, { document })
+      })
   }
   catch(error) {
     console.error('파일을 읽어드리는데 실패했습니다. ', error)

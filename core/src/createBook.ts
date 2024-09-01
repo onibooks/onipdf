@@ -45,7 +45,6 @@ export const createBook = async (
     },
     get mupdf () {
       return options.muPDFSrc
-      
     }
   }))
 

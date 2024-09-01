@@ -1,12 +1,8 @@
 import clsx from 'clsx'
 import { useRef, useEffect, useMemo } from 'preact/hooks'
 
-import OniPage from './OniPage'
-
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
-import { useState } from 'react'
-import { EVENTS } from '../constants'
 
 type OniPdfProps = {
   context: GlobalContext
@@ -17,30 +13,22 @@ const OniPdf = ({
 }: OniPdfProps) => {
   const { oniPDF, pageViews, options } = context
   const classes = useMemo(() => createClasses(context.emotion.css), [])
-  const pageRefs = useRef<Array<HTMLDivElement | null>>(new Array(pageViews.length).fill(null))
+  const pageRefs = useRef<HTMLDivElement>(null)
   const scrollingRef = useRef<HTMLDivElement>(null)
 
-  const [isRendered, setIsRendered] = useState(false)
-
-  const goToPage = async (page: number) => {
-    if (scrollingRef.current) {
-      const pageSize = await pageViews[page].getPageSize()
-      context.scrollingElement.scrollTop = page * Math.floor(pageSize.height)
-    }
-  }
-  
   const onReady = async () => {
     const totalPages = await oniPDF.getTotalPages()
     
     if (totalPages === pageViews.length) {
       console.log('뼈대 완성')
 
-      const page = options.page!
-      await goToPage(page)
-      const canvasNode = await oniPDF.renderToCanvas(page)
-      pageRefs.current[page]?.appendChild(canvasNode)
-
-      oniPDF.emit(EVENTS.FIRSTRENDERED)
+      switch (options.type) {
+        case 'image' :
+          await oniPDF.renderToImage()
+        break
+        default :
+          await oniPDF.renderToCanvas()
+      }
     }
   }
 
@@ -55,22 +43,15 @@ const OniPdf = ({
   useEffect(() => {
     const rootElement = document.documentElement
     rootElement.classList.add(classes.root)
+
+    for (const page of context.pageViews) {
+      pageRefs.current?.appendChild(page.rootNode)
+    }
   }, [])
 
   return (
     <div class={clsx('scrolling', classes.Scrolling)} ref={scrollingRef}>
-      {pageViews &&
-        <div class={clsx('pages')}>
-          {context.pageViews.map((_, index) => 
-            <OniPage 
-              key={index}
-              index={index}
-              context={context}
-              ref={(el: HTMLDivElement | null) => (pageRefs.current[index] = el)}
-            />
-          )}
-        </div>
-      }
+      {pageViews && <div class={clsx('pages')} ref={pageRefs} />}
     </div>
   )
 }

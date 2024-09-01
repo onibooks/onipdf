@@ -4,11 +4,23 @@ import { provider, type GlobalContext } from '../provider'
 export class PageView {
   static context: GlobalContext
   public index: number
+  public zoom: number
+  public pageSize: {width: number, height: number}
   public rootNode: HTMLDivElement
+  public canvasNode: HTMLCanvasElement
+  public canvasContext: CanvasRenderingContext2D | null
   public isLoad = false
 
   constructor (index: number) {
     this.index = index
+    this.zoom = this.context.zoom ?? 96
+
+    this.rootNode = document.createElement('div')
+		this.rootNode.id = 'page' + (this.index + 1)
+		this.rootNode.className = 'page'
+    
+    this.canvasNode = document.createElement('canvas')
+    this.canvasContext = this.canvasNode.getContext('2d')
   }
 
   get context () {
@@ -17,6 +29,20 @@ export class PageView {
 
   get pageNumber () {
     return this.index + 1
+  }
+
+  async init () {
+    this.pageSize = await this.context.worker.getPageSize(this.index)
+		this.rootNode.appendChild(this.canvasNode)
+
+    this.updateSize()
+  }
+
+  private updateSize () {
+    this.rootNode.style.width = `${((this.pageSize.width * this.zoom) / 72) | 0}px`
+    this.rootNode.style.height = `${((this.pageSize.height * this.zoom) / 72) | 0}px`
+    this.canvasNode.style.width = `${((this.pageSize.width * this.zoom) / 72) | 0}px`
+    this.canvasNode.style.height = `${((this.pageSize.height * this.zoom) / 72) | 0}px`
   }
 
   async load () {
@@ -38,28 +64,19 @@ export class PageView {
 
   async renderToCanvas () {
     const page = this.index ?? this.context.options.page
-    const zoom = this.context.zoom ?? 96
-    const canvas = await this.context.worker.getCanvasPixels(page, zoom * devicePixelRatio)
+    const canvas = await this.context.worker.getCanvasPixels(page, this.zoom * devicePixelRatio)
     
-    const canvasNode = document.createElement('canvas') as HTMLCanvasElement
-    const canvasContext = canvasNode.getContext('2d') as CanvasRenderingContext2D
-    
-    canvasNode.width = canvas.width
-    canvasNode.height = canvas.height
-    canvasContext?.putImageData(canvas, 0, 0)
-    
-    const pageSize = await this.context.worker.getPageSize(page)
-    // canvasNode.style.width = `${(pageSize.width * zoom) / 72 | 0}px`
-    // canvasNode.style.height = `${(pageSize.height * zoom) / 72 | 0}px`
-    canvasNode.style.width = `${(pageSize.width)}px`
-    canvasNode.style.height = `${(pageSize.height)}px`
+    this.canvasNode.width = canvas.width
+    this.canvasNode.height = canvas.height
+    this.canvasContext?.putImageData(canvas, 0, 0)
 
-    this.context.oniPDF.emit(EVENTS.RENDERED, canvasNode)
-
-    return canvasNode
+    this.context.oniPDF.emit(EVENTS.RENDERED, {
+      page
+    })
   }
 
   async renderToImage () {
+    const page = this.index ?? this.context.options.page
     const z = devicePixelRatio * 96 / 72
     const pixmapImage = await this.context.worker.getPixmapImage(this.index, z)
     
@@ -67,15 +84,18 @@ export class PageView {
     image.src = URL.createObjectURL(new Blob([pixmapImage], { type: 'image/png' }))
     image.style.width = '100%'
     
-    this.context.oniPDF.emit(EVENTS.RENDERED, image)
+    this.context.oniPDF.emit(EVENTS.RENDERED, { page })
     
     return image
   }
 }
 
-export const createPageView = (index: number) => provider((context) => {
+export const createPageView = (index: number) => provider(async (context) => {
   PageView.context = context
   const pageView = new PageView(index)
   
+  await pageView.load()
+  await pageView.init()
+
   return pageView
 })
