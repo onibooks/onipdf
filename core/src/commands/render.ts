@@ -38,8 +38,6 @@ export const render = (context: GlobalContext) => {
       type
     }
     
-    // await Promise.all(context.pageViews.map((pageView) => pageView.load()))
-
     const fragment = document.createElement('div')
     const Component = h(OniPdf, { context })
     prender(Component, fragment)

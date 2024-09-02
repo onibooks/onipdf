@@ -17,6 +17,7 @@ export class PageView {
 
     this.rootNode = document.createElement('div')
 		this.rootNode.id = 'page' + (this.index + 1)
+		this.rootNode.dataset.index = String(this.index)
 		this.rootNode.className = 'page'
     
     this.canvasNode = document.createElement('canvas')
@@ -70,9 +71,9 @@ export class PageView {
     this.canvasNode.height = canvas.height
     this.canvasContext?.putImageData(canvas, 0, 0)
 
-    this.context.oniPDF.emit(EVENTS.RENDERED, {
-      page
-    })
+    this.context.oniPDF.emit(EVENTS.RENDERED, { page })
+
+    this.isRendered = true
   }
 
   async renderToImage () {

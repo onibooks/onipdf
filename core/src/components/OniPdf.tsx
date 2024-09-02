@@ -24,10 +24,11 @@ const OniPdf = ({
 
       switch (options.type) {
         case 'image' :
-          await oniPDF.renderToImage()
+          await oniPDF.renderToImage(options.page)
         break
+
         default :
-          await oniPDF.renderToCanvas()
+          await oniPDF.renderToCanvas(options.page)
       }
     }
   }
@@ -48,6 +49,33 @@ const OniPdf = ({
       pageRefs.current?.appendChild(page.rootNode)
     }
   }, [])
+
+  useEffect(() => {
+    if (pageRefs.current) {
+      const io = new IntersectionObserver(([entry], observer) => {
+        const target = entry.target as HTMLElement
+        const index = Number(target.dataset.index)
+        const page = pageViews[index]
+
+        if (!entry.isIntersecting) {
+          console.log('returning')
+          return
+        }
+
+        if (!page.isRendered) {
+          page.renderToCanvas()
+        }
+
+      }, {
+        root: context.scrollingElement,
+        rootMargin: '40%'
+      })
+
+      for (let page of pageViews) {
+        io.observe(page.rootNode)
+      }
+    }
+  }, [pageRefs])
 
   return (
     <div class={clsx('scrolling', classes.Scrolling)} ref={scrollingRef}>

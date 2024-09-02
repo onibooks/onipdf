@@ -21,7 +21,7 @@ export declare class PageView {
         width: number;
         height: number;
     }>;
-    renderToCanvas(): Promise<HTMLCanvasElement>;
+    renderToCanvas(): Promise<void>;
     renderToImage(): Promise<HTMLImageElement>;
 }
-export declare const createPageView: (index: number) => PageView;
+export declare const createPageView: (index: number) => Promise<PageView>;

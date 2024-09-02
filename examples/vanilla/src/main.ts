@@ -5,7 +5,7 @@ import { createBook, EVENTS } from '@onipdf/core'
 
 ;(async () => {
   const oniPdf = await createBook('/books/179489140.pdf', {
-    muPDFSrc: '/lib/mupdf/mupdf.js'
+    muPDFSrc: '/lib/mupdf/mupdf.js',
   })
 
   const index = 2
@@ -23,7 +23,6 @@ import { createBook, EVENTS } from '@onipdf/core'
 
     // 전체 페이지 렌더링
     await oniPdf.render(document.getElementById('reader')!, {
-      type: 'canvas',
       page: index
     })
   })
