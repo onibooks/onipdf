@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useRef, useEffect, useMemo } from 'preact/hooks'
+import { useRef, useEffect, useMemo, useState } from 'preact/hooks'
 
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
@@ -15,6 +15,11 @@ const OniPdf = ({
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   const pageRefs = useRef<HTMLDivElement>(null)
   const scrollingRef = useRef<HTMLDivElement>(null)
+
+  const observerRef = useRef<IntersectionObserver | null>(null)
+  const lastScrollY = useRef<number>(0)
+  const scrollTimeout = useRef<number | null>(null)
+  const [renderedPages, setRenderedPages] = useState<Set<number>>(new Set())
 
   const onReady = async () => {
     const totalPages = await oniPDF.getTotalPages()
@@ -51,31 +56,75 @@ const OniPdf = ({
   }, [])
 
   useEffect(() => {
-    if (pageRefs.current) {
-      const io = new IntersectionObserver(([entry], observer) => {
-        const target = entry.target as HTMLElement
-        const index = Number(target.dataset.index)
-        const page = pageViews[index]
+    if (scrollingRef.current) {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(async (entry) => {
+          const target = entry.target as HTMLElement
+          const index = Number(target.dataset.index)
+          const page = pageViews[index]
 
-        if (!entry.isIntersecting) {
-          console.log('returning')
-          return
-        }
-
-        if (!page.isRendered) {
-          page.renderToCanvas()
-        }
-
-      }, {
-        root: context.scrollingElement,
-        rootMargin: '40%'
+          if (entry.isIntersecting && !renderedPages.has(index)) {
+            if (!page.isRendered) {
+              console.log('render', index)
+              await page.renderToCanvas()
+              setRenderedPages(prev => new Set(prev).add(index))
+            }
+          }
+        })
+      },{
+        root: scrollingRef.current,
+        rootMargin: '300%'
       })
 
-      for (let page of pageViews) {
-        io.observe(page.rootNode)
+      observerRef.current = observer
+
+      const observeElements = () => {
+        for (const page of pageViews) {
+          observerRef.current?.observe(page.rootNode)
+        }
+      }
+
+      const handleScroll = () => {
+        if (!scrollingRef.current) return
+
+        const currentScrollY = scrollingRef.current.scrollTop
+        const delta = Math.abs(currentScrollY - lastScrollY.current)
+
+        // 스크롤 속도가 빠르면 observer를 일시 해제
+        if (delta > 400 && observerRef.current) {
+          console.log('스크롤 빠름', delta)
+          observerRef.current.disconnect()
+        }
+
+        // 현재 스크롤 위치 업데이트
+        lastScrollY.current = currentScrollY
+
+        // 스크롤 멈추면 observer 다시 활성화
+        clearTimeout(scrollTimeout.current as number)
+        scrollTimeout.current = window.setTimeout(() => {
+          if (scrollingRef.current && observerRef.current) {
+             // 기존 observer를 disconnect 후 재설정
+            observerRef.current.disconnect()
+            observeElements()
+          }
+        }, 150)
+      }
+
+      if (scrollingRef.current) {
+        scrollingRef.current.addEventListener('scroll', handleScroll)
+      }
+
+      observeElements()
+
+      return () => {
+        if (scrollingRef.current) {
+          scrollingRef.current.removeEventListener('scroll', handleScroll)
+        }
+        observerRef.current?.disconnect()
       }
     }
-  }, [pageRefs])
+  }, [scrollingRef]) // pageViews, renderedPages
+
 
   return (
     <div class={clsx('scrolling', classes.Scrolling)} ref={scrollingRef}>

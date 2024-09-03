@@ -7,6 +7,8 @@ export * from './assign';
 export * from './isString';
 export * from './chunkArray';
 export * from './debounce';
+export * from './throttle';
 export * from './requestIdleCallback';
 export * from './addClass';
 export * from './removeClass';
+export * from './isElement';

@@ -8,7 +8,7 @@ import { createBook, EVENTS } from '@onipdf/core'
     muPDFSrc: '/lib/mupdf/mupdf.js',
   })
 
-  const index = 2
+  const index = 0
 
   oniPdf.on(EVENTS.OPEN, async () => {
     console.log('Document opened;')
@@ -31,8 +31,8 @@ import { createBook, EVENTS } from '@onipdf/core'
     console.log('LOAD PAGE')
   })
 
-  oniPdf.on(EVENTS.RENDERED, async (data) => {
-    console.log('RENDERED PAGE', data)
+  oniPdf.on(EVENTS.RENDERED, async ({ page }) => {
+    // console.log('RENDERED PAGE', page)
   })
 
   // @ts-ignore

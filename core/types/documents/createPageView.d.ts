@@ -11,6 +11,7 @@ export declare class PageView {
     canvasNode: HTMLCanvasElement;
     canvasContext: CanvasRenderingContext2D | null;
     isLoad: boolean;
+    isRendered: boolean;
     constructor(index: number);
     get context(): GlobalContext;
     get pageNumber(): number;

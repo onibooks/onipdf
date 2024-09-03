@@ -10,6 +10,7 @@ export class PageView {
   public canvasNode: HTMLCanvasElement
   public canvasContext: CanvasRenderingContext2D | null
   public isLoad = false
+  public isRendered = false
 
   constructor (index: number) {
     this.index = index
@@ -64,6 +65,8 @@ export class PageView {
   }
 
   async renderToCanvas () {
+    this.isRendered = true
+
     const page = this.index ?? this.context.options.page
     const canvas = await this.context.worker.getCanvasPixels(page, this.zoom * devicePixelRatio)
     
@@ -72,11 +75,11 @@ export class PageView {
     this.canvasContext?.putImageData(canvas, 0, 0)
 
     this.context.oniPDF.emit(EVENTS.RENDERED, { page })
-
-    this.isRendered = true
   }
 
   async renderToImage () {
+    this.isRendered = true
+    
     const page = this.index ?? this.context.options.page
     const z = devicePixelRatio * 96 / 72
     const pixmapImage = await this.context.worker.getPixmapImage(this.index, z)
