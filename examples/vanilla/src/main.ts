@@ -1,5 +1,4 @@
 import './style.css'
-// import './resizer'
 
 import { createBook, EVENTS } from '@onipdf/core'
 
@@ -15,25 +14,19 @@ import { createBook, EVENTS } from '@onipdf/core'
 
     const metadata = await oniPdf.getMetaData()
     const totalPages = await oniPdf.getTotalPages()
-    console.log(metadata, totalPages)
+    // console.log(metadata, totalPages)
 
-    // 부분 페이지 렌더링
-    // await oniPdf.loadPage(0)
-    // await oniPdf.renderToCanvas(0)
-
-    // 전체 페이지 렌더링
-    await oniPdf.render(document.getElementById('reader')!, {
-      page: index
-    })
+    await oniPdf.loadPage(index)
+    await oniPdf.render(document.getElementById('reader')!, { page: index })
   })
   
-  oniPdf.on(EVENTS.LOAD, async () => {
-    console.log('LOAD PAGE')
+  oniPdf.on(EVENTS.LOAD, async (data) => {
+    // console.log('LOAD PAGE', data)
   })
 
-  oniPdf.on(EVENTS.RENDERED, async ({ page }) => {
+  // oniPdf.on(EVENTS.RENDERED, async ({ page }) => {
     // console.log('RENDERED PAGE', page)
-  })
+  // })
 
   // @ts-ignore
   window.oniPdf = oniPdf
