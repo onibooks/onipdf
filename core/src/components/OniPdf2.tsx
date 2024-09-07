@@ -3,7 +3,6 @@ import { useRef, useEffect, useMemo } from 'preact/hooks'
 
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
-import { renderToCanvas } from '../commands'
 
 type OniPdfProps = {
   context: GlobalContext
@@ -12,11 +11,14 @@ type OniPdfProps = {
 const OniPdf = ({
   context
 }: OniPdfProps) => {
-  const { oniPDF, pageViews, options } = context
+  const { oniPDF, pageViews, options, sangte } = context
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   const pageRefs = useRef<HTMLDivElement>(null)
   const scrollingRef = useRef<HTMLDivElement>(null)
-  const isReadyRef = useRef<boolean>(false)
+  const isRendering = useRef(true)
+  const lastPos = useRef<number>(0)
+  const lastTime = useRef(performance.now())
+  const observerRef = useRef<IntersectionObserver | null>(null)
 
   const onReady = async () => {
     const totalPages = await oniPDF.getTotalPages()
@@ -35,7 +37,7 @@ const OniPdf = ({
     }
   }
 
-  useEffect(() => {
+  const setupObserver = () => {
     if (scrollingRef.current) {
       const io = new IntersectionObserver((entries, index) => {
         entries.forEach((entry) => {
@@ -43,30 +45,120 @@ const OniPdf = ({
           const index = Number(target.dataset.index)
           const page = pageViews[index]
 
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && isRendering.current) {
             if (!page.isRendered) {
-              console.log('render', index)
+              console.log('render: ', index)
               page.renderToCanvas()
             }
           }
         })
       }, {
         root: scrollingRef.current,
-        rootMargin: '20%'
+        rootMargin: '0%'
       })
 
-      for (const page of pageViews) {
-        io.observe(page.rootNode)
-      }
+      pageViews.forEach((page) => io.observe(page.rootNode))
+      
+      observerRef.current = io
     }
-  }, [])
+  }
+
+  const destroyObserver = () => {
+    if (observerRef.current) {
+      pageViews.forEach((page) => observerRef.current?.unobserve(page.rootNode))
+
+      observerRef.current.disconnect()
+      observerRef.current = null
+    }
+  }
+
+  const calculateCurrentPageIndex = () => {
+    if (!scrollingRef.current || pageViews.length === 0) return 0
+
+    const scrollTop = scrollingRef.current.scrollTop
+    const containerHeight = scrollingRef.current.clientHeight
+
+    let currentIndex = 0
+
+    pageViews.forEach((page, index) => {
+      const pageElement = page.rootNode
+      const pageTop = pageElement.offsetTop
+      const pageHeight = pageElement.offsetHeight
+
+      // 페이지가 30% 이상 보이는지 체크
+      const visibleHeight = Math.min(pageHeight, containerHeight + scrollTop - pageTop)
+      const visibilityRatio = visibleHeight / pageHeight
+
+      // 30% 이상 보이면 currentIndex 업데이트
+      if (visibilityRatio >= 0.3 && visibilityRatio <= 1) {
+        currentIndex = index
+      }
+    })
+
+    return currentIndex
+  }
 
   useEffect(() => {
     if (scrollingRef.current) {
       context.scrollingElement = scrollingRef.current
     }
-    
+
     onReady()
+    
+    scrollingRef.current?.addEventListener('scroll', async () => {
+      const currentIndex = calculateCurrentPageIndex()
+      sangte.setState({ currentIndex })
+      console.log('현재 보이는 페이지 인덱스:', currentIndex)
+    })
+
+    setupObserver()
+
+    return () => destroyObserver()
+  }, [])
+
+  
+  useEffect(() => {
+    if (!scrollingRef.current) return
+
+    const updateSpeed = async () => {
+      const currentPos = scrollingRef.current?.scrollTop!
+      const currentTime = performance.now()
+      const deltaPos = currentPos - lastPos.current
+      const deltaTime = currentTime - lastTime.current
+      const currentSpeed = deltaPos / deltaTime
+
+      if (currentSpeed > 12) {
+        if (isRendering.current) {
+          console.log('렌더링 중단')
+          isRendering.current = false
+        }
+      } else {
+        if (!isRendering.current) {
+          if (currentSpeed < 0.1) {
+            console.log('렌더링 재개')
+
+            // 현재 위치 업데이트
+            const { currentIndex } = sangte.getState()
+
+            // 현재 위치의 페이지 렌더링
+            console.log('현재 위치의 페이지 렌더링', currentIndex)
+            await oniPDF.renderToCanvas(currentIndex)
+
+            isRendering.current = true
+            setupObserver()
+          }
+        }
+      }
+
+      lastPos.current = currentPos
+      lastTime.current = currentTime
+
+      requestAnimationFrame(updateSpeed)
+    }
+
+    const animationId = requestAnimationFrame(updateSpeed)
+
+    return () => cancelAnimationFrame(animationId)
   }, [])
 
   useEffect(() => {
