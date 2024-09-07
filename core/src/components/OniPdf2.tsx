@@ -37,6 +37,11 @@ const OniPdf = ({
     }
   }
 
+  const onScroll = async () => {
+    const currentIndex = updateCurrentIndex()
+    sangte.setState({ currentIndex })
+  }
+  
   const setupObserver = () => {
     if (scrollingRef.current) {
       const io = new IntersectionObserver((entries, index) => {
@@ -54,7 +59,7 @@ const OniPdf = ({
         })
       }, {
         root: scrollingRef.current,
-        rootMargin: '0%'
+        rootMargin: '20%'
       })
 
       pageViews.forEach((page) => io.observe(page.rootNode))
@@ -72,21 +77,20 @@ const OniPdf = ({
     }
   }
 
-  const calculateCurrentPageIndex = () => {
-    if (!scrollingRef.current || pageViews.length === 0) return 0
+  const updateCurrentIndex = () => {
+    if (!scrollingRef.current || pageViews.length === 0) {
+      return 0
+    }
 
-    const scrollTop = scrollingRef.current.scrollTop
-    const containerHeight = scrollingRef.current.clientHeight
-
+    const { scrollTop, clientHeight } = scrollingRef.current
     let currentIndex = 0
 
     pageViews.forEach((page, index) => {
       const pageElement = page.rootNode
-      const pageTop = pageElement.offsetTop
-      const pageHeight = pageElement.offsetHeight
+      const { offsetTop: pageTop, offsetHeight: pageHeight } = pageElement
 
       // 페이지가 30% 이상 보이는지 체크
-      const visibleHeight = Math.min(pageHeight, containerHeight + scrollTop - pageTop)
+      const visibleHeight = Math.min(pageHeight, clientHeight + scrollTop - pageTop)
       const visibilityRatio = visibleHeight / pageHeight
 
       // 30% 이상 보이면 currentIndex 업데이트
@@ -99,25 +103,6 @@ const OniPdf = ({
   }
 
   useEffect(() => {
-    if (scrollingRef.current) {
-      context.scrollingElement = scrollingRef.current
-    }
-
-    onReady()
-    
-    scrollingRef.current?.addEventListener('scroll', async () => {
-      const currentIndex = calculateCurrentPageIndex()
-      sangte.setState({ currentIndex })
-      console.log('현재 보이는 페이지 인덱스:', currentIndex)
-    })
-
-    setupObserver()
-
-    return () => destroyObserver()
-  }, [])
-
-  
-  useEffect(() => {
     if (!scrollingRef.current) return
 
     const updateSpeed = async () => {
@@ -129,21 +114,17 @@ const OniPdf = ({
 
       if (currentSpeed > 12) {
         if (isRendering.current) {
-          console.log('렌더링 중단')
+          // 렌더링 중단
           isRendering.current = false
         }
       } else {
         if (!isRendering.current) {
           if (currentSpeed < 0.1) {
-            console.log('렌더링 재개')
-
-            // 현재 위치 업데이트
             const { currentIndex } = sangte.getState()
-
-            // 현재 위치의 페이지 렌더링
-            console.log('현재 위치의 페이지 렌더링', currentIndex)
             await oniPDF.renderToCanvas(currentIndex)
-
+            console.log('재개 렌더링', currentIndex)
+            
+            // 렌더링 재개
             isRendering.current = true
             setupObserver()
           }
@@ -159,6 +140,24 @@ const OniPdf = ({
     const animationId = requestAnimationFrame(updateSpeed)
 
     return () => cancelAnimationFrame(animationId)
+  }, [])
+
+  useEffect(() => {
+    if (scrollingRef.current) {
+      context.scrollingElement = scrollingRef.current
+    }
+
+    onReady()
+    
+    scrollingRef.current?.addEventListener('scroll', onScroll)
+    
+    setupObserver()
+
+    return () => {
+      scrollingRef.current?.removeEventListener('scroll', onScroll)
+      
+      destroyObserver()
+    }
   }, [])
 
   useEffect(() => {
