@@ -7,3 +7,4 @@ export * from './renderToImage';
 export * from './renderToCanvas';
 export * from './getPDFPage';
 export * from './updateSize';
+export * from './goToPage';

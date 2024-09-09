@@ -7,7 +7,7 @@ import { createBook, EVENTS } from '@onipdf/core'
     muPDFSrc: '/lib/mupdf/mupdf.js',
   })
 
-  const index = 0
+  const index = 2
 
   oniPdf.on(EVENTS.OPEN, async () => {
     console.log('Document opened;')

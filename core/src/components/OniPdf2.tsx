@@ -25,6 +25,7 @@ const OniPdf = ({
     
     if (totalPages === pageViews.length) {
       console.log('뼈대 완성')
+      oniPDF.goToPage(options.page)
 
       switch (options.type) {
         case 'image' :
