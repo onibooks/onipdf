@@ -10,6 +10,7 @@ import type { Sangte } from './sangte';
 import type { MuPDFWorker } from './workers/createWorker';
 import type { Options } from './commands/render';
 import type { PageView } from './documents/createPageView';
+import type { Rendition } from './rendition';
 export type GlobalContext = {
     oniPDF: OniPDF;
     worker: MuPDFWorker;
@@ -19,6 +20,7 @@ export type GlobalContext = {
     scrollingElement: HTMLElement;
     options: Options;
     pageViews: PageView[];
+    rendition: Rendition;
     zoom: number;
     uid: number;
 };

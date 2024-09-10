@@ -7,26 +7,21 @@ import { createBook, EVENTS } from '@onipdf/core'
     muPDFSrc: '/lib/mupdf/mupdf.js',
   })
 
-  const index = 2
+  const index = 1
 
   oniPdf.on(EVENTS.OPEN, async () => {
     console.log('Document opened;')
 
     const metadata = await oniPdf.getMetaData()
     const totalPages = await oniPdf.getTotalPages()
-    // console.log(metadata, totalPages)
+    console.log(metadata, totalPages)
 
     await oniPdf.loadPage(index)
     await oniPdf.render(document.getElementById('reader')!, { page: index })
   })
   
-  oniPdf.on(EVENTS.LOAD, async (data) => {
-    // console.log('LOAD PAGE', data)
-  })
-
-  // oniPdf.on(EVENTS.RENDERED, async ({ page }) => {
-    // console.log('RENDERED PAGE', page)
-  // })
+  // oniPdf.on(EVENTS.LOAD, async () => {})
+  // oniPdf.on(EVENTS.RENDERED, async ({ page }) => {})
 
   // @ts-ignore
   window.oniPdf = oniPdf

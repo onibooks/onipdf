@@ -10,6 +10,8 @@ import type { Sangte } from './sangte'
 import type { MuPDFWorker } from './workers/createWorker'
 import type { Options } from './commands/render'
 import type { PageView } from './documents/createPageView'
+import type { Rendition } from './rendition'
+
 
 export type GlobalContext = {
   oniPDF: OniPDF
@@ -20,6 +22,7 @@ export type GlobalContext = {
   scrollingElement: HTMLElement
   options: Options
   pageViews: PageView[]
+  rendition: Rendition
   zoom: number
   uid: number
 }
@@ -38,6 +41,7 @@ export const createContext = () => {
     scrollingElement: null as any,
     options: null as any,
     pageViews: [] as PageView[],
+    rendition: null as any,
     zoom: 96 as number,
     uid,
   }

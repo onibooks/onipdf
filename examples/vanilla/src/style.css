@@ -1,176 +1,114 @@
-:root {
-  --white: #ffffff;
-  --color: #222222;
-  --background: #d0d8d0;
-  --skeleton: #959b95;
-  --border: #475547;
-  --backgroundGradient: linear-gradient(to bottom, var(--white), var(--background));
-}
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html,
-body {
+html {
+  font-family: sans-serif;
+  font-size: 18px;
+  background-color: gray;
+}
+
+.onipdf {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
   width: 100%;
   height: 100%;
 }
 
-@keyframes fade {
-  100% {
-    opacity: 1;
-  }
-}
-
-#app {
-  user-select: none;
-  background: var(--background);
-}
-
-.button {
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.open {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  width: 48px;
-  height: 48px;
-}
-
-.sidebar {
+header {
   position: relative;
-  width: 280px;
-  height: 100%;
-  overflow-x: hidden;
-  background-image: var(--backgroundGradient);
-  transition: width .1s ease;
-}
-
-.resizer {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 1.4px;
-  height: 100%;
-  background-color: var(--border);
-  cursor: col-resize;
-  z-index: 10;
-}
-
-.resizer::before {
-  content: '';
-  position: absolute;
-  width: 15px;
-  height: 100%;
-  left: -7px;
-  right: -7px;
-  background-color: transparent;
-  cursor: col-resize;
-  z-index: 5;
-}
-
-.header {
-  padding: 12px 16px;
+  grid-column: 1 / 3;
+  grid-row: 1;
   display: flex;
-  flex-direction: column;
-}
-
-.close {
-  order: 1;
-  align-self: flex-end;
-}
-
-.header .logo {
-  color: var(--color);
-  white-space: nowrap;
-  order: 2;
-  align-self: flex-start;
-}
-
-.exit {
-  margin-top: 40px;
-  padding: 0 16px;
-  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 14px;
-  color: gray;
-  line-height: 20px;
-  transition: color 150ms;
-  width: fit-content;
-
-  text-decoration: none;
-  cursor: pointer;
+  justify-content: space-between;
+  background-color: rgba(83, 83, 83, 0.4);
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
 }
 
-.exit:hover {
-  color: var(--color);
-}
-
-nav {
-  padding: 12px 16px;
-  opacity: 0;
-  animation: fade .5s ease forwards;
-}
-
-nav ul {
-  min-width: 250px;
-  list-style: none;
-  padding: 11px 0px;
-  max-width: 360px;
+.left {
   display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-  gap: 10px;
+  align-items: center;
+  justify-content: space-evenly;
+  width: auto;
 }
 
-nav ul li {
+.menus {
+  height: 100%;
   display: flex;
-  font-size: 13px;
-}
-
-.radio {
-  display: inline-flex;
-  overflow: hidden;
-  border-radius: 15px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--border);
-  flex-grow: 1;
-}
-
-.radio-input {
-  display: none;
-}
-
-.radio-label {
-  padding: 8px 14px;
+  align-items: center;
+  margin-left: 10px;
+  color: rgba(255, 255, 255, 0.95);
   font-size: 14px;
-  color: var(--border);
-  background-color: var(--white);
-  cursor: pointer;
-  flex-grow: 1;
-  text-align: center;
-  transition: background-color 150ms, color 150ms;
 }
 
-.radio-label:not(:last-of-type) {
-  border-right: 1px solid var(--border);
-}
-
-.radio-input:checked+.radio-label {
-  background-color: var(--border);
+.menus.active {
+  font-weight: bold;
   color: #FFF;
 }
 
-.content {
-  position: relative;
-  font-size: 0;
+aside {
+  grid-column: 1;
+  grid-row: 2;
+  overflow-y: auto;
+  width: 250px;
+  color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(83, 83, 83, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(13px);
+  -webkit-backdrop-filter: blur(13px);
+}
+
+main {
+  grid-column: 2;
+  grid-row: 2;
+  overflow: scroll;
+  margin: 0 auto;
+}
+
+footer {
+  grid-column: 1 / 3;
+  grid-row: 3;
+  border-radius: 16px;
+  background-color: rgba(83, 83, 83, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(13px);
+  -webkit-backdrop-filter: blur(13px);
+}
+
+summary {
+  padding: 4px 8px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+details[open]>summary {
+  background-color: #0004;
+}
+
+menu {
+  list-style: none;
+  position: absolute;
+  top: 26.5px;
+  min-width: 140px;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.9);
+  border-radius: 5px;
+  z-index: 500;
+}
+
+menu li {
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+menu li:hover {
+  background-color: black;
+  color: white;
 }

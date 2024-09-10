@@ -6,11 +6,86 @@
     <title>OniPDF Example</title>
   </head>
   <body>
-    <div id="app">
-     <div class="content">
-        <div id="reader" class="reader"></div>
-     </div>
+    <div id="app" class="onipdf">
+      <header>
+        <div class="left">
+          <details class="menus">
+            <summary>파일</summary>
+            <menu>
+              <li>파일 선택</li>
+            </menu>
+          </details>
+          <details class="menus">
+            <summary>편집</summary>
+            <menu>
+              <li>검색</li>
+            </menu>
+          </details>
+          <details class="menus">
+            <summary>보기</summary>
+            <menu>
+              <li>
+                <input type="radio" id="scrolled" name="flow" checked>
+                <label for="scrolled">스크롤모드</label>
+              </li>
+              <li>
+                <input type="radio" id="paginated" name="flow">
+                <label for="paginated">페이지모드</label>
+              </li>
+              <hr>
+              <li>
+                <input type="radio" id="single" name="spread" checked>
+                <label for="single">한쪽보기</label>
+              </li>
+              <li>
+                <input type="radio" id="double" name="spread">
+                <label for="double">두쪽보기</label>
+              </li>
+              <li>
+                <input type="radio" id="coverFacing" name="spread">
+                <label for="coverFacing">표지보기</label>
+              </li>
+            </menu>
+          </details>
+          <details class="menus">
+            <summary>확대</summary>
+            <menu>
+              <li>50%</li>
+              <li>75%</li>
+              <li>100%</li>
+              <li>125%</li>
+              <li>150%</li>
+              <li>200%</li>
+            </menu>
+          </details>
+        </div>
+        <div class="right"></div>
+      </header>
+  
+      <aside class="outline-panel"></aside>
+  
+      <main id="reader" class="page-panel">
+        <!-- <div class="reader"></div> -->
+      </main>
+      
+      <footer class="search-panel">
+        <input type="search" id="searchInput" size="40" placeholder="검색">
+        
+        <button type="button">이전</button>
+        <button type="button">다음</button>
+  
+        <span id="searchStatus"></span>
+  
+        <button type="button">닫기</button>
+      </footer>
     </div>
+
+	  <input
+      style="display: none"
+      id="fileInput"
+      type="file"
+      accept=".pdf,application/pdf"
+    >
 
     <script type="module" src="/src/main.ts"></script>
   </body>
