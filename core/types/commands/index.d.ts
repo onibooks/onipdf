@@ -9,3 +9,4 @@ export * from './getPDFPage';
 export * from './updateSize';
 export * from './goToPage';
 export * from './layout';
+export * from './locate';

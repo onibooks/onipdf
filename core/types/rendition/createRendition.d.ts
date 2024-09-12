@@ -4,4 +4,4 @@ export type Rendition = {
     layout: (options?: LayoutOptions) => Layout;
     locate: (options?: LocateOptions) => Locate;
 };
-export declare const createRendition: () => void;
+export declare const createRendition: () => Rendition;
