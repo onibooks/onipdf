@@ -6,86 +6,106 @@
     <title>OniPDF Example</title>
   </head>
   <body>
-    <div id="app" class="onipdf">
-      <header>
-        <div class="left">
-          <details class="menus">
-            <summary>파일</summary>
-            <menu>
-              <li>파일 선택</li>
-            </menu>
-          </details>
-          <details class="menus">
-            <summary>편집</summary>
-            <menu>
-              <li>검색</li>
-            </menu>
-          </details>
-          <details class="menus">
-            <summary>보기</summary>
-            <menu>
-              <li>
-                <input type="radio" id="scrolled" name="flow" checked>
-                <label for="scrolled">스크롤모드</label>
-              </li>
-              <li>
-                <input type="radio" id="paginated" name="flow">
-                <label for="paginated">페이지모드</label>
-              </li>
-              <hr>
-              <li>
-                <input type="radio" id="single" name="spread" checked>
-                <label for="single">한쪽보기</label>
-              </li>
-              <li>
-                <input type="radio" id="double" name="spread">
-                <label for="double">두쪽보기</label>
-              </li>
-              <li>
-                <input type="radio" id="coverFacing" name="spread">
-                <label for="coverFacing">표지보기</label>
-              </li>
-            </menu>
-          </details>
-          <details class="menus">
-            <summary>확대</summary>
-            <menu>
-              <li>50%</li>
-              <li>75%</li>
-              <li>100%</li>
-              <li>125%</li>
-              <li>150%</li>
-              <li>200%</li>
-            </menu>
-          </details>
+    <div class="wrapper">
+      <div class="window-container">
+        <div class="topper">
+          <div class="circle-container">
+            <span class="circle"></span>
+            <span class="circle"></span>
+            <span class="circle"></span>
+          </div>
+          <div class="topper-logo-container">
+            <img alt="OniPDF logo" class="topper-logo" src="/images/logo.jpg" />
+          </div>
         </div>
-        <div class="right"></div>
-      </header>
-  
-      <aside class="outline-panel"></aside>
-  
-      <main id="reader" class="page-panel">
-        <!-- <div class="reader"></div> -->
-      </main>
-      
-      <footer class="search-panel">
-        <input type="search" id="searchInput" size="40" placeholder="검색">
-        
-        <button type="button">이전</button>
-        <button type="button">다음</button>
-  
-        <span id="searchStatus"></span>
-  
-        <button type="button">닫기</button>
-      </footer>
-    </div>
+        <div class="viewer-frame">
+          <div id="App">
+            <div class="app">
+              <div class="header">
+                <div class="header-items">
+                  <button type="button">
+                    <div class="icon"><svg width="24px" stroke-width="1.5" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor"><path d="M19 21L5 21C3.89543 21 3 20.1046 3 19L3 5C3 3.89543 3.89543 3 5 3L19 3C20.1046 3 21 3.89543 21 5L21 19C21 20.1046 20.1046 21 19 21Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9.5 21V3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5.5 10L7.25 12L5.5 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+                  </button>
 
-	  <input
-      style="display: none"
-      id="fileInput"
-      type="file"
-      accept=".pdf,application/pdf"
-    >
+                  <button type="button" class="controls-button">
+                    <div class="icon"><svg width="24px" height="24px" viewBox="0 0 24 24" stroke-width="1.5" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor"><path d="M20 12V5.74853C20 5.5894 19.9368 5.43679 19.8243 5.32426L16.6757 2.17574C16.5632 2.06321 16.4106 2 16.2515 2H4.6C4.26863 2 4 2.26863 4 2.6V21.4C4 21.7314 4.26863 22 4.6 22H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 10H16M8 6H12M8 14H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M17.9541 16.9394L18.9541 15.9394C19.392 15.5015 20.102 15.5015 20.5399 15.9394V15.9394C20.9778 16.3773 20.9778 17.0873 20.5399 17.5252L19.5399 18.5252M17.9541 16.9394L14.963 19.9305C14.8131 20.0804 14.7147 20.2741 14.6821 20.4835L14.4394 22.0399L15.9957 21.7973C16.2052 21.7646 16.3988 21.6662 16.5487 21.5163L19.5399 18.5252M17.9541 16.9394L19.5399 18.5252" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16 2V5.4C16 5.73137 16.2686 6 16.6 6H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+                  </button>
+
+                  <div class="zoom-overlay">
+                    <div class="toggle-zoom-overlay">
+                      <div class="overlay-container">
+                        <div class="overlay-text">
+                          <input type="text" class="textarea" value="63">
+                          <span>%</span>
+                        </div>
+                        <button type="button" class="overlay-button" data-element="zoomOverlay">
+                          <div class="icon"><svg width="12px" height="12px" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+                        </button>
+                      </div>
+                    </div>
+                    <button type="button" class="action-button" data-element="zoomOutButton">
+                      <div class="icon"><svg width="24px" height="24px" viewBox="0 0 24 24" stroke-width="2" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor"><path d="M17 17L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 11C3 15.4183 6.58172 19 11 19C13.213 19 15.2161 18.1015 16.6644 16.6493C18.1077 15.2022 19 13.2053 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 11L14 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+                    </button>
+                    <button type="button" class="action-button" data-element="zoomInButton">
+                      <div class="icon"><svg width="24px" height="24px" viewBox="0 0 24 24" stroke-width="2" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor"><path d="M8 11H11M14 11H11M11 11V8M11 11V14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M17 17L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 11C3 15.4183 6.58172 19 11 19C13.213 19 15.2161 18.1015 16.6644 16.6493C18.1077 15.2022 19 13.2053 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+                    </button>
+                  </div>
+
+                  <div class="ribbons-container"></div>
+
+                  <button type="button" data-element="searchButton">
+                    <div class="icon"><svg width="24px" height="24px" viewBox="0 0 24 24" stroke-width="2" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor"><path d="M17 17L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 11C3 15.4183 6.58172 19 11 19C13.213 19 15.2161 18.1015 16.6644 16.6493C18.1077 15.2022 19 13.2053 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+                  </button>
+                </div>
+                
+                <div class="header-border"></div>
+              </div>
+              
+              <div class="content">
+                <div class="left-panel">
+                  <div class="left-panel-container"></div>
+                </div>
+
+                <div class="document-content">
+                  <div class="measure-container">
+                    <div class="document-container"></div>
+                    <div class="footer"></div>
+                  </div>
+                </div>
+
+                <div class="right-panel"></div>
+              </div>
+
+              <div class="overlay-menu">
+                <div class="type" data-element="pageFlowHeader">Page Flow</div>
+                <button type="button" class="row" data-element="scrolledFlow">
+                  <div class="icon"><svg width="24px" height="24px" viewBox="0 0 24 24" fill="currentColor"><path d="M20,2V9a2,2,0,0,1-2,2H6A2,2,0,0,1,4,9V2H6V9H18V2Zm0,17.94s0,0,0,.06v2H18V21H13a1,1,0,0,1-1-1V15H6v7H4V15a2,2,0,0,1,2-2h7.06l.26.05.09,0a1.17,1.17,0,0,1,.3.19l6,6a1.17,1.17,0,0,1,.19.3.36.36,0,0,1,0,.09A2,2,0,0,1,20,19.94Z"></path></svg></div>
+                  <span class="title">스크롤모드</span>
+                </button>
+                <button type="button" class="row" data-element="paginatedFlow">
+                  <div class="icon"><svg width="24px" height="24px" viewBox="0 0 24 24" fill="currentColor"><path d="M17,17V7.83s0,0,0,0a1.7,1.7,0,0,0,0-.22l0-.07a.82.82,0,0,0-.16-.25l-5-5a.82.82,0,0,0-.25-.16l-.08,0-.21,0H5.34A1.67,1.67,0,0,0,3.67,3.67V17a1.67,1.67,0,0,0,1.67,1.67h10A1.67,1.67,0,0,0,17,17ZM5.67,4h4.66V7.83a.84.84,0,0,0,.84.83H15v8H5.67ZM20.33,9.51V20.33A1.67,1.67,0,0,1,18.66,22H11.17V20h7.16V9.51Z"></path></svg></div>
+                  <span class="title">페이지모드</span>
+                </button>
+                <div class="divider"></div>
+                <div class="type" data-element="pageSpreadHeader">Page Spread</div>
+                <button type="button" class="row" data-element="singleSpread">
+                  <div class="icon"><svg width="24px" height="24px" viewBox="0 0 24 24" fill="currentColor"><path class="cls-1" d="M20,8.94a2,2,0,0,0,0-.26.36.36,0,0,0,0-.09,1.17,1.17,0,0,0-.19-.3l-6-6a1.17,1.17,0,0,0-.3-.19l-.09,0L13.06,2H6A2,2,0,0,0,4,4V20a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V9S20,9,20,8.94ZM6,20V4h6V9a1,1,0,0,0,1,1h5V20Z"></path></svg></div>
+                  <span class="title">한쪽보기</span>
+                </button>
+                <button type="button" class="row" data-element="doubleSpread">
+                  <div class="icon"><svg width="24px" height="24px" viewBox="0 0 24 24" fill="currentColor"><path class="cls-1" d="M11,10.13s0,0,0-.05a1,1,0,0,0-.11-.17L7.46,6.54a.57.57,0,0,0-.16-.11l-.06,0-.14,0h-4A1.12,1.12,0,0,0,2,7.5v9a1.12,1.12,0,0,0,1.13,1.12H9.88A1.12,1.12,0,0,0,11,16.5V10.28A.4.4,0,0,0,11,10.13ZM3.13,16.5v-9H6.5v2.81a.57.57,0,0,0,.56.57H9.88V16.5ZM22,10.28a.4.4,0,0,0,0-.15s0,0,0-.05a1,1,0,0,0-.11-.17L18.46,6.54a.57.57,0,0,0-.16-.11l-.06,0-.14,0h-4A1.12,1.12,0,0,0,13,7.5v9a1.12,1.12,0,0,0,1.13,1.12h6.74A1.12,1.12,0,0,0,22,16.5V10.28ZM14.13,16.5v-9H17.5v2.81a.57.57,0,0,0,.56.57h2.81V16.5Z"></path></svg></div>
+                  <span class="title">두쪽보기</span>
+                </button>
+                <button type="button" class="row" data-element="coverFacingSpread">
+                  <div class="icon"><svg width="24px" height="24px" viewBox="0 0 24 24" fill="currentColor"><path class="cls-1" d="M2.13,14.13H1V12.59H2.13Zm0,1.18H1V16.5a1.12,1.12,0,0,0,1.13,1.12H3.31V16.5H2.13Zm0-5.44H1v1.54H2.13Zm0-2.37H3.31V6.38H2.13A1.12,1.12,0,0,0,1,7.5V8.68H2.13Zm4.2.83,1-1-.83-.83a.57.57,0,0,0-.16-.11l-.06,0-.14,0H4.49V7.5h1ZM8.88,16.5H7.69v1.12H8.88A1.12,1.12,0,0,0,10,16.5V15.32H8.88ZM4.49,17.62h2V16.5h-2Zm4.39-3.49H10V10.61L8.88,11.74Zm.55-4.62-1.3-1.3-1,1,1.3,1.3Zm11.57.8V16.5a1.12,1.12,0,0,1-1.13,1.12H13.12A1.12,1.12,0,0,1,12,16.5v-9a1.12,1.12,0,0,1,1.12-1.12h4l.14,0,.06,0a.57.57,0,0,1,.16.11l3.38,3.37a1,1,0,0,1,.11.17s0,0,0,.05a.4.4,0,0,1,0,.15ZM19.88,16.5V10.88H17.06a.57.57,0,0,1-.56-.57V7.5H13.12v9Z"></path></svg></div>
+                  <span class="title">표지보기</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

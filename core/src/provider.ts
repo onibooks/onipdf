@@ -19,7 +19,7 @@ export type GlobalContext = {
   sangte: StoreApi<Sangte>
   emotion: Emotion
   rootElement: HTMLElement
-  scrollingElement: HTMLElement
+  documentElement: HTMLElement
   options: Options
   pageViews: PageView[]
   rendition: Rendition
@@ -38,7 +38,7 @@ export const createContext = () => {
     sangte: null as any,
     emotion: null as any,
     rootElement: null as any,
-    scrollingElement: null as any,
+    documentElement: null as any,
     options: null as any,
     pageViews: [] as PageView[],
     rendition: null as any,
