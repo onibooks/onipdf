@@ -1,4 +1,5 @@
 import { provider } from '../provider'
+// @ts-ignore
 import * as commands from '.'
 
 export type Commands = {

@@ -1,3 +1,6 @@
 export const EVENTS = {
-  OPEN: 'open'
+  OPEN: 'open',
+  LOAD: 'load',
+  RENDERED: 'rendered',
+  FIRSTRENDERED: 'firstrendered'
 }

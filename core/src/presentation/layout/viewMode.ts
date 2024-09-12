@@ -1,0 +1,1 @@
+// setSinglePageView, setDoublePageView, getViewMode

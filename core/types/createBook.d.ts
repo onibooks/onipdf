@@ -5,4 +5,4 @@ export type Options = {
 };
 export type OniPDF = Commands & Events & {};
 export declare const createObject: <T extends object, P extends object>(proto: T, props: P) => any;
-export declare const createBook: ({ muPDFSrc }: Options) => Promise<OniPDF>;
+export declare const createBook: (url: string, options: Options) => Promise<OniPDF>;
