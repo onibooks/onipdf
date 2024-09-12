@@ -11,10 +11,10 @@ export const createRendition = () => provider((context) => {
   const layout = createLayout()
   const locate = createLocate()
 
-  // const rendition: Rendition = {
-    // layout,
-    // locate
-  // }
+  const rendition: Rendition = {
+    layout,
+    locate
+  }
 
-  // return rendition
+  return rendition
 })

@@ -145,7 +145,7 @@ const OniPdf = ({
 
   useEffect(() => {
     if (scrollingRef.current) {
-      context.scrollingElement = scrollingRef.current
+      context.documentElement = scrollingRef.current
     }
 
     onReady()

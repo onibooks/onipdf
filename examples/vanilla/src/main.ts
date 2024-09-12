@@ -1,80 +1,80 @@
 import './style.css'
+import { createBook, EVENTS, OniPDF } from '@onipdf/core'
 
-import { createBook, EVENTS } from '@onipdf/core'
+type ViewType = 'flow' | 'spread'
+type ViewElement = 'scrolled' | 'paginated' | 'single' | 'double' | 'coverFacing'
 
-type ViewControls = 'scrolledFlow' | 'paginatedFlow' | 'singleSpread' | 'doubleSpread' | 'coverFacingSpread'
-
-(() => {
-  const header = document.querySelector('.header-items')
-  const buttons = document.querySelectorAll('.header-items > button')
-  const overlayMenu = document.querySelector('.overlay-menu')
-
-  header?.addEventListener('click', handleButtonClick)
-  overlayMenu?.addEventListener('click', handleMenuClick)
-
-
-  function handleButtonClick(event: Event) {
-    const button = (event.target as HTMLElement)?.closest('button') as HTMLButtonElement
-    if (!button) return
-
-    const isControlsButton = button.classList.contains('controls-button')
-    const isActive = button.classList.contains('active')
-
-    buttons.forEach(btn => btn.classList.remove('active'))
-
-    if (!isActive && !button.classList.contains('action-button')) {
-      button.classList.add('active')
-    }
-
-    toggleOverlayMenu(isControlsButton && button.classList.contains('active'))
-  }
-
-  function handleMenuClick(event: Event) {
-    const button = (event.target as HTMLElement)?.closest('button') as HTMLButtonElement
-    if (!button) return
-
-    const viewControlElement = button.dataset.element as ViewControls
-    setViewControls(viewControlElement)
-
-    overlayMenu?.classList.remove('active')
-  }
-
-  function toggleOverlayMenu(isActive: boolean) {
-    if (isActive) {
-      overlayMenu?.classList.add('active')
-    } else {
-      overlayMenu?.classList.remove('active')
-    }
-  }
-
-  function setViewControls(element: ViewControls) {
-    if (element) {
-      console.log(element)
-    }
-  }
-})()
-
-;(async () => {
-  const oniPdf = await createBook('/books/179489140.pdf', {
+async function initializePdfViewer (): Promise<OniPDF> {
+  const oniPdf: OniPDF = await createBook('/books/179489140.pdf', {
     muPDFSrc: '/lib/mupdf/mupdf.js',
   })
 
-  const index = 1
-
-  oniPdf.on(EVENTS.OPEN, async () => {
-    console.log('Document opened;')
-
-    const metadata = await oniPdf.getMetaData()
-    const totalPages = await oniPdf.getTotalPages()
-    console.log(metadata, totalPages)
-
-    await oniPdf.loadPage(index)
-    await oniPdf.render(document.querySelector('.document-container')!, { page: index })
-  })
-  
-  // oniPdf.on(EVENTS.LOAD, async () => {})
-  // oniPdf.on(EVENTS.RENDERED, async ({ page }) => {})
-
   // @ts-ignore
   window.oniPdf = oniPdf
-})()
+
+  oniPdf.on(EVENTS.OPEN, async () => {
+    console.log('Document opened')
+
+    await oniPdf.loadPage(1)
+    await oniPdf.render(document.querySelector('.document-container')!, { page: 1 })
+  })
+
+  return oniPdf
+}
+
+function setupEventHandlers (): void {
+  const header = document.querySelector('.header-items') as HTMLElement
+  const overlayMenu = document.querySelector('.overlay-menu') as HTMLElement
+
+  header?.addEventListener('click', event => handleButtonClick(event))
+  overlayMenu?.addEventListener('click', event => handleMenuClick(event))
+
+  function handleButtonClick (event: Event): void {
+    const button = (event.target as HTMLElement).closest('button') as HTMLButtonElement | null
+    if (!button) return
+
+    toggleButtonActiveState(button)
+    toggleOverlayMenu(button, overlayMenu)
+  }
+
+  function handleMenuClick (event: Event): void {
+    const button = (event.target as HTMLElement).closest('button') as HTMLButtonElement | null
+    if (!button) return
+
+    const viewElement = button.dataset.element as ViewElement
+    const viewType = button.dataset.type as ViewType
+
+    setViewControls(viewElement, viewType)
+    toggleOverlayMenu(button, overlayMenu, false)
+  }
+}
+
+function toggleButtonActiveState (button: HTMLButtonElement): void {
+  button.classList.toggle('active', !button.classList.contains('active'))
+}
+
+function toggleOverlayMenu (button: HTMLButtonElement, overlayMenu: HTMLElement, isVisible: boolean = true): void {
+  if (button.classList.contains('controls-button') && isVisible) {
+    overlayMenu.classList.toggle('active', button.classList.contains('active'))
+  } else {
+    overlayMenu.classList.remove('active')
+  }
+}
+
+async function setViewControls (viewElement: ViewElement, viewType: ViewType): Promise<void> {
+  // @ts-ignore
+  const oniPdf = window.oniPdf as OniPDF
+  
+  if (viewElement && oniPdf) {
+    await oniPdf.layout({
+      [viewType]: viewElement
+    })
+  }
+}
+
+async function main (): Promise<void> {
+  await initializePdfViewer()
+  setupEventHandlers()
+}
+
+document.addEventListener('DOMContentLoaded', main)

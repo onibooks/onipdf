@@ -8,6 +8,5 @@ export * from './renderToCanvas'
 export * from './getPDFPage'
 export * from './updateSize'
 export * from './goToPage'
-
-// export * from './locate'
-// export * from './layout'
+export * from './layout'
+export * from './locate'

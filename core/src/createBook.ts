@@ -1,6 +1,7 @@
 import { createContext } from './provider'
 import { createSangte } from './sangte'
 import { createWorker } from './workers'
+import { createRendition } from './rendition'
 import { createEvents, type Events } from './events'
 import { createCommands, type Commands } from './commands/createCommands'
 import { createPDFDocument } from './documents/createPDFDocument'
@@ -47,6 +48,8 @@ export const createBook = async (
       return options.muPDFSrc
     }
   }))
+
+  context.rendition = createRendition()
 
   await createPDFDocument(url)
 
