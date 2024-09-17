@@ -1,12 +1,13 @@
 import { EVENTS } from '../constants'
 import { provider, type GlobalContext } from '../provider'
+import { addStyles } from '../utils'
 
 export class PageView {
   static context: GlobalContext
   public index: number
   public zoom: number
   public pageSize: {width: number, height: number}
-  public rootNode: HTMLDivElement
+  public pageSection: HTMLDivElement
   public canvasNode: HTMLCanvasElement
   public canvasContext: CanvasRenderingContext2D | null
   public isLoad = false
@@ -16,11 +17,17 @@ export class PageView {
     this.index = index
     this.zoom = this.context.zoom ?? 96
 
-    this.rootNode = document.createElement('div')
-		this.rootNode.id = 'page' + (this.index + 1)
-		this.rootNode.dataset.index = String(this.index)
-		this.rootNode.className = 'page'
-    
+    this.pageSection = document.createElement('div')
+		this.pageSection.id = 'pageSection' + (this.index + 1)
+		this.pageSection.dataset.index = String(this.index)
+		this.pageSection.className = 'pageSection'
+
+    addStyles(this.pageSection, {
+      float: 'left',
+      position: 'relative',
+      margin: '1px'
+    })
+   
     this.canvasNode = document.createElement('canvas')
     this.canvasContext = this.canvasNode.getContext('2d')
   }
@@ -35,14 +42,14 @@ export class PageView {
 
   async init () {
     this.pageSize = await this.context.worker.getPageSize(this.index)
-		this.rootNode.appendChild(this.canvasNode)
+		this.pageSection.appendChild(this.canvasNode)
 
     this.updateSize()
   }
 
   private updateSize () {
-    this.rootNode.style.width = `${((this.pageSize.width * this.zoom) / 72) | 0}px`
-    this.rootNode.style.height = `${((this.pageSize.height * this.zoom) / 72) | 0}px`
+    this.pageSection.style.width = `${((this.pageSize.width * this.zoom) / 72) | 0}px`
+    this.pageSection.style.height = `${((this.pageSize.height * this.zoom) / 72) | 0}px`
     this.canvasNode.style.width = `${((this.pageSize.width * this.zoom) / 72) | 0}px`
     this.canvasNode.style.height = `${((this.pageSize.height * this.zoom) / 72) | 0}px`
   }
@@ -73,6 +80,8 @@ export class PageView {
     this.canvasNode.width = canvas.width
     this.canvasNode.height = canvas.height
     this.canvasContext?.putImageData(canvas, 0, 0)
+
+    console.log(123)
 
     this.context.oniPDF.emit(EVENTS.RENDERED, { page })
   }

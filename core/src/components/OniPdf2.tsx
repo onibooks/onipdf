@@ -63,7 +63,7 @@ const OniPdf = ({
         rootMargin: '20%'
       })
 
-      pageViews.forEach((page) => io.observe(page.rootNode))
+      pageViews.forEach((page) => io.observe(page.pageSection))
       
       observerRef.current = io
     }
@@ -71,7 +71,7 @@ const OniPdf = ({
 
   const destroyObserver = () => {
     if (observerRef.current) {
-      pageViews.forEach((page) => observerRef.current?.unobserve(page.rootNode))
+      pageViews.forEach((page) => observerRef.current?.unobserve(page.pageSection))
 
       observerRef.current.disconnect()
       observerRef.current = null
@@ -87,7 +87,7 @@ const OniPdf = ({
     let currentIndex = 0
 
     pageViews.forEach((page, index) => {
-      const pageElement = page.rootNode
+      const pageElement = page.pageSection
       const { offsetTop: pageTop, offsetHeight: pageHeight } = pageElement
 
       // 페이지가 30% 이상 보이는지 체크
@@ -166,13 +166,13 @@ const OniPdf = ({
     rootElement.classList.add(classes.root)
 
     for (const page of context.pageViews) {
-      pageRefs.current?.appendChild(page.rootNode)
+      pageRefs.current?.appendChild(page.pageSection)
     }
   }, [])
 
   return (
     <div class={clsx('scrolling', classes.Scrolling)} ref={scrollingRef}>
-      {pageViews && <div class={clsx('pages')} ref={pageRefs} />}
+      {pageViews && <div class={clsx('pageSection')} ref={pageRefs} />}
     </div>
   )
 }
