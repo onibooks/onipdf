@@ -9,17 +9,24 @@ async function initializePdfViewer (): Promise<OniPDF> {
     muPDFSrc: '/lib/mupdf/mupdf.js',
   })
 
+  const index = 0
+
   // @ts-ignore
   window.oniPdf = oniPdf
 
   oniPdf.on(EVENTS.OPEN, async () => {
     console.log('Document opened')
-
-    await oniPdf.loadPage(1)
-    await oniPdf.render(document.querySelector('.document-container')!, { page: 1 })
+    
+    // await oniPdf.loadPage(index)
+    await oniPdf.render(document.querySelector('.document-container')!, { page: index })
   })
 
+  oniPdf.on(EVENTS.LOAD, async () => {
+    console.log('Document loaded')
+  })
+  
   return oniPdf
+
 }
 
 function setupEventHandlers (): void {

@@ -5,6 +5,7 @@ import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
 import type { Options } from '../commands/render'
 import { PageView } from '../documents/createPageView'
+import { EVENTS } from '../constants'
 
 type OniPdfProps = {
   context: GlobalContext
@@ -47,9 +48,12 @@ const OniPdf = ({
     }
   }, [])
 
-  useEffect(() => {
-    if (options.page && pageViews[options.page]) {
+  const initStyles = async () => {
+    const totalPages = await oniPDF.getTotalPages()
+
+    if (typeof options.page === 'number' && options.page >= 0 && pageViews[options.page]) {
       currentPageView.current = pageViews[options.page]
+
       documentWidthRef.current = (((currentPageView.current.pageSize.width * currentPageView.current.zoom) / 72) | 0) + 3
       visualContainerHeightRef.current = (((currentPageView.current.pageSize.height * currentPageView.current.zoom) / 72) | 0)
 
@@ -57,25 +61,28 @@ const OniPdf = ({
         documentRef.current.style.width = `${documentWidthRef.current}px`
       }
       if (visualListContainerRef.current) {
-        visualListContainerRef.current.style.height = `${visualContainerHeightRef.current}px`
+        visualListContainerRef.current.style.height = `${visualContainerHeightRef.current * totalPages}px`
       }
     }
+  }
+
+  useEffect(() => {
+    initStyles()
   }, [options.page, pageViews])
 
   return (
     <div 
       class={clsx('document', classes.Document)}
-      style={{ width: documentWidthRef+'px' }}
       ref={documentRef}
     >
       <div 
         className={clsx('visual-list-container', classes.VisualListContainer)} 
         ref={visualListContainerRef}
       >
-        {pageViews && <div 
+        <div 
           className={clsx('visual-list-body', classes.VisualListBody)} 
           ref={visualListRef}
-        />}
+        />
       </div>
     </div>
   )
@@ -108,7 +115,7 @@ const createClasses = (
     will-change: transform;
     width: 100%;
 
-    height: ${options.layout && options.layout.flow === 'scrolled' ? '' : ''}
+    /* height: ${options.layout && options.layout.flow === 'scrolled' ? '' : ''} */
   `,
 
   VisualListBody: css`

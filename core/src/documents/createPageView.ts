@@ -81,8 +81,6 @@ export class PageView {
     this.canvasNode.height = canvas.height
     this.canvasContext?.putImageData(canvas, 0, 0)
 
-    console.log(123)
-
     this.context.oniPDF.emit(EVENTS.RENDERED, { page })
   }
 
