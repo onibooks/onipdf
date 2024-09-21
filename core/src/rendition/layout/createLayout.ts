@@ -1,3 +1,4 @@
+import * as commands from './index'
 import { provider } from '../../provider'
 import { createStore } from 'zustand/vanilla'
 import { subscribeWithSelector } from 'zustand/middleware'
@@ -31,7 +32,15 @@ export const createLayout = () => provider((context) => {
     }))
   )
 
-  layout.subscribe((options) => options.flow)
+  layout.subscribe(
+    (options) => options.flow,
+    commands.setFlow(context)
+  )
+
+  layout.subscribe(
+    (options) => options.spread,
+    commands.setSpread(context)
+  )
 
   const configure = (
     options: Layout
@@ -39,6 +48,8 @@ export const createLayout = () => provider((context) => {
     if (options.spread === 'single') {
       options.divisor = 1
     } else if (options.spread === 'double') {
+      options.divisor = 2
+    } else if (options.spread === 'coverFacing') {
       options.divisor = 2
     }
 

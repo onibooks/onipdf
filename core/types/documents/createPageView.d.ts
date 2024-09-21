@@ -7,7 +7,7 @@ export declare class PageView {
         width: number;
         height: number;
     };
-    rootNode: HTMLDivElement;
+    pageSection: HTMLDivElement;
     canvasNode: HTMLCanvasElement;
     canvasContext: CanvasRenderingContext2D | null;
     isLoad: boolean;

@@ -21,12 +21,9 @@ async function initializePdfViewer (): Promise<OniPDF> {
     await oniPdf.render(document.querySelector('.document-container')!, { page: index })
   })
 
-  oniPdf.on(EVENTS.LOAD, async () => {
-    console.log('Document loaded')
-  })
+  oniPdf.on(EVENTS.LOAD, async () => {})
   
   return oniPdf
-
 }
 
 function setupEventHandlers (): void {

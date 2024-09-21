@@ -50,9 +50,9 @@ button {
   flex-direction: column;
   width: 100%;
   height: 100%;
-  border: 5px solid #e1dddd;
+  border: 5px solid #F3F4F4;
   border-radius: 10px;
-  box-shadow: inset 1px 1px #e1dddd;
+  box-shadow: inset 1px 1px #F3F4F4;
 }
 
 .topper {
@@ -60,7 +60,7 @@ button {
   display: flex;
   justify-content: center;
   height: 35px;
-  background-color: #e1dddd;
+  background-color: #F3F4F4;
 }
 
 .circle-container {
@@ -74,7 +74,7 @@ button {
   width: 10px;
   height: 10px;
   background-color: #f1f3f5;
-  border: .5px solid #cfd4da;
+  border: .5px solid #E8E8E9;
   border-radius: 45px;
   font-size: 10px;
   margin: auto 0 auto 5px;
@@ -117,7 +117,7 @@ button {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: #f1f3f5;
+  background-color: #FFFFFF;
   overflow: hidden;
 }
 
@@ -225,7 +225,7 @@ button {
 .header-border {
   width: 100%;
   height: 1px;
-  background-color: #CFD4DA;
+  background-color: #E8E8E9;
 }
 
 .overlay-menu {
