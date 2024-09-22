@@ -9,6 +9,7 @@ import type { LayoutOptions } from '../rendition/layout/createLayout'
 export type Options = {
   type?: 'image' | 'canvas' | 'svg'
   page?: number
+  zoom?: number
   layout?: LayoutOptions
 }
 
@@ -39,6 +40,9 @@ export const render = (context: GlobalContext) => {
       page,
       type
     }
+    
+    const zoomValue = context.options.zoom ?? 100
+    context.pageViews.forEach((pageView) => pageView.setZoom(zoomValue))
     
     const fragment = document.createElement('div')
     const Component = h(OniPdf, { context })

@@ -23,7 +23,6 @@ export type GlobalContext = {
   options: Options
   pageViews: PageView[]
   rendition: Rendition
-  zoom: number
   uid: number
 }
 
@@ -42,7 +41,6 @@ export const createContext = () => {
     options: null as any,
     pageViews: [] as PageView[],
     rendition: null as any,
-    zoom: 96 as number,
     uid,
   }
 

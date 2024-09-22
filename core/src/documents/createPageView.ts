@@ -15,7 +15,7 @@ export class PageView {
 
   constructor (index: number) {
     this.index = index
-    this.zoom = this.context.zoom ?? 96
+    this.zoom = this.convertPercentageToDPI(100)
 
     this.pageSection = document.createElement('div')
 		this.pageSection.id = 'pageSection' + (this.index + 1)
@@ -38,6 +38,21 @@ export class PageView {
 
   get pageNumber () {
     return this.index + 1
+  }
+
+  setZoom (zoomPercentage: number) {
+    const newZoom = this.convertPercentageToDPI(zoomPercentage)
+
+    if (this.zoom !== newZoom) {
+      this.zoom = newZoom
+      
+      this.updateSize()
+    }
+  }
+
+  convertPercentageToDPI (scale: number = 1): number {
+    const DPI = 96 // 100% 일 때 DPI는 96
+    return DPI * scale
   }
 
   async init () {
@@ -71,17 +86,29 @@ export class PageView {
     return await this.context.worker.getPageSize(this.index)
   }
 
-  async renderToCanvas () {
-    this.isRendered = true
-
-    const page = this.index ?? this.context.options.page
-    const canvas = await this.context.worker.getCanvasPixels(page, this.zoom * devicePixelRatio)
-    
-    this.canvasNode.width = canvas.width
-    this.canvasNode.height = canvas.height
-    this.canvasContext?.putImageData(canvas, 0, 0)
-
-    this.context.oniPDF.emit(EVENTS.RENDERED, { page })
+  async renderToCanvas() {
+    try {
+      this.isRendered = true
+  
+      const page = this.index ?? this.context.options.page
+      const canvas = await this.context.worker.getCanvasPixels(page, this.zoom * devicePixelRatio)
+  
+      if (!canvas) {
+        throw new Error('Failed to get canvas pixels')
+      }
+  
+      this.canvasNode.width = canvas.width
+      this.canvasNode.height = canvas.height
+      if (this.canvasContext) {
+        this.canvasContext.putImageData(canvas, 0, 0)
+      } else {
+        console.error('Canvas context is not available')
+      }
+  
+      this.context.oniPDF.emit(EVENTS.RENDERED, { page })
+    } catch (error) {
+      console.error('Error rendering to canvas:', error)
+    }
   }
 
   async renderToImage () {

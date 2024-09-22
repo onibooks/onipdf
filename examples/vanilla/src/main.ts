@@ -18,10 +18,11 @@ async function initializePdfViewer (): Promise<OniPDF> {
     console.log('Document opened')
     
     // await oniPdf.loadPage(index)
-    await oniPdf.render(document.querySelector('.document-container')!, { page: index })
+    await oniPdf.render(document.querySelector('.document-container')!, { 
+      page: index,
+      zoom: 0.8
+    })
   })
-
-  oniPdf.on(EVENTS.LOAD, async () => {})
   
   return oniPdf
 }

@@ -15,6 +15,8 @@ export declare class PageView {
     constructor(index: number);
     get context(): GlobalContext;
     get pageNumber(): number;
+    setZoom(zoomPercentage: number): void;
+    convertPercentageToDPI(percentage?: number): number;
     init(): Promise<void>;
     private updateSize;
     load(): Promise<this | undefined>;

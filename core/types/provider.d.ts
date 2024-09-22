@@ -21,7 +21,6 @@ export type GlobalContext = {
     options: Options;
     pageViews: PageView[];
     rendition: Rendition;
-    zoom: number;
     uid: number;
 };
 export declare const createContext: () => GlobalContext;
