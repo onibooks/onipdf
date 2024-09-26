@@ -63,6 +63,7 @@ export class PageView {
   }
 
   private updateSize () {
+    // pdf는 기본적으로 72dpi를
     this.pageSection.style.width = `${((this.pageSize.width * this.zoom) / 72) | 0}px`
     this.pageSection.style.height = `${((this.pageSize.height * this.zoom) / 72) | 0}px`
     this.canvasNode.style.width = `${((this.pageSize.width * this.zoom) / 72) | 0}px`

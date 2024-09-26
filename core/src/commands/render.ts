@@ -41,7 +41,8 @@ export const render = (context: GlobalContext) => {
       type
     }
     
-    const zoomValue = context.options.zoom ?? 100
+    const zoomValue = context.options.zoom ?? 1
+    // 전반적인 뼈대를 먼저 설정
     context.pageViews.forEach((pageView) => pageView.setZoom(zoomValue))
     
     const fragment = document.createElement('div')

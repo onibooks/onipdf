@@ -20,7 +20,7 @@ async function initializePdfViewer (): Promise<OniPDF> {
     // await oniPdf.loadPage(index)
     await oniPdf.render(document.querySelector('.document-container')!, { 
       page: index,
-      zoom: 0.8
+      zoom: 1
     })
   })
   
