@@ -8,8 +8,7 @@ export declare class PageView {
         height: number;
     };
     pageSection: HTMLDivElement;
-    canvasNode: HTMLCanvasElement;
-    canvasContext: CanvasRenderingContext2D | null;
+    pageContainer: HTMLDivElement;
     isLoad: boolean;
     isRendered: boolean;
     constructor(index: number);
@@ -17,14 +16,20 @@ export declare class PageView {
     get pageNumber(): number;
     setZoom(zoomPercentage: number): void;
     convertPercentageToDPI(scale?: number): number;
+    getViewport(): {
+        width: number;
+        height: number;
+    };
     init(): Promise<void>;
-    private updateSize;
+    getScaledSize(): {
+        scaledWidth: number;
+        scaledHeight: number;
+    };
+    getScale(): number;
     load(): Promise<this | undefined>;
     getPageSize(): Promise<{
         width: number;
         height: number;
     }>;
-    renderToCanvas(): Promise<void>;
-    renderToImage(): Promise<HTMLImageElement>;
 }
 export declare const createPageView: (index: number) => Promise<PageView>;

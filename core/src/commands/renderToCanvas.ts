@@ -7,5 +7,5 @@ export const renderToCanvas = (context: GlobalContext) => async (index: number =
     await pageView.load()
   }
 
-  return pageView.renderToCanvas()
+  // return pageView.renderToCanvas()
 }

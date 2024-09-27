@@ -2,34 +2,47 @@ import { EVENTS } from '../constants'
 import { provider, type GlobalContext } from '../provider'
 import { addStyles } from '../utils'
 
+type PageSize = {
+  width: number,
+  height: number
+}
+
 export class PageView {
   static context: GlobalContext
   public index: number
   public zoom: number
-  public pageSize: {width: number, height: number}
+  public pageSize: PageSize
   public pageSection: HTMLDivElement
-  public canvasNode: HTMLCanvasElement
-  public canvasContext: CanvasRenderingContext2D | null
+  public pageContainer: HTMLDivElement
   public isLoad = false
   public isRendered = false
 
   constructor (index: number) {
     this.index = index
-    this.zoom = this.convertPercentageToDPI(100)
+    this.zoom = this.convertPercentageToDPI(1)
 
     this.pageSection = document.createElement('div')
 		this.pageSection.id = 'pageSection' + (this.index + 1)
 		this.pageSection.dataset.index = String(this.index)
 		this.pageSection.className = 'pageSection'
 
+    this.pageContainer = document.createElement('div')
+		this.pageContainer.id = 'pageContainer' + (this.index + 1)
+		this.pageContainer.dataset.index = String(this.index)
+		this.pageContainer.className = 'pageContainer'
+
+    this.pageSection.appendChild(this.pageContainer)
+
     addStyles(this.pageSection, {
       float: 'left',
-      position: 'relative',
-      margin: '1px'
+      position: 'relative'
     })
-   
-    this.canvasNode = document.createElement('canvas')
-    this.canvasContext = this.canvasNode.getContext('2d')
+
+    addStyles(this.pageContainer, {
+      position: 'relative',
+      top: '0',
+      margin: '0 auto'
+    })
   }
 
   get context () {
@@ -38,15 +51,16 @@ export class PageView {
 
   get pageNumber () {
     return this.index + 1
-  }
+  }  
 
   setZoom (zoomPercentage: number) {
+    if (zoomPercentage < 0) zoomPercentage = 0
+    if (zoomPercentage > 10) zoomPercentage = 10
+
     const newZoom = this.convertPercentageToDPI(zoomPercentage)
 
     if (this.zoom !== newZoom) {
       this.zoom = newZoom
-      
-      this.updateSize()
     }
   }
 
@@ -55,19 +69,65 @@ export class PageView {
     return DPI * scale
   }
 
-  async init () {
-    this.pageSize = await this.context.worker.getPageSize(this.index)
-		this.pageSection.appendChild(this.canvasNode)
+  getViewport (): PageSize {
+    const width = this.pageSize.width * (this.zoom / 96)
+    const height = this.pageSize.height * (this.zoom / 96)
 
-    this.updateSize()
+    return {
+      width,
+      height
+    }
   }
 
-  private updateSize () {
-    // pdf는 기본적으로 72dpi를
-    this.pageSection.style.width = `${((this.pageSize.width * this.zoom) / 72) | 0}px`
-    this.pageSection.style.height = `${((this.pageSize.height * this.zoom) / 72) | 0}px`
-    this.canvasNode.style.width = `${((this.pageSize.width * this.zoom) / 72) | 0}px`
-    this.canvasNode.style.height = `${((this.pageSize.height * this.zoom) / 72) | 0}px`
+  async init () {
+    this.pageSize = await this.context.worker.getPageSize(this.index)
+    const { width: scaledWidth, height: scaledHeight } = this.getScaledSize()
+
+    addStyles(this.pageSection, {
+      width: `${scaledWidth}px`,
+      height: `${scaledHeight}px`
+    })
+
+    addStyles(this.pageContainer, {
+      width: `${scaledWidth}px`,
+      height: `${scaledHeight}px`
+    })
+  }
+
+  getScaledSize (): PageSize {
+    const scale = this.getScale()
+    const width = this.pageSize.width * scale
+    const height = this.pageSize.height * scale
+
+    return {
+      width,
+      height
+    }
+  }
+
+  getScale (): number {
+    const viewport = this.getViewport()
+    const { sangte, rootElement } = this.context
+    const { cachedRootRect, cachedScale } = sangte.getState()
+
+    const rootRect = cachedRootRect || rootElement.getBoundingClientRect()
+    if (!cachedRootRect) {
+      sangte.setState({ cachedRootRect: rootRect })
+    }
+
+    const rootWidth = rootRect.width
+    const rootHeight = rootRect.height
+    
+    const pageWidthScale = rootWidth / viewport.width
+    const pageHeightScale = rootHeight / viewport.height
+
+    const scale = Math.min(pageWidthScale, pageHeightScale)
+
+    if (cachedScale !== scale) {
+      sangte.setState({ cachedScale: scale })
+    }
+
+    return scale
   }
 
   async load () {
@@ -86,55 +146,13 @@ export class PageView {
   async getPageSize (): Promise<{ width: number, height: number}> {
     return await this.context.worker.getPageSize(this.index)
   }
-
-  async renderToCanvas() {
-    try {
-      this.isRendered = true
-  
-      const page = this.index ?? this.context.options.page
-      const canvas = await this.context.worker.getCanvasPixels(page, this.zoom * devicePixelRatio)
-  
-      if (!canvas) {
-        throw new Error('Failed to get canvas pixels')
-      }
-  
-      this.canvasNode.width = canvas.width
-      this.canvasNode.height = canvas.height
-      if (this.canvasContext) {
-        this.canvasContext.putImageData(canvas, 0, 0)
-      } else {
-        console.error('Canvas context is not available')
-      }
-  
-      this.context.oniPDF.emit(EVENTS.RENDERED, { page })
-    } catch (error) {
-      console.error('Error rendering to canvas:', error)
-    }
-  }
-
-  async renderToImage () {
-    this.isRendered = true
-    
-    const page = this.index ?? this.context.options.page
-    const z = devicePixelRatio * 96 / 72
-    const pixmapImage = await this.context.worker.getPixmapImage(this.index, z)
-    
-    const image = new Image()
-    image.src = URL.createObjectURL(new Blob([pixmapImage], { type: 'image/png' }))
-    image.style.width = '100%'
-    
-    this.context.oniPDF.emit(EVENTS.RENDERED, { page })
-    
-    return image
-  }
 }
 
 export const createPageView = (index: number) => provider(async (context) => {
   PageView.context = context
-  const pageView = new PageView(index)
   
+  const pageView = new PageView(index)
   await pageView.load()
-  await pageView.init()
 
   return pageView
 })

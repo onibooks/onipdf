@@ -5,7 +5,6 @@ import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
 import type { Options } from '../commands/render'
 import { PageView } from '../documents/createPageView'
-import { EVENTS } from '../constants'
 
 type OniPdfProps = {
   context: GlobalContext
@@ -18,56 +17,36 @@ const OniPdf = ({
   const classes = useMemo(() => createClasses(context.emotion.css, options), [options])
   const documentRef = useRef<HTMLDivElement>(null)
   const visualListContainerRef = useRef<HTMLDivElement>(null)  
-  const visualListRef = useRef<HTMLDivElement>(null)  
-  const currentPageView = useRef<PageView>(pageViews[options.page!])
-  const documentWidthRef = useRef<number>(currentPageView.current?.pageSize.width || 0)
-  const visualContainerHeightRef = useRef<number>(currentPageView.current?.pageSize.height || 0)
-  
-  const renderCurrentPage = async () => {
-    const totalPages = await oniPDF.getTotalPages()
-
-    if (totalPages === pageViews.length) {
-      oniPDF.renderToCanvas(options.page)
-    }
-  }
+  const visualListRef = useRef<HTMLDivElement>(null)
+  const MAX_DIV = options.page! + 10
 
   useEffect(() => {
     if (documentRef.current) {
       context.documentElement = documentRef.current
     }
-
-    renderCurrentPage()
   }, [])
 
   useEffect(() => {
     const rootElement = document.documentElement
     rootElement.classList.add(classes.root)
 
-    for (const page of context.pageViews) {
-      visualListRef.current?.appendChild(page.pageSection)
+    for (let page = options.page!; page < MAX_DIV; page++) {
+      const { pageSection } = pageViews[page] as PageView
+      visualListRef.current?.appendChild(pageSection)
     }
   }, [])
 
-  const initStyles = async () => {
-    const totalPages = await oniPDF.getTotalPages()
-
-    if (typeof options.page === 'number' && options.page >= 0 && pageViews[options.page]) {
-      currentPageView.current = pageViews[options.page]
-
-      documentWidthRef.current = (((currentPageView.current.pageSize.width * currentPageView.current.zoom) / 72) | 0) + 3
-      visualContainerHeightRef.current = (((currentPageView.current.pageSize.height * currentPageView.current.zoom) / 72) | 0)
-
-      if (documentRef.current) {
-        documentRef.current.style.width = `${documentWidthRef.current}px`
-      }
-      if (visualListContainerRef.current) {
-        visualListContainerRef.current.style.height = `${visualContainerHeightRef.current * totalPages}px`
-      }
-    }
-  }
-
+  // 이부분이 사실 마음에 안든다.. 하지만 뼈대를 여기서 관리하고 있기 때문에 어쩔 수 없을거같기도...
   useEffect(() => {
-    initStyles()
+    const targetPageView = pageViews[options.page!]
+    const { width: scaledWidth, height: scaledHeight } = targetPageView.getScaledSize()
+
+    if (documentRef.current) {
+      documentRef.current.style.width = `${scaledWidth + 8}px`
+    }
+    if (visualListContainerRef.current) {
+      visualListContainerRef.current.style.height = `${MAX_DIV * scaledHeight}px`
+    }
   }, [options.page, pageViews])
 
   return (
@@ -114,8 +93,6 @@ const createClasses = (
     overflow: hidden;
     will-change: transform;
     width: 100%;
-
-    /* height: ${options.layout && options.layout.flow === 'scrolled' ? '' : ''} */
   `,
 
   VisualListBody: css`

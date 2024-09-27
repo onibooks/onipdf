@@ -7,5 +7,5 @@ export const renderToImage = (context: GlobalContext) => async (index: number = 
     await pageView.load()
   }
 
-  return pageView.renderToImage()
+  // return pageView.renderToImage()
 }
