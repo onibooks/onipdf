@@ -42,9 +42,8 @@ export const render = (context: GlobalContext) => {
     }
     
     const zoomValue = context.options.zoom ?? 1
-    context.pageViews.forEach((pageView) => pageView.setZoom(zoomValue))
+    context.oniPDF.setZoom(zoomValue)
     
-    // render 함수에서 init을 해주는 거 왜이리 마음에 안드는지...
     context.pageViews.forEach((pageView) => pageView.init())
     
     const fragment = document.createElement('div')

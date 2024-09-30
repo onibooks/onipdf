@@ -39,13 +39,13 @@ const OniPdf = ({
   // 이부분이 사실 마음에 안든다.. 하지만 뼈대를 여기서 관리하고 있기 때문에 어쩔 수 없을거같기도...
   useEffect(() => {
     const targetPageView = pageViews[options.page!]
-    const { width: scaledWidth, height: scaledHeight } = targetPageView.getScaledSize()
+    const { width, height } = targetPageView.rootPageSize
 
     if (documentRef.current) {
-      documentRef.current.style.width = `${scaledWidth + 8}px`
+      documentRef.current.style.width = `${width + 8}px`
     }
     if (visualListContainerRef.current) {
-      visualListContainerRef.current.style.height = `${MAX_DIV * scaledHeight}px`
+      visualListContainerRef.current.style.height = `${MAX_DIV * height}px`
     }
   }, [options.page, pageViews])
 

@@ -10,8 +10,9 @@ type PageSize = {
 export class PageView {
   static context: GlobalContext
   public index: number
-  public zoom: number
+  public rootPageSize: PageSize
   public pageSize: PageSize
+  public scaledSize: PageSize
   public pageSection: HTMLDivElement
   public pageContainer: HTMLDivElement
   public isLoad = false
@@ -19,30 +20,12 @@ export class PageView {
 
   constructor (index: number) {
     this.index = index
-    this.zoom = this.convertPercentageToDPI(1)
-
-    this.pageSection = document.createElement('div')
-		this.pageSection.id = 'pageSection' + (this.index + 1)
-		this.pageSection.dataset.index = String(this.index)
-		this.pageSection.className = 'pageSection'
-
-    this.pageContainer = document.createElement('div')
-		this.pageContainer.id = 'pageContainer' + (this.index + 1)
-		this.pageContainer.dataset.index = String(this.index)
-		this.pageContainer.className = 'pageContainer'
-
+    
+    this.pageSection = this.createDivElement('pageSection', 'pageSection' + (this.index + 1))
+    this.pageContainer = this.createDivElement('pageContainer', 'pageContainer' + (this.index + 1))
     this.pageSection.appendChild(this.pageContainer)
 
-    addStyles(this.pageSection, {
-      float: 'left',
-      position: 'relative'
-    })
-
-    addStyles(this.pageContainer, {
-      position: 'relative',
-      top: '0',
-      margin: '0 auto'
-    })
+    this.applyStyles()
   }
 
   get context () {
@@ -51,83 +34,37 @@ export class PageView {
 
   get pageNumber () {
     return this.index + 1
-  }  
-
-  setZoom (zoomPercentage: number) {
-    if (zoomPercentage < 0) zoomPercentage = 0.1
-    if (zoomPercentage > 2) zoomPercentage = 2
-
-    const newZoom = this.convertPercentageToDPI(zoomPercentage)
-
-    if (this.zoom !== newZoom) {
-      this.zoom = newZoom
-    }
-  }
-
-  convertPercentageToDPI (scale: number = 1): number {
-    const DPI = 96 // 100% 일 때 DPI는 96
-    return DPI * scale
-  }
-
-  getViewport (): PageSize {
-    const width = this.pageSize.width * (this.zoom / 96)
-    const height = this.pageSize.height * (this.zoom / 96)
-
-    return {
-      width,
-      height
-    }
   }
 
   async init () {
+     // 1. 기본 pdf 페이지 사이즈 받아오기
     this.pageSize = await this.getPageSize()
-    const { width: scaledWidth, height: scaledHeight } = this.getScaledSize()
-
-    addStyles(this.pageSection, {
-      width: `${scaledWidth}px`,
-      height: `${scaledHeight}px`
-    })
-
-    addStyles(this.pageContainer, {
-      width: `${scaledWidth}px`,
-      height: `${scaledHeight}px`
-    })
-  }
-
-  getScaledSize (): PageSize {
-    const scale = this.getScale()
-    const width = this.pageSize.width * scale
-    const height = this.pageSize.height * scale
-
-    return {
-      width,
-      height
-    }
-  }
-
-  getScale (): number {
-    const viewport = this.getViewport()
-    const { sangte, rootElement } = this.context
-    const { cachedRootRect, cachedScale } = sangte.getState()
-
-    const rootRect = cachedRootRect || rootElement.getBoundingClientRect()
-    if (!cachedRootRect) {
-      sangte.setState({ cachedRootRect: rootRect })
+    
+    // 2. 사용자가 지정해서 넘겨준 scale에 맞게 페이지 사이즈 설정
+    const { scale } = this.context.sangte.getState()
+    this.scaledSize = { 
+      width: this.pageSize.width * scale,
+      height: this.pageSize.height * scale
     }
 
+    // 3. root 사이즈에 맞게 화면 크기 설정
+    // 주의할 점은 resize될 때 같이 반응되어야 한다는 점..
+    const rootRect = this.context.rootElement.getBoundingClientRect()
     const rootWidth = rootRect.width
     const rootHeight = rootRect.height
     
-    const pageWidthScale = rootWidth / viewport.width
-    const pageHeightScale = rootHeight / viewport.height
+    const pageWidthScale = rootWidth / this.scaledSize.width
+    const pageHeightScale = rootHeight / this.scaledSize.height
+    
+    const minRootScale = Math.min(pageWidthScale, pageHeightScale)
 
-    const scale = Math.min(pageWidthScale, pageHeightScale)
-
-    if (cachedScale !== scale) {
-      sangte.setState({ cachedScale: scale })
+    this.rootPageSize = {
+      width: this.scaledSize.width * minRootScale,
+      height: this.scaledSize.height * minRootScale
     }
 
-    return scale
+    // 4. 스타일 적용하기
+    this.setSizeStyles(this.rootPageSize)
   }
 
   async load () {
@@ -145,6 +82,40 @@ export class PageView {
 
   async getPageSize (): Promise<{ width: number, height: number}> {
     return await this.context.worker.getPageSize(this.index)
+  }
+
+  private setSizeStyles (size: PageSize) {
+    addStyles(this.pageSection, {
+      width: `${size.width}px`,
+      height: `${size.height}px`,
+    })
+
+    addStyles(this.pageContainer, {
+      width: `${size.width}px`,
+      height: `${size.height}px`,
+    })
+  }
+
+  private createDivElement (className: string, id: string): HTMLDivElement {
+    const div = document.createElement('div')
+    div.className = className
+    div.id = id
+    div.dataset.index = String(this.index)
+    
+    return div
+  }
+
+  private applyStyles () {
+    addStyles(this.pageSection, {
+      float: 'left',
+      position: 'relative',
+    })
+
+    addStyles(this.pageContainer, {
+      position: 'relative',
+      top: '0',
+      margin: '0 auto',
+    })
   }
 }
 
