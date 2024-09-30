@@ -6,8 +6,9 @@ type PageSize = {
 export declare class PageView {
     static context: GlobalContext;
     index: number;
-    zoom: number;
+    rootPageSize: PageSize;
     pageSize: PageSize;
+    scaledSize: PageSize;
     pageSection: HTMLDivElement;
     pageContainer: HTMLDivElement;
     isLoad: boolean;
@@ -15,17 +16,15 @@ export declare class PageView {
     constructor(index: number);
     get context(): GlobalContext;
     get pageNumber(): number;
-    setZoom(zoomPercentage: number): void;
-    convertPercentageToDPI(scale?: number): number;
-    getViewport(): PageSize;
     init(): Promise<void>;
-    getScaledSize(): PageSize;
-    getScale(): number;
     load(): Promise<this | undefined>;
     getPageSize(): Promise<{
         width: number;
         height: number;
     }>;
+    private setSizeStyles;
+    private createDivElement;
+    private applyStyles;
 }
 export declare const createPageView: (index: number) => Promise<PageView>;
 export {};

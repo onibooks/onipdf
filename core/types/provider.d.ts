@@ -11,6 +11,7 @@ import type { MuPDFWorker } from './workers/createWorker';
 import type { Options } from './commands/render';
 import type { PageView } from './documents/createPageView';
 import type { Rendition } from './rendition';
+import type { Presentation } from './presentation';
 export type GlobalContext = {
     oniPDF: OniPDF;
     worker: MuPDFWorker;
@@ -21,6 +22,7 @@ export type GlobalContext = {
     options: Options;
     pageViews: PageView[];
     rendition: Rendition;
+    presentation: Presentation;
     uid: number;
 };
 export declare const createContext: () => GlobalContext;

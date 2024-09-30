@@ -4,5 +4,4 @@ export declare const EVENTS: {
     REFLOW: string;
     RESIZE: string;
     RENDERED: string;
-    FIRSTRENDERED: string;
 };

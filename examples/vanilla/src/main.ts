@@ -69,7 +69,10 @@ function setupEventHandlers (): void {
     numeric = Math.min(Math.max(10, numeric), 200)
     input.value = String(numeric)
 
-    oniPdf.setZoom(numeric)
+    const scale = numeric / 100
+    oniPdf.layout({
+      zoom: scale
+    })
   }
 }
 
@@ -84,7 +87,6 @@ function toggleOverlayMenu (button: HTMLButtonElement, overlayMenu: HTMLElement,
     overlayMenu.classList.remove('active')
   }
 }
-
 
 async function setViewControls (viewElement: ViewElement, viewType: ViewType): Promise<void> {
   // @ts-ignore

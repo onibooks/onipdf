@@ -59,10 +59,10 @@ export class PageView {
     const minRootScale = Math.min(pageWidthScale, pageHeightScale)
 
     this.rootPageSize = {
-      width: this.scaledSize.width * minRootScale,
-      height: this.scaledSize.height * minRootScale
+      width: this.scaledSize.width * (scale === 1 ? minRootScale : 1),
+      height: this.scaledSize.height * (scale === 1 ? minRootScale : 1)
     }
-
+    
     // 4. 스타일 적용하기
     this.setSizeStyles(this.rootPageSize)
   }

@@ -1,2 +1,2 @@
 import type { GlobalContext } from '../provider';
-export declare const setZoom: (context: GlobalContext) => (scale?: number) => Promise<void>;
+export declare const setZoom: (context: GlobalContext) => (newScale?: number) => number;

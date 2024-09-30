@@ -42,7 +42,9 @@ export const render = (context: GlobalContext) => {
     }
     
     const zoomValue = context.options.zoom ?? 1
-    context.oniPDF.setZoom(zoomValue)
+    context.oniPDF.layout({
+      zoom: zoomValue
+    })
     
     context.pageViews.forEach((pageView) => pageView.init())
     

@@ -1,8 +1,8 @@
 import type { GlobalContext } from '../provider'
-import type { LayoutOptions } from '../rendition/layout/createLayout'
+import type { LayoutOptions } from '../presentation/layout/createLayout'
 
 export const layout = (context: GlobalContext) => (options?: LayoutOptions) => {
-  const { rendition } = context
+  const { presentation } = context
 
-  return rendition.layout(options)
+  return presentation.layout(options)
 }

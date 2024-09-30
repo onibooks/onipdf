@@ -3,6 +3,5 @@ export const EVENTS = {
   LOAD: 'load',
   REFLOW: 'reflow',
   RESIZE: 'resize',
-  RENDERED: 'rendered',
-  FIRSTRENDERED: 'firstrendered'
+  RENDERED: 'rendered'
 }

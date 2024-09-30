@@ -1,13 +1,21 @@
+import { EVENTS } from '../constants'
 import type { GlobalContext } from '../provider'
 
-export const setZoom = (context: GlobalContext) => async (scale: number = 1) => {
+export const setZoom = (context: GlobalContext) => (newScale: number = 1) => {
   const { sangte } = context
-  const { cachedScale } = sangte.getState()
+  const { scale } = sangte.getState()
 
-  if (cachedScale !== scale) {
-    sangte.setState({ cachedScale: scale })
+  if (newScale >= 10 && newScale <= 200) {
+    newScale = newScale / 100
+  }
+  newScale = Math.max(Math.min(0.1, newScale), 2)
+
+  if (scale !== newScale) {
+    sangte.setState({ scale: newScale })
   }
 
-  const { cachedScale: updatedScale } = sangte.getState()
-  console.log('cachedScale', updatedScale)
+  const { scale: updatedScale } = sangte.getState()
+  context.oniPDF.emit((EVENTS.RESIZE), { scale: updatedScale })
+  
+  return updatedScale
 }

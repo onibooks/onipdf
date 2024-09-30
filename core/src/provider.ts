@@ -11,6 +11,7 @@ import type { MuPDFWorker } from './workers/createWorker'
 import type { Options } from './commands/render'
 import type { PageView } from './documents/createPageView'
 import type { Rendition } from './rendition'
+import type { Presentation } from './presentation'
 
 
 export type GlobalContext = {
@@ -23,6 +24,7 @@ export type GlobalContext = {
   options: Options
   pageViews: PageView[]
   rendition: Rendition
+  presentation: Presentation
   uid: number
 }
 
@@ -41,6 +43,7 @@ export const createContext = () => {
     options: null as any,
     pageViews: [] as PageView[],
     rendition: null as any,
+    presentation: null as any,
     uid,
   }
 
