@@ -16,7 +16,6 @@ export class PageView {
   public pageSection: HTMLDivElement
   public pageContainer: HTMLDivElement
   public isLoad = false
-  public isRendered = false
 
   constructor (index: number) {
     this.index = index
