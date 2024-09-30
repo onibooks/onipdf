@@ -30,9 +30,11 @@ async function initializePdfViewer (): Promise<OniPDF> {
 function setupEventHandlers (): void {
   const header = document.querySelector('.header-items') as HTMLElement
   const overlayMenu = document.querySelector('.overlay-menu') as HTMLElement
+  const textarea = document.querySelector('.textarea') as HTMLTextAreaElement
 
   header?.addEventListener('click', event => handleButtonClick(event))
   overlayMenu?.addEventListener('click', event => handleMenuClick(event))
+  textarea?.addEventListener('change', event => handleChangeScale(event))
 
   function handleButtonClick (event: Event): void {
     const button = (event.target as HTMLElement).closest('button') as HTMLButtonElement | null
@@ -52,6 +54,23 @@ function setupEventHandlers (): void {
     setViewControls(viewElement, viewType)
     toggleOverlayMenu(button, overlayMenu, false)
   }
+
+  function handleChangeScale (event: Event) {
+    // @ts-ignore
+    const oniPdf = window.oniPdf as OniPDF
+    const input = event.target as HTMLInputElement
+    let value = input.value.trim()
+    let numeric = Number(value)
+
+    if (isNaN(numeric)) {
+      numeric = 100
+    }
+
+    numeric = Math.min(Math.max(10, numeric), 200)
+    input.value = String(numeric)
+
+    oniPdf.setZoom(numeric)
+  }
 }
 
 function toggleButtonActiveState (button: HTMLButtonElement): void {
@@ -65,6 +84,7 @@ function toggleOverlayMenu (button: HTMLButtonElement, overlayMenu: HTMLElement,
     overlayMenu.classList.remove('active')
   }
 }
+
 
 async function setViewControls (viewElement: ViewElement, viewType: ViewType): Promise<void> {
   // @ts-ignore

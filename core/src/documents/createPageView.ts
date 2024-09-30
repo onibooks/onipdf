@@ -54,8 +54,8 @@ export class PageView {
   }  
 
   setZoom (zoomPercentage: number) {
-    if (zoomPercentage < 0) zoomPercentage = 0
-    if (zoomPercentage > 10) zoomPercentage = 10
+    if (zoomPercentage < 0) zoomPercentage = 0.1
+    if (zoomPercentage > 2) zoomPercentage = 2
 
     const newZoom = this.convertPercentageToDPI(zoomPercentage)
 
@@ -80,7 +80,7 @@ export class PageView {
   }
 
   async init () {
-    this.pageSize = await this.context.worker.getPageSize(this.index)
+    this.pageSize = await this.getPageSize()
     const { width: scaledWidth, height: scaledHeight } = this.getScaledSize()
 
     addStyles(this.pageSection, {
