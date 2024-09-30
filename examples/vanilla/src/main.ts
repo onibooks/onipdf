@@ -4,12 +4,15 @@ import { createBook, EVENTS, OniPDF } from '@onipdf/core'
 type ViewType = 'flow' | 'spread'
 type ViewElement = 'scrolled' | 'paginated' | 'single' | 'double' | 'coverFacing'
 
+const renderOptions = {
+  page: 0,
+  zoom: 1
+}
+
 async function initializePdfViewer (): Promise<OniPDF> {
   const oniPdf: OniPDF = await createBook('/books/179489140.pdf', {
     muPDFSrc: '/lib/mupdf/mupdf.js',
   })
-
-  const index = 0
 
   // @ts-ignore
   window.oniPdf = oniPdf
@@ -18,10 +21,7 @@ async function initializePdfViewer (): Promise<OniPDF> {
     console.log('Document opened')
     
     // await oniPdf.loadPage(index)
-    await oniPdf.render(document.querySelector('.document-container')!, { 
-      page: index,
-      zoom: 1
-    })
+    await oniPdf.render(document.querySelector('.document-container')!, renderOptions)
   })
   
   return oniPdf
@@ -31,6 +31,8 @@ function setupEventHandlers (): void {
   const header = document.querySelector('.header-items') as HTMLElement
   const overlayMenu = document.querySelector('.overlay-menu') as HTMLElement
   const textarea = document.querySelector('.textarea') as HTMLTextAreaElement
+
+  // textarea.value = String(renderOptions.zoom * 100)
 
   header?.addEventListener('click', event => handleButtonClick(event))
   overlayMenu?.addEventListener('click', event => handleMenuClick(event))

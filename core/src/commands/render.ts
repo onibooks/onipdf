@@ -4,13 +4,15 @@ import { warn } from '../helpers'
 import OniPdf from '../components/OniPdf'
 
 import type { GlobalContext } from '../provider'
-import type { LayoutOptions } from '../rendition/layout/createLayout'
+import type { LayoutOptions } from '../presentation/layout/createLayout'
+import type { LocateOptions } from '../presentation/locate/createLocate'
 
 export type Options = {
   type?: 'image' | 'canvas' | 'svg'
   page?: number
   zoom?: number
   layout?: LayoutOptions
+  locate?: LocateOptions
 }
 
 export const render = (context: GlobalContext) => {

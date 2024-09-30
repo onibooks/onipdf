@@ -1,8 +1,8 @@
 import type { GlobalContext } from '../provider';
-import type { LocateOptions } from '../rendition/locate/createLocate'
+import type { LocateOptions } from '../presentation/locate/createLocate'
 
 export const locate = (context: GlobalContext) => (options?: LocateOptions) => {
-  const { rendition } = context
+  const { presentation } = context
 
-  return rendition.locate(options)
+  return presentation.locate(options)
 }

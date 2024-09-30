@@ -1,7 +1,6 @@
 import { createContext } from './provider'
 import { createSangte } from './sangte'
 import { createWorker } from './workers'
-import { createRendition } from './rendition'
 import { createPresentation } from './presentation'
 import { createEvents, type Events } from './events'
 import { createCommands, type Commands } from './commands/createCommands'
@@ -50,7 +49,6 @@ export const createBook = async (
     }
   }))
 
-  // context.rendition = createRendition()
   context.presentation = createPresentation()
 
   await createPDFDocument(url)

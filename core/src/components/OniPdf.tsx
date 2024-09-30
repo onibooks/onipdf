@@ -13,7 +13,7 @@ type OniPdfProps = {
 const OniPdf = ({
   context
 }: OniPdfProps) => {
-  const { oniPDF, pageViews, options } = context
+  const { pageViews, options } = context
   const classes = useMemo(() => createClasses(context.emotion.css, options), [options])
   const documentRef = useRef<HTMLDivElement>(null)
   const visualListContainerRef = useRef<HTMLDivElement>(null)  
@@ -30,13 +30,18 @@ const OniPdf = ({
     const rootElement = document.documentElement
     rootElement.classList.add(classes.root)
 
+    const fragment = document.createDocumentFragment()
     for (let page = options.page!; page < MAX_DIV; page++) {
+      context.renderedPageViews.push(pageViews[page])
+
       const { pageSection } = pageViews[page] as PageView
-      visualListRef.current?.appendChild(pageSection)
+      fragment.appendChild(pageSection)
     }
+    
+    visualListRef.current?.appendChild(fragment)
   }, [])
 
-  // 이부분이 사실 마음에 안든다.. 하지만 뼈대를 여기서 관리하고 있기 때문에 어쩔 수 없을거같기도...
+  // 이 부분이 사실 마음에 안든다.. 하지만 뼈대를 여기서 관리하고 있기 때문에 어쩔 수 없을거같기도...
   useEffect(() => {
     const targetPageView = pageViews[options.page!]
     const { width, height } = targetPageView.rootPageSize

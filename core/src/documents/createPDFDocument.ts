@@ -28,7 +28,6 @@ export const initPageView = () => provider(async (context) => {
   .map((_, index) => createPageView(index)))
 
   context.pageViews = await pageViews
-  console.log(context.pageViews)
 })
 
 export const createPDFDocument = (url: string) => provider(async (context) => {

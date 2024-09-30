@@ -10,7 +10,6 @@ import type { Sangte } from './sangte'
 import type { MuPDFWorker } from './workers/createWorker'
 import type { Options } from './commands/render'
 import type { PageView } from './documents/createPageView'
-import type { Rendition } from './rendition'
 import type { Presentation } from './presentation'
 
 
@@ -23,7 +22,7 @@ export type GlobalContext = {
   documentElement: HTMLElement
   options: Options
   pageViews: PageView[]
-  rendition: Rendition
+  renderedPageViews: PageView[]
   presentation: Presentation
   uid: number
 }
@@ -42,7 +41,7 @@ export const createContext = () => {
     documentElement: null as any,
     options: null as any,
     pageViews: [] as PageView[],
-    rendition: null as any,
+    renderedPageViews: [] as PageView[],
     presentation: null as any,
     uid,
   }
