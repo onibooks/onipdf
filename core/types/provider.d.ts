@@ -10,7 +10,6 @@ import type { Sangte } from './sangte';
 import type { MuPDFWorker } from './workers/createWorker';
 import type { Options } from './commands/render';
 import type { PageView } from './documents/createPageView';
-import type { Rendition } from './rendition';
 import type { Presentation } from './presentation';
 export type GlobalContext = {
     oniPDF: OniPDF;
@@ -21,7 +20,7 @@ export type GlobalContext = {
     documentElement: HTMLElement;
     options: Options;
     pageViews: PageView[];
-    rendition: Rendition;
+    renderedPageViews: PageView[];
     presentation: Presentation;
     uid: number;
 };

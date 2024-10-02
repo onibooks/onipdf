@@ -1,10 +1,11 @@
 import clsx from 'clsx'
-import { useRef, useMemo, useEffect } from 'preact/hooks'
+import { useState, useRef, useMemo, useEffect } from 'preact/hooks'
 
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
 import type { Options } from '../commands/render'
 import { PageView } from '../documents/createPageView'
+import { EVENTS } from '../constants'
 
 type OniPdfProps = {
   context: GlobalContext
@@ -13,11 +14,13 @@ type OniPdfProps = {
 const OniPdf = ({
   context
 }: OniPdfProps) => {
-  const { pageViews, options } = context
+  const { oniPDF, pageViews, options, sangte } = context
   const classes = useMemo(() => createClasses(context.emotion.css, options), [options])
   const documentRef = useRef<HTMLDivElement>(null)
   const visualListContainerRef = useRef<HTMLDivElement>(null)  
   const visualListRef = useRef<HTMLDivElement>(null)
+  
+  const [scale, setScale] = useState<number>(sangte.getState().scale)
   const MAX_DIV = options.page! + 10
 
   useEffect(() => {
@@ -27,32 +30,50 @@ const OniPdf = ({
   }, [])
 
   useEffect(() => {
+    const renderPages = () => {
+      const fragment = document.createDocumentFragment()
+      
+      for (let page = options.page!; page < MAX_DIV; page++) {
+        context.renderedPageViews.push(pageViews[page])
+
+        const { pageSection } = pageViews[page] as PageView
+        fragment.appendChild(pageSection)
+      }
+      visualListRef.current?.appendChild(fragment)
+    }
+
     const rootElement = document.documentElement
     rootElement.classList.add(classes.root)
 
-    const fragment = document.createDocumentFragment()
-    for (let page = options.page!; page < MAX_DIV; page++) {
-      context.renderedPageViews.push(pageViews[page])
+    renderPages()
+  }, [classes.root, MAX_DIV, options.page, pageViews])
 
-      const { pageSection } = pageViews[page] as PageView
-      fragment.appendChild(pageSection)
-    }
-    
-    visualListRef.current?.appendChild(fragment)
-  }, [])
-
-  // 이 부분이 사실 마음에 안든다.. 하지만 뼈대를 여기서 관리하고 있기 때문에 어쩔 수 없을거같기도...
   useEffect(() => {
-    const targetPageView = pageViews[options.page!]
-    const { width, height } = targetPageView.rootPageSize
+    const updateDimensions = () => {
+      const targetPageView = pageViews[options.page!]
+      const { width, height } = targetPageView.rootPageSize
+  
+      if (documentRef.current) {
+        documentRef.current.style.width = `${width + 8}px`
+      }
+      if (visualListContainerRef.current) {
+        visualListContainerRef.current.style.height = `${MAX_DIV * height}px`
+      }
+    }
 
-    if (documentRef.current) {
-      documentRef.current.style.width = `${width + 8}px`
+    updateDimensions()
+  }, [scale, MAX_DIV])
+
+  // scale이 업데이트 될 때 실행할 로직을 내부에서 이렇게 EVENTS로 처리하는게 맞는지..
+  useEffect(() => {
+    const handleScale = () => {
+      const { scale: updateScale } = sangte.getState()
+      setScale(updateScale)
     }
-    if (visualListContainerRef.current) {
-      visualListContainerRef.current.style.height = `${MAX_DIV * height}px`
-    }
-  }, [options.page, pageViews])
+
+    oniPDF.on(EVENTS.UPDATESCALE, handleScale)
+    return () => oniPDF.off(EVENTS.UPDATESCALE, handleScale)
+  }, [])
 
   return (
     <div 

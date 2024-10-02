@@ -12,7 +12,6 @@ export declare class PageView {
     pageSection: HTMLDivElement;
     pageContainer: HTMLDivElement;
     isLoad: boolean;
-    isRendered: boolean;
     constructor(index: number);
     get context(): GlobalContext;
     get pageNumber(): number;
