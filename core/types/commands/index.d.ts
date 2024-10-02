@@ -6,5 +6,6 @@ export * from './render';
 export * from './renderToCanvas';
 export * from './getPDFPage';
 export * from './goToPage';
+export * from './getZoom';
 export * from './layout';
 export * from './locate';

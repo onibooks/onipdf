@@ -155,57 +155,34 @@ button {
   pointer-events: none;
 }
 
-.zoom-overlay {
+.zoom {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   height: 28px;
   background-color: #F1F3F5;
   border-radius: 4px;
-  margin: 0 2px;
 }
 
-.toggle-zoom-overlay {
-  height: 100%;
-  color: #485056;
-  margin-right: 1px;
-}
-
-.overlay-container {
-  position: relative;
+.zoom-text {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  min-width: 68px;
   height: 100%;
-  border-radius: 4px;
-}
-
-.overlay-text {
-  display: flex;
-  text-align: center;
-  align-items: center;
-  height: 100%;
-  border-radius: 4px;
-  margin-right: -8px;
-  font-weight: 700;
 }
 
 .textarea {
   font-weight: 700;
-  width: 30px;
-  text-align: right;
-}
-
-.overlay-button>.icon {
-  width: 12px;
-  height: 12px;
-  color: #485056;
+  width: 2rem;
+  text-align: center;
 }
 
 .action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
   height: 100%;
-  margin: 0 1px;
 }
 
 .action-button>.icon {

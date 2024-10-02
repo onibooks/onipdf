@@ -31,12 +31,29 @@ function setupEventHandlers (): void {
   const header = document.querySelector('.header-items') as HTMLElement
   const overlayMenu = document.querySelector('.overlay-menu') as HTMLElement
   const textarea = document.querySelector('.textarea') as HTMLTextAreaElement
-
-  // textarea.value = String(renderOptions.zoom * 100)
+  const actionButtons = document.querySelectorAll('.action-button')
 
   header?.addEventListener('click', event => handleButtonClick(event))
   overlayMenu?.addEventListener('click', event => handleMenuClick(event))
   textarea?.addEventListener('change', event => handleChangeScale(event))
+  actionButtons.forEach((button) => {
+    const elementType = (button as HTMLElement).dataset.element as 'zoomOutButton' | 'zoomInButton'
+    button.addEventListener('click', () => handleActionButtonClick(elementType))
+  })
+
+  function handleActionButtonClick (elementType: 'zoomOutButton' | 'zoomInButton') {
+    // @ts-ignore
+    const oniPdf = window.oniPdf as OniPDF
+    let zoom = oniPdf.getZoom()
+
+    const zoomChange = elementType === 'zoomOutButton' ? -0.1 : 0.1
+    zoom = Math.max(0.1, Math.min(2, zoom + zoomChange))
+    zoom = Math.round(zoom * 100) / 100
+
+    textarea.value = Math.round(zoom * 100).toString()
+    
+    oniPdf.layout({ zoom })
+  }
 
   function handleButtonClick (event: Event): void {
     const button = (event.target as HTMLElement).closest('button') as HTMLButtonElement | null
