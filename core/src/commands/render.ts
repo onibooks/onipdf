@@ -6,6 +6,7 @@ import OniPdf from '../components/OniPdf'
 import type { GlobalContext } from '../provider'
 import type { LayoutOptions } from '../presentation/layout/createLayout'
 import type { LocateOptions } from '../presentation/locate/createLocate'
+import { EVENTS } from '../constants'
 
 export type Options = {
   type?: 'image' | 'canvas' | 'svg'
@@ -55,5 +56,7 @@ export const render = (context: GlobalContext) => {
     prender(Component, fragment)
     
     element.appendChild(fragment.firstChild as HTMLElement)
+
+    context.oniPDF.emit(EVENTS.RENDERED)
   }
 }

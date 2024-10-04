@@ -21,7 +21,7 @@ const OniPdf = ({
   const visualListRef = useRef<HTMLDivElement>(null)
   
   const [scale, setScale] = useState<number>(sangte.getState().scale)
-  const MAX_DIV = options.page! + 10
+  
 
   useEffect(() => {
     if (documentRef.current) {
@@ -32,10 +32,12 @@ const OniPdf = ({
   useEffect(() => {
     const renderPages = () => {
       const fragment = document.createDocumentFragment()
-      
-      for (let page = options.page!; page < MAX_DIV; page++) {
-        context.renderedPageViews.push(pageViews[page])
 
+      const startPage = Math.max(0, options.page! - 10)
+      const endPage = Math.min(options.page! + 10, context.totalPages - 1)
+      for (let page = startPage!; page < endPage; page++) {
+        context.renderedPageViews.push(pageViews[page])
+        
         const { pageSection } = pageViews[page] as PageView
         fragment.appendChild(pageSection)
       }
@@ -46,12 +48,15 @@ const OniPdf = ({
     rootElement.classList.add(classes.root)
 
     renderPages()
-  }, [classes.root, MAX_DIV, options.page, pageViews])
+  }, [classes.root, options.page, pageViews])
 
   useEffect(() => {
     const updateDimensions = () => {
-      const targetPageView = pageViews[options.page!]
+      const targetPageNumber = Math.min(Math.max(0, options.page!), context.totalPages - 1)
+      const targetPageView = pageViews[targetPageNumber]
+
       const { width, height } = targetPageView.rootPageSize
+      const MAX_DIV = context.renderedPageViews.length
   
       if (documentRef.current) {
         documentRef.current.style.width = `${width + 8}px`
@@ -62,7 +67,7 @@ const OniPdf = ({
     }
 
     updateDimensions()
-  }, [scale, MAX_DIV])
+  }, [scale])
 
   // scale이 업데이트 될 때 실행할 로직을 내부에서 이렇게 EVENTS로 처리하는게 맞는지..
   useEffect(() => {

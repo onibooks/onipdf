@@ -24,6 +24,7 @@ export type GlobalContext = {
   pageViews: PageView[]
   renderedPageViews: PageView[]
   presentation: Presentation
+  totalPages: number
   uid: number
 }
 
@@ -43,6 +44,7 @@ export const createContext = () => {
     pageViews: [] as PageView[],
     renderedPageViews: [] as PageView[],
     presentation: null as any,
+    totalPages: -1 as number,
     uid,
   }
 

@@ -27,6 +27,7 @@ export const initPageView = () => provider(async (context) => {
   .fill(null)
   .map((_, index) => createPageView(index)))
 
+  context.totalPages = await totalPages
   context.pageViews = await pageViews
 })
 
