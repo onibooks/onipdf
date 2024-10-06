@@ -17,75 +17,98 @@ const OniPdf = ({
   const { oniPDF, pageViews, options, sangte } = context
   const classes = useMemo(() => createClasses(context.emotion.css, options), [options])
   const documentRef = useRef<HTMLDivElement>(null)
-  const visualListContainerRef = useRef<HTMLDivElement>(null)  
+  const visualListContainerRef = useRef<HTMLDivElement>(null)
   const visualListRef = useRef<HTMLDivElement>(null)
-
-  const [renderedPageViews, setRenderedPageViews] = useState(context.renderedPageViews) 
+  const observerRef = useRef<IntersectionObserver | null>(null)
+  const renderedPageViewsRef = useRef(context.renderedPageViews) // 현재 렌더링된 페이지 뷰를 관리하기 위한 ref
   
+  const [renderedPageViews, setRenderedPageViews] = useState<PageView[]>(context.renderedPageViews) // 현재 렌더링된 페이지 뷰 상태 관리
   const [scale, setScale] = useState<number>(sangte.getState().scale)
-  
-  useEffect(() => {
-    context.renderedPageViews = renderedPageViews
-  }, [renderedPageViews, context])
+  const [isScaling, setIsScaling] = useState<boolean>(false)
 
   const renderPage = (index: number, addToTop = false) => {
-    // 페이지가 이미 렌더링되어 있으면 추가하지 않음
-    if (!context.pageViews[index] || renderedPageViews.includes(context.pageViews[index])) return
-  
+    if (isScaling) return
+
+    // 페이지가 이미 렌더링된 상태라면 추가하지 않음
+    if (!context.pageViews[index] || renderedPageViewsRef.current.includes(context.pageViews[index])) return
+    
     const { pageSection } = context.pageViews[index] as PageView
-  
+    // 이미 렌더링된 경우 추가하지 않음
+    if (visualListRef.current?.contains(pageSection)) {
+      console.warn(`pageSection${index} 이미 visualListRef에 존재`)
+      return
+    }
+
+    // 페이지를 리스트의 맨 앞이나 맨 뒤에 추가
     if (addToTop) {
       visualListRef.current?.insertAdjacentElement('afterbegin', pageSection)
+      console.log(`pageSection${index} 맨 앞에 추가`)
     } else {
       visualListRef.current?.insertAdjacentElement('beforeend', pageSection)
+      console.log(`pageSection${index} 맨 뒤에 추가`)
     }
-  
-    // 상태 업데이트로 관리
-    setRenderedPageViews((prev) => [...prev, context.pageViews[index]])
+
+    // 상태 업데이트 및 ref 동기화
+    setRenderedPageViews((prev) => {
+      const updated = [...prev, context.pageViews[index]]
+      renderedPageViewsRef.current = updated
+
+      return updated
+    })
   }
 
   const removePage = (index: number) => {
+    if (isScaling) return
+
     const pageView = context.pageViews[index]
-    if (!pageView || !renderedPageViews.includes(pageView)) return
-  
+    if (!pageView || !renderedPageViewsRef.current.includes(pageView)) return
+
     const { pageSection } = pageView
     if (visualListRef.current?.contains(pageSection)) {
       visualListRef.current.removeChild(pageSection)
+      console.log(`pageSection${index} 제거`)
     } else {
-      console.warn(`pageSection${index}은 visualListRef의 자식에 존재하지 않습니다.`)
+      console.warn(`pageSection${index}은 visualListRef에 존재하지 않음`)
     }
 
-    // 상태에서 제거
-    setRenderedPageViews(prev => prev.filter((view) => view !== pageView))
+    setRenderedPageViews((prev) => {
+      const updated = prev.filter((view) => view !== pageView)
+      renderedPageViewsRef.current = updated
+
+      return updated
+    })
   }
 
-   // 페이지 추가/제거를 위한 IntersectionObserver 설정
-   useEffect(() => {
+  const setupIntersectionObserver = () => {
+    if (observerRef.current) {
+      observerRef.current.disconnect()
+    }
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           const pageIndex = parseInt(entry.target.getAttribute('data-index')!, 10)
 
-          // 현재 페이지 기준으로 앞뒤로 최대 10개씩 페이지를 유지
-          const startPage = Math.max(0, pageIndex - 10) // 앞쪽 페이지
-          const endPage = Math.min(pageIndex + 10, context.totalPages - 1) // 뒤쪽 페이지
+          // 현재 페이지를 기준으로 앞뒤로 최대 10개씩 유지
+          const startPage = Math.max(0, pageIndex - 10)
+          const endPage = Math.min(pageIndex + 10, context.totalPages - 1)
 
           // 앞쪽 페이지 추가
           for (let i = startPage; i < pageIndex; i++) {
-            if (!renderedPageViews.includes(context.pageViews[i])) { //이미 추가된 페이지는 제외
+            if (!renderedPageViewsRef.current.includes(context.pageViews[i])) {
               renderPage(i, true)
             }
           }
 
-          // 뒤쪽 페이지 추가 
+          // 뒤쪽 페이지 추가
           for (let i = pageIndex + 1; i <= endPage; i++) {
-            if (!renderedPageViews.includes(context.pageViews[i])) { // 이미 추가된 페이지는 제외
+            if (!renderedPageViewsRef.current.includes(context.pageViews[i])) {
               renderPage(i)
             }
           }
 
           // 앞쪽 페이지가 10개 초과하면 제거
-          const renderedIndexes = renderedPageViews.map((view) => context.pageViews.indexOf(view))
+          const renderedIndexes = renderedPageViewsRef.current.map((view) => context.pageViews.indexOf(view))
           const pagesToRemoveFront = renderedIndexes.filter((index) => index < startPage)
           pagesToRemoveFront.forEach((index) => {
             removePage(index)
@@ -103,11 +126,18 @@ const OniPdf = ({
       threshold: 0.5
     })
 
-    const currentPages = context.pageViews
-    currentPages.forEach(page => observer.observe(page.pageSection))
+    context.pageViews.forEach(page => observer.observe(page.pageSection))
+    observerRef.current = observer
+  }
 
-    return () => observer.disconnect()
-  }, [context.pageViews, context.rootElement, renderedPageViews])
+  // IntersectionObserver 설정
+  useEffect(() => {
+    if (isScaling) return
+
+    setupIntersectionObserver()
+    
+    return () => observerRef.current?.disconnect()
+  }, [context.pageViews, context.rootElement, renderedPageViews, isScaling])
 
   useEffect(() => {
     if (documentRef.current) {
@@ -122,9 +152,14 @@ const OniPdf = ({
       const startPage = Math.max(0, options.page! - 10)
       const endPage = Math.min(options.page! + 10, context.totalPages - 1)
 
+      // 페이지 추가
       for (let page = startPage; page <= endPage; page++) {
-        if (!renderedPageViews.includes(pageViews[page])) {
-          setRenderedPageViews(prev => [...prev, pageViews[page]])
+        if (!renderedPageViewsRef.current.includes(pageViews[page])) {
+          setRenderedPageViews((prev) => {
+            const updated = [...prev, pageViews[page]]
+            renderedPageViewsRef.current = updated
+            return updated
+          })
           const { pageSection } = pageViews[page] as PageView
           fragment.appendChild(pageSection)
         }
@@ -132,9 +167,8 @@ const OniPdf = ({
       visualListRef.current?.appendChild(fragment)
     }
 
-    const rootElement = document.documentElement
-    rootElement.classList.add(classes.root)
-
+    document.documentElement.classList.add(classes.root)
+    
     renderPages()
   }, [classes.root, options.page, pageViews])
 
@@ -144,8 +178,8 @@ const OniPdf = ({
       const targetPageView = pageViews[targetPageNumber]
 
       const { width, height } = targetPageView.rootPageSize
-      const MAX_DIV = renderedPageViews.length
-  
+      const MAX_DIV = renderedPageViewsRef.current.length
+
       if (documentRef.current) {
         documentRef.current.style.width = `${width + 8}px`
       }
@@ -157,12 +191,24 @@ const OniPdf = ({
     updateDimensions()
   }, [scale, renderedPageViews])
 
-  // scale이 업데이트 될 때 실행할 로직을 내부에서 이렇게 EVENTS로 처리하는게 맞는지..
+  useEffect(() => {
+    context.renderedPageViews = renderedPageViews
+    renderedPageViewsRef.current = renderedPageViews
+  }, [renderedPageViews, context])
+
   useEffect(() => {
     const handleScale = () => {
+      setIsScaling(true)
       const { scale: updateScale } = sangte.getState()
       setScale(updateScale)
       console.log('updateScale', updateScale)
+
+      // Observer 해제 후 재설정
+      if (observerRef.current) {
+        observerRef.current.disconnect()
+      }
+      setIsScaling(false)
+      setupIntersectionObserver()
     }
 
     oniPDF.on(EVENTS.UPDATESCALE, handleScale)
@@ -170,16 +216,16 @@ const OniPdf = ({
   }, [])
 
   return (
-    <div 
+    <div
       class={clsx('document', classes.Document)}
       ref={documentRef}
     >
-      <div 
-        className={clsx('visual-list-container', classes.VisualListContainer)} 
+      <div
+        className={clsx('visual-list-container', classes.VisualListContainer)}
         ref={visualListContainerRef}
       >
-        <div 
-          className={clsx('visual-list-body', classes.VisualListBody)} 
+        <div
+          className={clsx('visual-list-body', classes.VisualListBody)}
           ref={visualListRef}
         />
       </div>
@@ -187,12 +233,12 @@ const OniPdf = ({
   )
 }
 
+// CSS 클래스 생성 함수
 const createClasses = (
   css: Emotion['css'],
   options: Options
 ) => ({
   root: css`
-    /* https://stackoverflow.com/questions/15751012/css-transform-causes-flicker-in-safari-but-only-when-the-browser-is-2000px-w#15759785 */
     backface-visibility: hidden;
     overflow-x: hidden;
     overflow-y: hidden;
