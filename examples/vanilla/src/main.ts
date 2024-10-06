@@ -6,7 +6,7 @@ type ViewElement = 'scrolled' | 'paginated' | 'single' | 'double' | 'coverFacing
 
 const renderOptions = {
   page: 0,
-  zoom: 1
+  zoom: 0.7
 }
 
 async function initializePdfViewer(): Promise<OniPDF> {

@@ -1,11 +1,11 @@
 import clsx from 'clsx'
 import { useState, useRef, useMemo, useEffect } from 'preact/hooks'
+import { EVENTS } from '../constants'
 
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
 import type { Options } from '../commands/render'
-import { PageView } from '../documents/createPageView'
-import { EVENTS } from '../constants'
+import type { PageView } from '../documents/createPageView'
 
 type OniPdfProps = {
   context: GlobalContext
@@ -23,6 +23,10 @@ const OniPdf = ({
   const [renderedPageViews, setRenderedPageViews] = useState(context.renderedPageViews) 
   
   const [scale, setScale] = useState<number>(sangte.getState().scale)
+  
+  useEffect(() => {
+    context.renderedPageViews = renderedPageViews
+  }, [renderedPageViews, context])
 
   const renderPage = (index: number, addToTop = false) => {
     // 페이지가 이미 렌더링되어 있으면 추가하지 않음
@@ -45,7 +49,11 @@ const OniPdf = ({
     if (!pageView || !renderedPageViews.includes(pageView)) return
   
     const { pageSection } = pageView
-    visualListRef.current?.removeChild(pageSection)
+    if (visualListRef.current?.contains(pageSection)) {
+      visualListRef.current.removeChild(pageSection)
+    } else {
+      console.warn(`pageSection${index}은 visualListRef의 자식에 존재하지 않습니다.`)
+    }
 
     // 상태에서 제거
     setRenderedPageViews(prev => prev.filter((view) => view !== pageView))
@@ -77,15 +85,15 @@ const OniPdf = ({
           }
 
           // 앞쪽 페이지가 10개 초과하면 제거
-          const renderedIndexes = renderedPageViews.map(view => context.pageViews.indexOf(view))
-          const pagesToRemoveFront = renderedIndexes.filter(index => index < startPage)
-          pagesToRemoveFront.forEach(index => {
+          const renderedIndexes = renderedPageViews.map((view) => context.pageViews.indexOf(view))
+          const pagesToRemoveFront = renderedIndexes.filter((index) => index < startPage)
+          pagesToRemoveFront.forEach((index) => {
             removePage(index)
           })
 
           // 뒤쪽 페이지가 10개 초과하면 제거
-          const pagesToRemoveBack = renderedIndexes.filter(index => index > endPage)
-          pagesToRemoveBack.forEach(index => {
+          const pagesToRemoveBack = renderedIndexes.filter((index) => index > endPage)
+          pagesToRemoveBack.forEach((index) => {
             removePage(index)
           })
         }
@@ -131,8 +139,6 @@ const OniPdf = ({
   }, [classes.root, options.page, pageViews])
 
   useEffect(() => {
-    console.log(renderedPageViews)
-
     const updateDimensions = () => {
       const targetPageNumber = Math.min(Math.max(0, options.page!), context.totalPages - 1)
       const targetPageView = pageViews[targetPageNumber]
@@ -156,6 +162,7 @@ const OniPdf = ({
     const handleScale = () => {
       const { scale: updateScale } = sangte.getState()
       setScale(updateScale)
+      console.log('updateScale', updateScale)
     }
 
     oniPDF.on(EVENTS.UPDATESCALE, handleScale)
