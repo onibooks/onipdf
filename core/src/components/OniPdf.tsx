@@ -25,11 +25,6 @@ const OniPdf = ({
   const [renderedPageViews, setRenderedPageViews] = useState<PageView[]>(context.renderedPageViews)
   const [scale, setScale] = useState<number>(sangte.getState().scale)
   const [isScaling, setIsScaling] = useState<boolean>(false)
-  
-  useEffect(() => {
-    context.renderedPageViews = renderedPageViews
-    renderedPageViewsRef.current = renderedPageViews
-  }, [renderedPageViews, context])
 
   const renderPage = (index: number, addToTop = false) => {
     if (isScaling) return
@@ -131,10 +126,28 @@ const OniPdf = ({
   }, [context.pageViews, context.rootElement, renderedPageViews, isScaling])
 
   useEffect(() => {
-    if (documentRef.current) {
-      context.documentElement = documentRef.current
+    const updateDimensions = () => {
+      const targetPageNumber = Math.min(Math.max(0, options.page!), context.totalPages - 1)
+      const targetPageView = pageViews[targetPageNumber]
+
+      const { width, height } = targetPageView.rootPageSize
+      const MAX_DIV = renderedPageViewsRef.current.length
+  
+      if (documentRef.current) {
+        documentRef.current.style.width = `${width + 8}px`
+      }
+      if (visualListContainerRef.current) {
+        visualListContainerRef.current.style.height = `${MAX_DIV * height}px`
+      }
     }
-  }, [])
+
+    updateDimensions()
+  }, [scale, renderedPageViews])
+
+  useEffect(() => {
+    context.renderedPageViews = renderedPageViews
+    renderedPageViewsRef.current = renderedPageViews
+  }, [renderedPageViews, context])
 
   // 페이지 초기 렌더링
   useEffect(() => {
@@ -163,25 +176,6 @@ const OniPdf = ({
     renderPages()
   }, [classes.root, options.page, pageViews])
 
-  useEffect(() => {
-    const updateDimensions = () => {
-      const targetPageNumber = Math.min(Math.max(0, options.page!), context.totalPages - 1)
-      const targetPageView = pageViews[targetPageNumber]
-
-      const { width, height } = targetPageView.rootPageSize
-      const MAX_DIV = renderedPageViewsRef.current.length
-  
-      if (documentRef.current) {
-        documentRef.current.style.width = `${width + 8}px`
-      }
-      if (visualListContainerRef.current) {
-        visualListContainerRef.current.style.height = `${MAX_DIV * height}px`
-      }
-    }
-
-    updateDimensions()
-  }, [scale, renderedPageViews])
-
   // scale이 업데이트 될 때 실행할 로직을 내부에서 이렇게 EVENTS로 처리하는게 맞는지..
   useEffect(() => {
     const handleScale = () => {
@@ -200,6 +194,12 @@ const OniPdf = ({
 
     oniPDF.on(EVENTS.UPDATESCALE, handleScale)
     return () => oniPDF.off(EVENTS.UPDATESCALE, handleScale)
+  }, [])
+
+  useEffect(() => {
+    if (documentRef.current) {
+      context.documentElement = documentRef.current
+    }
   }, [])
 
   return (
