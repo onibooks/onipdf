@@ -20,12 +20,11 @@ const OniPdf = ({
   const visualListContainerRef = useRef<HTMLDivElement>(null)  
   const visualListRef = useRef<HTMLDivElement>(null)
   const observerRef = useRef<IntersectionObserver | null>(null)
-  const renderedPageViewsRef = useRef(context.renderedPageViews)
+  const renderedPageViewsRef = useRef<PageView[]>(context.renderedPageViews)
 
-  const [renderedPageViews, setRenderedPageViews] = useState(context.renderedPageViews)
-  
+  const [renderedPageViews, setRenderedPageViews] = useState<PageView[]>(context.renderedPageViews)
   const [scale, setScale] = useState<number>(sangte.getState().scale)
-  const [isScaling, setIsScaling] = useState(false)
+  const [isScaling, setIsScaling] = useState<boolean>(false)
   
   useEffect(() => {
     context.renderedPageViews = renderedPageViews
@@ -34,14 +33,10 @@ const OniPdf = ({
 
   const renderPage = (index: number, addToTop = false) => {
     if (isScaling) return
-    
     if (!context.pageViews[index] || renderedPageViewsRef.current.includes(context.pageViews[index])) return
   
     const { pageSection } = context.pageViews[index] as PageView
-  
-    if (visualListRef.current?.contains(pageSection)) {
-      return
-    }
+    if (visualListRef.current?.contains(pageSection)) return
   
     if (addToTop) {
       visualListRef.current?.insertAdjacentElement('afterbegin', pageSection)
@@ -52,6 +47,7 @@ const OniPdf = ({
     setRenderedPageViews((prev) => {
       const updated = [...prev, context.pageViews[index]]
       renderedPageViewsRef.current = updated
+
       return updated
     })
   }
@@ -70,6 +66,7 @@ const OniPdf = ({
     setRenderedPageViews((prev) => {
       const updated = prev.filter((view) => view !== pageView)
       renderedPageViewsRef.current = updated
+
       return updated
     })
   }
@@ -188,12 +185,12 @@ const OniPdf = ({
   // scale이 업데이트 될 때 실행할 로직을 내부에서 이렇게 EVENTS로 처리하는게 맞는지..
   useEffect(() => {
     const handleScale = () => {
-      setIsScaling(true) // Scaling 중임을 설정
+      setIsScaling(true)
+
       const { scale: updateScale } = sangte.getState()
       setScale(updateScale)
       console.log('updateScale', updateScale)
 
-      // Observer 해제 후 다시 설정
       if (observerRef.current) {
         observerRef.current.disconnect()
       }
