@@ -21,30 +21,32 @@ const OniPdf = ({
   const visualListRef = useRef<HTMLDivElement>(null)
   const observerRef = useRef<IntersectionObserver | null>(null)
   const renderedPageViewsRef = useRef<PageView[]>(context.renderedPageViews)
-
+  
   const [renderedPageViews, setRenderedPageViews] = useState<PageView[]>(context.renderedPageViews)
   const [scale, setScale] = useState<number>(sangte.getState().scale)
   const [isScaling, setIsScaling] = useState<boolean>(false)
+  const [isInitialRenderComplete, setIsInitialRenderComplete] = useState(false)
 
-  const renderPage = (index: number, addToTop = false) => {
+  const renderPage = (index: number, afterBegin = false) => {
     if (isScaling) return
+
     if (!context.pageViews[index] || renderedPageViewsRef.current.includes(context.pageViews[index])) return
-  
+    
     const { pageSection } = context.pageViews[index] as PageView
     if (visualListRef.current?.contains(pageSection)) return
-  
-    if (addToTop) {
+    
+    if (afterBegin) {
       visualListRef.current?.insertAdjacentElement('afterbegin', pageSection)
     } else {
       visualListRef.current?.insertAdjacentElement('beforeend', pageSection)
     }
-  
-    setRenderedPageViews((prev) => {
-      const updated = [...prev, context.pageViews[index]]
-      renderedPageViewsRef.current = updated
-
-      return updated
-    })
+    
+    renderedPageViewsRef.current = [...renderedPageViewsRef.current, context.pageViews[index]]
+    setRenderedPageViews((prev) => [...prev, context.pageViews[index]])
+    
+    if (!context.renderedPageViews.includes(context.pageViews[index])) {
+      context.renderedPageViews.push(context.pageViews[index])
+    }
   }
 
   const removePage = (index: number) => {
@@ -58,12 +60,8 @@ const OniPdf = ({
       visualListRef.current.removeChild(pageSection)
     }
 
-    setRenderedPageViews((prev) => {
-      const updated = prev.filter((view) => view !== pageView)
-      renderedPageViewsRef.current = updated
-
-      return updated
-    })
+    setRenderedPageViews((prev) => prev.filter((view) => view !== pageView))
+    renderedPageViewsRef.current = renderedPageViewsRef.current.filter((view) => view !== pageView)
   }
 
   const setupIntersectionObserver = () => {
@@ -120,10 +118,14 @@ const OniPdf = ({
 
   useEffect(() => {
     if (isScaling) return
+    if (!isInitialRenderComplete) return
+
+    // 현재 위치로 이동해줘야할듯?
+    // oniPDF.goToPage(options.page)
     setupIntersectionObserver()
 
     return () => observerRef.current?.disconnect()
-  }, [context.pageViews, context.rootElement, renderedPageViews, isScaling])
+  }, [context.pageViews, context.rootElement, isScaling, isInitialRenderComplete]) // renderedPageViews
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -144,10 +146,6 @@ const OniPdf = ({
     updateDimensions()
   }, [scale, renderedPageViews])
 
-  useEffect(() => {
-    context.renderedPageViews = renderedPageViews
-    renderedPageViewsRef.current = renderedPageViews
-  }, [renderedPageViews, context])
 
   // 페이지 초기 렌더링
   useEffect(() => {
@@ -160,13 +158,18 @@ const OniPdf = ({
         if (!renderedPageViewsRef.current.includes(pageViews[page])) {
           setRenderedPageViews((prev) => {
             const updated = [...prev, pageViews[page]]
-            renderedPageViewsRef.current = updated
+            const sortedUpdated = updated.sort((a, b) => a.index - b.index)
+            renderedPageViewsRef.current = sortedUpdated
+            context.renderedPageViews = sortedUpdated
+
             return updated
           })
+          
           const { pageSection } = pageViews[page] as PageView
           fragment.appendChild(pageSection)
         }
       }
+
       visualListRef.current?.appendChild(fragment)
     }
 
@@ -174,6 +177,8 @@ const OniPdf = ({
     rootElement.classList.add(classes.root)
 
     renderPages()
+
+    setIsInitialRenderComplete(true)
   }, [classes.root, options.page, pageViews])
 
   // scale이 업데이트 될 때 실행할 로직을 내부에서 이렇게 EVENTS로 처리하는게 맞는지..

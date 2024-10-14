@@ -22,6 +22,7 @@ export type GlobalContext = {
     pageViews: PageView[];
     renderedPageViews: PageView[];
     presentation: Presentation;
+    totalPages: number;
     uid: number;
 };
 export declare const createContext: () => GlobalContext;
