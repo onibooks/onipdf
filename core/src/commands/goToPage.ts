@@ -1,10 +1,13 @@
 import type { GlobalContext } from '../provider'
 
-export const goToPage = (context: GlobalContext) => async (index: number = 0) => {
-  const pageView = context.pageViews[index]
+export const goToPage = (context: GlobalContext) => (index: number = 0) => {
+  const { pageViews, sangte } = context
+  const { pageViewSections }  = sangte.getState()
+
+  const pageView = pageViews[index]
   const { height } = pageView.rootPageSize
 
-  console.log(index, index * Math.floor(height)) // 스크롤 영역 찾기...
+  const targetPageIndex = pageViewSections.findIndex((view) => view.index === index)
   
-  context.documentElement.scrollTop = index * Math.floor(height)
+  requestAnimationFrame(() => context.rootElement.scrollTop = targetPageIndex * height)
 }

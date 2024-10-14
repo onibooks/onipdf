@@ -1,16 +1,19 @@
 import { createStore } from 'zustand/vanilla'
+import { PageView } from './documents/createPageView'
 
 export type Sangte = {
   isLoad: boolean
   currentIndex: number
   scale: number
+  pageViewSections: PageView[]
 }
 
 export const createSangte = () => {
   const sangte = createStore<Sangte>((set) => ({
     isLoad: false,
     currentIndex: 0,
-    scale: 1
+    scale: 1,
+    pageViewSections: []
   }))
 
   return sangte

@@ -43,6 +43,10 @@ const OniPdf = ({
     
     renderedPageViewsRef.current = [...renderedPageViewsRef.current, context.pageViews[index]]
     setRenderedPageViews((prev) => [...prev, context.pageViews[index]])
+    // setPageViewSections((prev) => [...prev, context.pageViews[index]])
+    context.sangte.setState((state) => ({
+      pageViewSections: [...state.pageViewSections, context.pageViews[index]]
+    }))
     
     if (!context.renderedPageViews.includes(context.pageViews[index])) {
       context.renderedPageViews.push(context.pageViews[index])
@@ -61,6 +65,10 @@ const OniPdf = ({
     }
 
     setRenderedPageViews((prev) => prev.filter((view) => view !== pageView))
+    // setPageViewSections((prev) => prev.filter((view) => view !== pageView))
+    context.sangte.setState((state) => ({
+      pageViewSections: state.pageViewSections.filter((view) => view !== pageView)
+    }))
     renderedPageViewsRef.current = renderedPageViewsRef.current.filter((view) => view !== pageView)
   }
 
@@ -119,9 +127,8 @@ const OniPdf = ({
   useEffect(() => {
     if (isScaling) return
     if (!isInitialRenderComplete) return
-
-    // 현재 위치로 이동해줘야할듯?
-    // oniPDF.goToPage(options.page)
+    
+    oniPDF.goToPage(options.page)
     setupIntersectionObserver()
 
     return () => observerRef.current?.disconnect()
@@ -154,21 +161,27 @@ const OniPdf = ({
       const startPage = Math.max(0, options.page! - 10)
       const endPage = Math.min(options.page! + 10, context.totalPages - 1)
 
-      for (let page = startPage; page <= endPage; page++) {
-        if (!renderedPageViewsRef.current.includes(pageViews[page])) {
+      for (let index = startPage; index <= endPage; index++) {
+        if (!renderedPageViewsRef.current.includes(pageViews[index])) {
           setRenderedPageViews((prev) => {
-            const updated = [...prev, pageViews[page]]
+            const updated = [...prev, pageViews[index]]
             const sortedUpdated = updated.sort((a, b) => a.index - b.index)
             renderedPageViewsRef.current = sortedUpdated
             context.renderedPageViews = sortedUpdated
 
             return updated
           })
-          
-          const { pageSection } = pageViews[page] as PageView
+
+          const { pageSection } = pageViews[index] as PageView
           fragment.appendChild(pageSection)
         }
       }
+
+      // renderedPageViewsRef.current랑 동일하면 사실 안되지만.. 일단 초기 렌더링이니까..
+      sangte.setState((prev) => ({
+        ...prev,
+        pageViewSections: [...renderedPageViewsRef.current]
+      }))
 
       visualListRef.current?.appendChild(fragment)
     }
