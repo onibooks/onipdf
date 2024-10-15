@@ -5,7 +5,7 @@ type ViewType = 'flow' | 'spread'
 type ViewElement = 'scrolled' | 'paginated' | 'single' | 'double' | 'coverFacing'
 
 const renderOptions = {
-  page: 50,
+  page: 10,
   zoom: 1
 }
 

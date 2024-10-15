@@ -27,7 +27,7 @@ const OniPdf = ({
   const [isScaling, setIsScaling] = useState<boolean>(false)
   const [isInitialRenderComplete, setIsInitialRenderComplete] = useState(false)
 
-  const renderPage = (index: number, afterBegin = false) => {
+  const renderPage = async (index: number, afterBegin = false) => {
     if (isScaling) return
 
     if (!context.pageViews[index] || renderedPageViewsRef.current.includes(context.pageViews[index])) return
@@ -43,14 +43,15 @@ const OniPdf = ({
     
     renderedPageViewsRef.current = [...renderedPageViewsRef.current, context.pageViews[index]]
     setRenderedPageViews((prev) => [...prev, context.pageViews[index]])
-    // setPageViewSections((prev) => [...prev, context.pageViews[index]])
-    context.sangte.setState((state) => ({
+    sangte.setState((state) => ({
       pageViewSections: [...state.pageViewSections, context.pageViews[index]]
     }))
     
     if (!context.renderedPageViews.includes(context.pageViews[index])) {
       context.renderedPageViews.push(context.pageViews[index])
     }
+
+    await context.pageViews[index].drawPageAsPixmap()
   }
 
   const removePage = (index: number) => {
@@ -65,8 +66,7 @@ const OniPdf = ({
     }
 
     setRenderedPageViews((prev) => prev.filter((view) => view !== pageView))
-    // setPageViewSections((prev) => prev.filter((view) => view !== pageView))
-    context.sangte.setState((state) => ({
+    sangte.setState((state) => ({
       pageViewSections: state.pageViewSections.filter((view) => view !== pageView)
     }))
     renderedPageViewsRef.current = renderedPageViewsRef.current.filter((view) => view !== pageView)
@@ -125,10 +125,83 @@ const OniPdf = ({
   }
 
   useEffect(() => {
+    const rootElement = document.documentElement
+    rootElement.classList.add(classes.root)
+  }, [])
+
+  useEffect(() => {
+    if (documentRef.current) {
+      context.documentElement = documentRef.current
+    }
+  }, [])
+
+  // 페이지 초기 렌더링
+  useEffect(() => {
+    ;(async () => {
+      const renderPages = () => (
+        new Promise((resolve, reject) => {
+          const fragment = document.createDocumentFragment()
+          const startPage = Math.max(0, options.page! - 10)
+          const endPage = Math.min(options.page! + 10, context.totalPages - 1)
+    
+          for (let i = startPage; i <= endPage; i++) {
+            if (!renderedPageViewsRef.current.includes(pageViews[i])) {
+              setRenderedPageViews((prev) => {
+                const updated = [...prev, pageViews[i]]
+                const sortedUpdated = updated.sort((a, b) => a.index - b.index)
+                renderedPageViewsRef.current = sortedUpdated
+                context.renderedPageViews = sortedUpdated
+    
+                return updated
+              })
+    
+              const { pageSection } = pageViews[i] as PageView
+              fragment.appendChild(pageSection)
+            }
+          }
+
+          // 가장 초기 렌더링에서 renderedPageViewsRef은 renderedPageViews와 동일합니다.
+          sangte.setState((prev) => ({
+            ...prev,
+            pageViewSections: [
+              ...renderedPageViewsRef.current
+            ]
+          }))
+    
+          visualListRef.current?.appendChild(fragment)
+
+          setTimeout(() => resolve(null), 1)
+        })        
+      )
+
+      await renderPages()
+      
+      const currentPage = options.page!
+
+      const preloadRenderedPages = [
+        renderedPageViewsRef.current[currentPage],
+        // renderedPageViewsRef.current[currentPage + 1]
+      ]
+
+      await Promise.all(preloadRenderedPages.map((page) => (
+        context.pageViews[page.index].drawPageAsPixmap()
+      )))
+ 
+      setIsInitialRenderComplete(true)
+
+      const renderedPage = renderedPageViewsRef.current
+      await Promise.all(renderedPage.map((page) => (
+        context.pageViews[page.index].drawPageAsPixmap()
+      )))
+    })()
+  }, [classes.root, options.page, pageViews])  
+
+  useEffect(() => {
     if (isScaling) return
     if (!isInitialRenderComplete) return
     
     oniPDF.goToPage(options.page)
+    
     setupIntersectionObserver()
 
     return () => observerRef.current?.disconnect()
@@ -153,47 +226,6 @@ const OniPdf = ({
     updateDimensions()
   }, [scale, renderedPageViews])
 
-
-  // 페이지 초기 렌더링
-  useEffect(() => {
-    const renderPages = () => {
-      const fragment = document.createDocumentFragment()
-      const startPage = Math.max(0, options.page! - 10)
-      const endPage = Math.min(options.page! + 10, context.totalPages - 1)
-
-      for (let index = startPage; index <= endPage; index++) {
-        if (!renderedPageViewsRef.current.includes(pageViews[index])) {
-          setRenderedPageViews((prev) => {
-            const updated = [...prev, pageViews[index]]
-            const sortedUpdated = updated.sort((a, b) => a.index - b.index)
-            renderedPageViewsRef.current = sortedUpdated
-            context.renderedPageViews = sortedUpdated
-
-            return updated
-          })
-
-          const { pageSection } = pageViews[index] as PageView
-          fragment.appendChild(pageSection)
-        }
-      }
-
-      // renderedPageViewsRef.current랑 동일하면 사실 안되지만.. 일단 초기 렌더링이니까..
-      sangte.setState((prev) => ({
-        ...prev,
-        pageViewSections: [...renderedPageViewsRef.current]
-      }))
-
-      visualListRef.current?.appendChild(fragment)
-    }
-
-    const rootElement = document.documentElement
-    rootElement.classList.add(classes.root)
-
-    renderPages()
-
-    setIsInitialRenderComplete(true)
-  }, [classes.root, options.page, pageViews])
-
   // scale이 업데이트 될 때 실행할 로직을 내부에서 이렇게 EVENTS로 처리하는게 맞는지..
   useEffect(() => {
     const handleScale = () => {
@@ -212,12 +244,6 @@ const OniPdf = ({
 
     oniPDF.on(EVENTS.UPDATESCALE, handleScale)
     return () => oniPDF.off(EVENTS.UPDATESCALE, handleScale)
-  }, [])
-
-  useEffect(() => {
-    if (documentRef.current) {
-      context.documentElement = documentRef.current
-    }
   }, [])
 
   return (

@@ -12,17 +12,26 @@ export class PageView {
   public index: number
   public rootPageSize: PageSize
   public pageSize: PageSize
+  public canvasSize: PageSize
   public scaledSize: PageSize
-  public pageSection: HTMLDivElement
-  public pageContainer: HTMLDivElement
+  public pageSection: HTMLElement
+  public pageContainer: HTMLElement
+  public canvasNode: HTMLCanvasElement
+  public canvasContext: CanvasRenderingContext2D | null
   public isLoad = false
+  public isRendered = false
 
   constructor (index: number) {
     this.index = index
     
-    this.pageSection = this.createDivElement('pageSection', 'pageSection' + (this.index + 1))
-    this.pageContainer = this.createDivElement('pageContainer', 'pageContainer' + (this.index + 1))
+    this.pageSection = this.createElement('div', 'pageSection', 'pageSection' + (this.index + 1))
+    this.pageContainer = this.createElement('div', 'pageContainer', 'pageContainer' + (this.index + 1))
+    this.pageContainer.innerText = String(this.index)
     this.pageSection.appendChild(this.pageContainer)
+        
+    this.canvasNode = this.createElement('canvas', 'canvasNode', 'canvasNode' + (this.index + 1)) as HTMLCanvasElement
+    this.canvasContext = this.canvasNode.getContext('2d')
+    this.pageSection.appendChild(this.canvasNode)
 
     this.applyStyles()
   }
@@ -61,9 +70,16 @@ export class PageView {
       width: this.scaledSize.width * (scale === 1 ? minRootScale : 1),
       height: this.scaledSize.height * (scale === 1 ? minRootScale : 1)
     }
+
+    this.canvasSize = {
+      width: this.scaledSize.width * (scale === 1 ? minRootScale : 1),
+      height: this.scaledSize.height * (scale === 1 ? minRootScale : 1)
+    }
+  
     
     // 4. 스타일 적용하기
     this.setSizeStyles(this.rootPageSize)
+    this.setSizeStyles(this.canvasSize)
   }
 
   async load () {
@@ -77,6 +93,30 @@ export class PageView {
     this.context.oniPDF.emit(EVENTS.LOAD, this)
 
     return this
+  }
+
+  async drawPageAsPixmap () {
+    try {
+      if (this.isRendered) return 
+
+      const page = this.index ?? this.context.options.page
+      const zoom = this.context.sangte.getState().scale * 96
+
+      const canvas = await this.context.worker.getCanvasPixels(page, zoom * devicePixelRatio)
+      if (!canvas) {
+        throw new Error('Fail getCanvasPixels')
+      }
+      
+      this.canvasNode.width = canvas.width
+      this.canvasNode.height = canvas.height
+      if (this.canvasContext) {
+        this.canvasContext.putImageData(canvas, 0, 0)
+      }
+
+      this.isRendered = true
+    } catch (error) {
+      console.error('Error rendering to canvas:', error)
+    }
   }
 
   async getPageSize (): Promise<{ width: number, height: number}> {
@@ -93,15 +133,20 @@ export class PageView {
       width: `${size.width}px`,
       height: `${size.height}px`,
     })
+
+    addStyles(this.canvasNode, {
+      width: `${size.width}px`,
+      height: `${size.height}px`,
+    })
   }
 
-  private createDivElement (className: string, id: string): HTMLDivElement {
-    const div = document.createElement('div')
-    div.className = className
-    div.id = id
-    div.dataset.index = String(this.index)
+  private createElement (element: keyof HTMLElementTagNameMap, className: string, id: string): HTMLElement {
+    const elem = document.createElement(element)
+    elem.className = className
+    elem.id = id
+    elem.dataset.index = String(this.index)
     
-    return div
+    return elem
   }
 
   private applyStyles () {
@@ -114,6 +159,12 @@ export class PageView {
       position: 'relative',
       top: '0',
       margin: '0 auto',
+    })
+
+    addStyles(this.canvasNode, {
+      position: 'absolute',
+      top: '0',
+      left: '0'
     })
   }
 }
