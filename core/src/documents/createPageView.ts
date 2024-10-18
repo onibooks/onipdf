@@ -16,10 +16,12 @@ export class PageView {
   public scaledSize: PageSize
   public pageSection: HTMLElement
   public pageContainer: HTMLElement
+  public canvas: ImageData
   public canvasNode: HTMLCanvasElement
   public canvasContext: CanvasRenderingContext2D | null
   public isLoad = false
   public isRendered = false
+  public currentScale: number
 
   constructor (index: number) {
     this.index = index
@@ -50,6 +52,8 @@ export class PageView {
     
     // 2. 사용자가 지정해서 넘겨준 scale에 맞게 페이지 사이즈 설정
     const { scale } = this.context.sangte.getState()
+    this.currentScale = scale
+    
     this.scaledSize = { 
       width: this.pageSize.width * scale,
       height: this.pageSize.height * scale
@@ -80,6 +84,34 @@ export class PageView {
     // 4. 스타일 적용하기
     this.setSizeStyles(this.rootPageSize)
     this.setSizeStyles(this.canvasSize)
+  }
+
+  async updatePageSize () {
+    const { scale } = this.context.sangte.getState()
+
+    // 2. 사용자가 지정해서 넘겨준 scale에 맞게 페이지 사이즈 설정
+    const updateScaledSize = {
+      width: this.scaledSize.width * scale,
+      height: this.scaledSize.height * scale
+    }
+    
+    this.scaledSize = updateScaledSize
+    
+    const rootRect = this.context.rootElement.getBoundingClientRect()
+    const rootWidth = rootRect.width
+    const rootHeight = rootRect.height
+    
+    const pageWidthScale = rootWidth / this.scaledSize.width
+    const pageHeightScale = rootHeight / this.scaledSize.height
+    
+    const minRootScale = Math.min(pageWidthScale, pageHeightScale)
+
+    this.rootPageSize = {
+      width: this.scaledSize.width * (scale === 1 ? minRootScale : 1),
+      height: this.scaledSize.height * (scale === 1 ? minRootScale : 1)
+    }
+
+    this.setSizeStyles(this.rootPageSize)
   }
 
   async load () {
@@ -113,10 +145,26 @@ export class PageView {
         this.canvasContext.putImageData(canvas, 0, 0)
       }
 
+      this.canvas = canvas
+
       this.isRendered = true
     } catch (error) {
       console.error('Error rendering to canvas:', error)
     }
+  }
+
+  restoreCanvasSize () {
+    this.canvasNode.width = this.canvas.width
+    this.canvasNode.height = this.canvas.height
+
+    if (this.canvasContext) {
+      this.canvasContext.putImageData(this.canvas, 0, 0)
+    }
+  }
+
+  clearCanvasSize () {
+    this.canvasNode.width = 0
+    this.canvasNode.height = 0
   }
 
   async getPageSize (): Promise<{ width: number, height: number}> {

@@ -8,21 +8,28 @@ export declare class PageView {
     index: number;
     rootPageSize: PageSize;
     pageSize: PageSize;
+    canvasSize: PageSize;
     scaledSize: PageSize;
-    pageSection: HTMLDivElement;
-    pageContainer: HTMLDivElement;
+    pageSection: HTMLElement;
+    pageContainer: HTMLElement;
+    canvasNode: HTMLCanvasElement;
+    canvasContext: CanvasRenderingContext2D | null;
     isLoad: boolean;
+    isRendered: boolean;
+    currentScale: number;
     constructor(index: number);
     get context(): GlobalContext;
     get pageNumber(): number;
     init(): Promise<void>;
+    updatePageSize(): Promise<void>;
     load(): Promise<this | undefined>;
+    drawPageAsPixmap(): Promise<void>;
     getPageSize(): Promise<{
         width: number;
         height: number;
     }>;
     private setSizeStyles;
-    private createDivElement;
+    private createElement;
     private applyStyles;
 }
 export declare const createPageView: (index: number) => Promise<PageView>;

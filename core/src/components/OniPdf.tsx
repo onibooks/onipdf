@@ -35,6 +35,8 @@ const OniPdf = ({
     const { pageSection } = context.pageViews[index] as PageView
     if (visualListRef.current?.contains(pageSection)) return
     
+    // 여기서 append가 일어나면서 observer가 계속 걸리는 문제
+    // 레이아웃 안정성을 위해서 스크롤의 위치를 기억할 수 있도록하거나, 현재 페이지로 보내주는 함수를 만들어서 이를 방지해야한다.
     if (afterBegin) {
       visualListRef.current?.insertAdjacentElement('afterbegin', pageSection)
     } else {

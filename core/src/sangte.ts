@@ -6,6 +6,7 @@ export type Sangte = {
   currentIndex: number
   scale: number
   pageViewSections: PageView[]
+  renderedPageViews: PageView[]
 }
 
 export const createSangte = () => {
@@ -13,7 +14,8 @@ export const createSangte = () => {
     isLoad: false,
     currentIndex: 0,
     scale: 1,
-    pageViewSections: []
+    pageViewSections: [],
+    renderedPageViews: []
   }))
 
   return sangte

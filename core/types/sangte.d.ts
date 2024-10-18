@@ -4,5 +4,6 @@ export type Sangte = {
     currentIndex: number;
     scale: number;
     pageViewSections: PageView[];
+    renderedPageViews: PageView[];
 };
 export declare const createSangte: () => import("zustand/vanilla").StoreApi<Sangte>;

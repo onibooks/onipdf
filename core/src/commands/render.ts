@@ -1,7 +1,7 @@
 import createEmotion from '@emotion/css/create-instance'
 import { h, render as prender } from 'preact'
 import { warn } from '../helpers'
-import OniPdf from '../components/OniPdf'
+import OniPdf from '../components/OniPdf2'
 
 import type { GlobalContext } from '../provider'
 import type { LayoutOptions } from '../presentation/layout/createLayout'
