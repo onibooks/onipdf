@@ -5,8 +5,8 @@ import { EVENTS } from '../constants'
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
 import type { Options } from '../commands/render'
-import type { PageView } from '../documents/createPageView'
 import { debounce } from '../utils/debounce'
+import { addStyles } from '../utils'
 
 type OniPdfProps = {
   context: GlobalContext
@@ -18,13 +18,16 @@ const OniPdf = ({
   const { oniPDF, pageViews, options, sangte } = context
   const classes = useMemo(() => createClasses(context.emotion.css, options), [options])
   const { scale } = sangte.getState()
+  const flow = options?.layout?.flow ?? 'scrolled'
   
   const documentRef = useRef<HTMLDivElement>(null)
   const visualListContainerRef = useRef<HTMLDivElement>(null)  
   const visualListRef = useRef<HTMLDivElement>(null)
   const observerRef = useRef<IntersectionObserver | null>(null)
   
-  const [documentWidth, setDocumentWidth] = useState(0)
+  const [documentWidth, setDocumentWidth] = useState<number>(0)
+  const [visualListHeight, setVisualListHeight] = useState<number>(0)
+  const [currentPageIndex, setCurrentPageIndex] = useState<number>(0)
 
   const cachedPages = new Set<number>()
   const renderedPages = new Set<number>()
@@ -64,6 +67,10 @@ const OniPdf = ({
     const observer = new IntersectionObserver(debounce((entries) => {
       entries.forEach(async (entry: IntersectionObserverEntry) => {
         const pageIndex = parseInt(entry.target.getAttribute('data-index')!)
+
+        context.options.page = pageIndex
+
+        // setCurrentPageIndex(pageIndex)
         
         if (entry.isIntersecting) {  
           await renderPage(pageIndex)
@@ -105,19 +112,22 @@ const OniPdf = ({
   }, [])
 
   const updateDimensions = (scale: number) => {
-    const targetPageNumber = Math.min(Math.max(0, options.page!), context.totalPages - 1)
+    const totalPages = context.totalPages
+    const targetPageNumber = Math.min(Math.max(0, options.page!), totalPages - 1)
     const targetPageView = pageViews[targetPageNumber]
+
+    if (!targetPageView) return
   
     const { width, height } = targetPageView.rootPageSize
-    const MAX_DIV = context.totalPages
-  
+
     if (documentRef.current) {
-      const newWidth = width * scale + 8
+      const PAGE_MARGIN = 8
+      const newWidth = width * scale + PAGE_MARGIN
       setDocumentWidth(newWidth)
     }
   
     if (visualListContainerRef.current) {
-      visualListContainerRef.current.style.height = `${MAX_DIV * height}px`
+      setVisualListHeight(totalPages * height)
     }
   }
 
@@ -129,6 +139,13 @@ const OniPdf = ({
   useEffect(() => {
     if (documentRef.current) {
       context.documentElement = documentRef.current
+      
+      oniPDF.layout({ flow })
+
+      // 코드 정리 필요
+      addStyles(context.rootElement, {
+        overflow: oniPDF.layout().flow === 'paginated' ? 'hidden' : ''
+      })
     }
   }, [])
 
@@ -149,13 +166,50 @@ const OniPdf = ({
   }, [])
 
   useEffect(() => {
+    let currentPageIndex = 0
+    
+    const handleArrowKey = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+        if (currentPageIndex < context.totalPages - 1) {
+          currentPageIndex++
+          oniPDF.goToPage(currentPageIndex)
+        }
+      } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+        if (currentPageIndex > 0) {
+          currentPageIndex--
+          oniPDF.goToPage(currentPageIndex)
+        }
+      }
+    }
+  
+    window.addEventListener('keydown', handleArrowKey)
+    return () => window.removeEventListener('keydown', handleArrowKey)
+  }, [])
+  
+
+  useEffect(() => {
+    const handleReflow = () => {
+      oniPDF.goToPage(context.options.page)
+
+      addStyles(context.rootElement, {
+        overflow: oniPDF.layout().flow === 'paginated' ? 'hidden' : ''
+      })
+
+      updateDimensions(scale)
+    }
+
+    oniPDF.on(EVENTS.REFLOW, handleReflow)
+    return () => oniPDF.off(EVENTS.REFLOW, handleReflow)
+  }, [])
+
+  useEffect(() => {
     const handleScale = ({ scale }: { scale: number }) => {
       updateDimensions(scale)
     }
 
     oniPDF.on(EVENTS.UPDATESCALE, handleScale)
     return () => oniPDF.off(EVENTS.UPDATESCALE, handleScale)
-  }, [scale])
+  }, [])
 
   return (
     <div
@@ -165,6 +219,7 @@ const OniPdf = ({
     >
       <div
         className={clsx('visual-list-container', classes.VisualListContainer)}
+        style={{ height: `${visualListHeight}px` }}
         ref={visualListContainerRef}
       >
         <div

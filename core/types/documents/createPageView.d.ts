@@ -12,6 +12,7 @@ export declare class PageView {
     scaledSize: PageSize;
     pageSection: HTMLElement;
     pageContainer: HTMLElement;
+    canvas: ImageData;
     canvasNode: HTMLCanvasElement;
     canvasContext: CanvasRenderingContext2D | null;
     isLoad: boolean;
@@ -24,6 +25,8 @@ export declare class PageView {
     updatePageSize(): Promise<void>;
     load(): Promise<this | undefined>;
     drawPageAsPixmap(): Promise<void>;
+    restoreCanvasSize(): void;
+    clearCanvasSize(): void;
     getPageSize(): Promise<{
         width: number;
         height: number;

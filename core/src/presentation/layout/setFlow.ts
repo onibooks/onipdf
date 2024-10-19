@@ -8,8 +8,8 @@ export const setFlow = (context: GlobalContext) => (value: LayoutOptions['flow']
   const { oniPDF, documentElement } = context
 
   removeClass(documentElement, 'paginated')
-  removeClass(documentElement, 'scrolled') 
+  removeClass(documentElement, 'scrolled')
   addClass(documentElement, value!)
- 
+
   oniPDF.emit(EVENTS.REFLOW)
 }

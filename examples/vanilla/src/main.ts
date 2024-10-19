@@ -6,8 +6,11 @@ type ViewElement = 'scrolled' | 'paginated' | 'single' | 'double' | 'coverFacing
 
 const renderOptions = {
   page: 0,
-  zoom: 1
-}
+  zoom: 1,
+  layout: {
+    flow: 'paginated'
+  }
+} as const
 
 async function initializePdfViewer(): Promise<OniPDF> {
   const oniPdf: OniPDF = await createBook('/books/179489140.pdf', {

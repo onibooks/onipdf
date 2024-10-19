@@ -34,6 +34,7 @@ export const render = (context: GlobalContext) => {
     const { type = 'canvas', page = 0 } = options || {}
     
     context.rootElement = element
+
     context.emotion = createEmotion({
       key: `onipdf`,
       container: element,
@@ -46,7 +47,7 @@ export const render = (context: GlobalContext) => {
     
     const zoomValue = context.options.zoom ?? 1
     context.oniPDF.layout({
-      zoom: zoomValue
+      zoom: zoomValue,
     })
     
     context.pageViews.forEach((pageView) => pageView.init())
