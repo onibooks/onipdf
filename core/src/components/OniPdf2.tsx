@@ -23,7 +23,6 @@ const OniPdf = ({
   const documentRef = useRef<HTMLDivElement>(null)
   const visualListContainerRef = useRef<HTMLDivElement>(null)  
   const visualListRef = useRef<HTMLDivElement>(null)
-  const observerRef = useRef<IntersectionObserver | null>(null)
   
   const [documentWidth, setDocumentWidth] = useState<number>(0)
   const [visualListHeight, setVisualListHeight] = useState<number>(0)
@@ -69,8 +68,7 @@ const OniPdf = ({
         const pageIndex = parseInt(entry.target.getAttribute('data-index')!)
 
         context.options.page = pageIndex
-
-        // setCurrentPageIndex(pageIndex)
+        setCurrentPageIndex(pageIndex)
         
         if (entry.isIntersecting) {  
           await renderPage(pageIndex)
@@ -100,9 +98,11 @@ const OniPdf = ({
       threshold: 0.5
     })
 
-    const currentPages = context.pageViews
-    currentPages.forEach((page) => observer.observe(page.pageSection))
-    observerRef.current = observer
+    pageViews.forEach((page) => observer.observe(page.pageSection))
+
+    return () => {
+      observer.disconnect()
+    }
   }
 
   useEffect(() => {
@@ -166,26 +166,29 @@ const OniPdf = ({
   }, [])
 
   useEffect(() => {
-    let currentPageIndex = 0
+    // 현재 페이지를 기준으로 계산되도록 수정하기
+    let pageIndex = 0
     
     const handleArrowKey = (event: KeyboardEvent) => {
+      console.log(pageIndex)
       if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
-        if (currentPageIndex < context.totalPages - 1) {
-          currentPageIndex++
-          oniPDF.goToPage(currentPageIndex)
+        if (pageIndex < context.totalPages - 1) {
+          pageIndex++
+          oniPDF.goToPage(pageIndex)
         }
       } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
-        if (currentPageIndex > 0) {
-          currentPageIndex--
-          oniPDF.goToPage(currentPageIndex)
+        if (pageIndex > 0) {
+          pageIndex--
+          oniPDF.goToPage(pageIndex)
         }
       }
+
+      setCurrentPageIndex(pageIndex)
     }
-  
+
     window.addEventListener('keydown', handleArrowKey)
     return () => window.removeEventListener('keydown', handleArrowKey)
   }, [])
-  
 
   useEffect(() => {
     const handleReflow = () => {
