@@ -33,7 +33,7 @@ export class PageView {
         
     this.canvasNode = this.createElement('canvas', 'canvasNode', 'canvasNode' + (this.index + 1)) as HTMLCanvasElement
     this.canvasContext = this.canvasNode.getContext('2d')
-    this.pageSection.appendChild(this.canvasNode)
+    // this.pageSection.appendChild(this.canvasNode)
 
     this.applyStyles()
   }
@@ -58,7 +58,7 @@ export class PageView {
       width: this.pageSize.width * scale,
       height: this.pageSize.height * scale
     }
-
+    
     // 3. root 사이즈에 맞게 화면 크기 설정
     // 주의할 점은 resize될 때 같이 반응되어야 한다는 점..
     const rootRect = this.context.rootElement.getBoundingClientRect()
@@ -80,7 +80,6 @@ export class PageView {
       height: this.scaledSize.height * (scale === 1 ? minRootScale : 1)
     }
   
-    
     // 4. 스타일 적용하기
     this.setSizeStyles(this.rootPageSize)
     this.setSizeStyles(this.canvasSize)
@@ -172,19 +171,28 @@ export class PageView {
   }
 
   private setSizeStyles (size: PageSize) {
+    const divisor = this.context.options.layout?.spread !== 'single' ? 2 : 1
+    // 이게 아니라 전체 화면에서 절반 사이즈를 구해야한다...
+    const divisorSize = {
+      width: size.width / divisor,
+      height: size.height / divisor
+    }
+
     addStyles(this.pageSection, {
-      width: `${size.width}px`,
-      height: `${size.height}px`,
+      width: `${divisorSize.width}px`,
+      height: `${divisorSize.height}px`,
+      // width: `${size.width}px`,
+      // height: `${size.height}px`,
     })
 
     addStyles(this.pageContainer, {
-      width: `${size.width}px`,
-      height: `${size.height}px`,
+      width: `${divisorSize.width}px`,
+      height: `${divisorSize.height}px`,
     })
 
     addStyles(this.canvasNode, {
-      width: `${size.width}px`,
-      height: `${size.height}px`,
+      width: `${divisorSize.width}px`,
+      height: `${divisorSize.height}px`,
     })
   }
 

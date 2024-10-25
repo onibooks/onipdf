@@ -15,10 +15,12 @@ type OniPdfProps = {
 const OniPdf = ({
   context
 }: OniPdfProps) => {
-  const { oniPDF, pageViews, options, sangte } = context
+  const { oniPDF, pageViews, presentation, options, sangte } = context
   const classes = useMemo(() => createClasses(context.emotion.css, options), [options])
   const { scale } = sangte.getState()
+  
   const flow = options?.layout?.flow ?? 'scrolled'
+  const spread = options?.layout?.spread ?? 'single'
   
   const documentRef = useRef<HTMLDivElement>(null)
   const visualListContainerRef = useRef<HTMLDivElement>(null)  
@@ -119,10 +121,12 @@ const OniPdf = ({
     if (!targetPageView) return
   
     const { width, height } = targetPageView.rootPageSize
-
+    const { divisor } = presentation.layout()
+    const divisorWidth = divisor === 2 ? context.rootElement.offsetWidth : width
+    
     if (documentRef.current) {
       const PAGE_MARGIN = 8
-      const newWidth = width * scale + PAGE_MARGIN
+      const newWidth = divisorWidth * scale + PAGE_MARGIN
       setDocumentWidth(newWidth)
     }
   
@@ -140,7 +144,7 @@ const OniPdf = ({
     if (documentRef.current) {
       context.documentElement = documentRef.current
       
-      oniPDF.layout({ flow })
+      oniPDF.layout({ flow, spread })
 
       // 코드 정리 필요
       addStyles(context.rootElement, {
