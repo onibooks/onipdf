@@ -171,28 +171,19 @@ export class PageView {
   }
 
   private setSizeStyles (size: PageSize) {
-    const divisor = this.context.options.layout?.spread !== 'single' ? 2 : 1
-    // 이게 아니라 전체 화면에서 절반 사이즈를 구해야한다...
-    const divisorSize = {
-      width: size.width / divisor,
-      height: size.height / divisor
-    }
-
     addStyles(this.pageSection, {
-      width: `${divisorSize.width}px`,
-      height: `${divisorSize.height}px`,
-      // width: `${size.width}px`,
-      // height: `${size.height}px`,
+      width: `${size.width}px`,
+      height: `${size.height}px`,
     })
 
     addStyles(this.pageContainer, {
-      width: `${divisorSize.width}px`,
-      height: `${divisorSize.height}px`,
+      width: `${size.width}px`,
+      height: `${size.height}px`,
     })
 
     addStyles(this.canvasNode, {
-      width: `${divisorSize.width}px`,
-      height: `${divisorSize.height}px`,
+      width: `${size.width}px`,
+      height: `${size.height}px`,
     })
   }
 

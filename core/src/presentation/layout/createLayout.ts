@@ -17,7 +17,10 @@ export type Layout = LayoutOptions & {
 export const createLayout = () => provider((context) => {
   const layout = createStore(
     subscribeWithSelector<Layout>(() => ({
-      divisor: 0
+      divisor: 0,
+      flow: 'scrolled',
+      spread: 'single',
+      zoom: 1
     }))
   )
 

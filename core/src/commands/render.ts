@@ -39,19 +39,13 @@ export const render = (context: GlobalContext) => {
       key: `onipdf`,
       container: element,
     })
+
     context.options = {
       ...options,
       page,
       type
     }
-    
-    const zoomValue = context.options.zoom ?? 1
-    context.oniPDF.layout({
-      zoom: zoomValue,
-    })
-    
-    context.pageViews.forEach((pageView) => pageView.init())
-    
+
     const fragment = document.createElement('div')
     const Component = h(OniPdf, { context })
     prender(Component, fragment)
