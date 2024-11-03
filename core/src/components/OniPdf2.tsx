@@ -31,6 +31,8 @@ const OniPdf = ({
   const renderedPages = new Set<number>()
   const renderingPages = new Set<number>()
 
+  const PAGE_MARGIN = 8
+
   const renderPage = async (index: number) => {
     if (!context.pageViews[index]) return
 
@@ -108,21 +110,17 @@ const OniPdf = ({
     const totalPages = context.totalPages
     const targetPageNumber = Math.min(Math.max(0, options.page!), totalPages - 1)
     const targetPageView = pageViews[targetPageNumber]
-
     if (!targetPageView) return
   
+    const { divisor } = context.presentation.layout()
     const { width, height } = targetPageView.rootPageSize
-    
-    if (documentRef.current) {
-      const PAGE_MARGIN = 8
-      const newWidth = width * scale + PAGE_MARGIN
-      setDocumentWidth(newWidth)
-    }
-  
-    if (visualListContainerRef.current) {
-      setVisualListHeight(totalPages * height)
-    }
-  }  
+
+    const scaledWidth = (width * divisor) * scale + PAGE_MARGIN
+    const totalHeight = (totalPages / divisor) * height
+
+    if (documentRef.current) setDocumentWidth(scaledWidth)
+    if (visualListContainerRef.current) setVisualListHeight(totalHeight)
+  }
 
   useEffect(() => {
     const rootElement = document.documentElement
@@ -169,6 +167,11 @@ const OniPdf = ({
           if (index % 2 === 0) {
             const spread = document.createElement('div')
             addClass(spread, 'spread')
+            addStyles(spread, {
+              // height: '100%',
+              // display: 'flex',
+              // justifyContent: 'center'
+            })
             acc.push(spread)
             fragment.appendChild(spread)
           }

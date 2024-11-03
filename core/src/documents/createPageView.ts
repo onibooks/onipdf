@@ -65,9 +65,9 @@ export class PageView {
     const rootWidth = rootRect.width
     const rootHeight = rootRect.height
     
-    const pageWidthScale = rootWidth / this.scaledSize.width
+    const { divisor } = this.context.presentation.layout()
+    const pageWidthScale = rootWidth / (this.scaledSize.width * divisor)
     const pageHeightScale = rootHeight / this.scaledSize.height
-    
     const minRootScale = Math.min(pageWidthScale, pageHeightScale)
 
     this.rootPageSize = {

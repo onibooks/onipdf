@@ -329,7 +329,7 @@ button {
 /* page */
 .pageSection {
   background-color: #fff;
-  margin: 0 4px;
+  /* margin: 0 4px; */
 }
 
 .pageContainer {
