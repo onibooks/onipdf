@@ -25,7 +25,6 @@ const OniPdf = ({
   
   const [documentWidth, setDocumentWidth] = useState<number>(0)
   const [visualListHeight, setVisualListHeight] = useState<number>(0)
-  const [currentPageIndex, setCurrentPageIndex] = useState<number>(0)
 
   const cachedPages = new Set<number>()
   const renderedPages = new Set<number>()
@@ -68,9 +67,9 @@ const OniPdf = ({
       entries.forEach(async (entry: IntersectionObserverEntry) => {
         const pageIndex = parseInt(entry.target.getAttribute('data-index')!)
 
-        if (entry.isIntersecting) {  
+        if (entry.isIntersecting) {
+          sangte.setState({ currentIndex: pageIndex })
           context.options.page = pageIndex
-          setCurrentPageIndex(pageIndex)
           
           await renderPage(pageIndex)
           
@@ -226,7 +225,8 @@ const OniPdf = ({
 
   useEffect(() => {
     const handleReflow = () => {
-      oniPDF.goToPage(context.options.page)
+      const { currentIndex } = sangte.getState()
+      oniPDF.goToPage(currentIndex)
 
       updateDimensions(scale)
     }
@@ -235,9 +235,9 @@ const OniPdf = ({
       updateDimensions(scale)
     }
 
-    // 현재 페이지를 기준으로 계산되도록 수정하기
-    let pageIndex = 0
     const handleArrowKey = (event: KeyboardEvent) => {
+      let { currentIndex: pageIndex } = sangte.getState()
+
       if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
         if (pageIndex < context.totalPages - 1) {
           pageIndex++
@@ -250,7 +250,7 @@ const OniPdf = ({
         }
       }
 
-      setCurrentPageIndex(pageIndex)
+      sangte.setState({ currentIndex: pageIndex })
     }
 
     oniPDF.on(EVENTS.REFLOW, handleReflow)

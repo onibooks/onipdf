@@ -46,6 +46,8 @@ export const render = (context: GlobalContext) => {
       type
     }
 
+    context.sangte.setState({ currentIndex: page })
+
     const fragment = document.createElement('div')
     const Component = h(OniPdf, { context })
     prender(Component, fragment)
