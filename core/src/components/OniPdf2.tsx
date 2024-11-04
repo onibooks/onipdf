@@ -6,7 +6,7 @@ import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
 import type { Options } from '../commands/render'
 import { debounce } from '../utils/debounce'
-import { addClass, addStyles } from '../utils'
+import { addClass, addStyles, removeStyles } from '../utils'
 
 type OniPdfProps = {
   context: GlobalContext
@@ -68,10 +68,10 @@ const OniPdf = ({
       entries.forEach(async (entry: IntersectionObserverEntry) => {
         const pageIndex = parseInt(entry.target.getAttribute('data-index')!)
 
-        context.options.page = pageIndex
-        setCurrentPageIndex(pageIndex)
-        
         if (entry.isIntersecting) {  
+          context.options.page = pageIndex
+          setCurrentPageIndex(pageIndex)
+          
           await renderPage(pageIndex)
           
           // 현재 페이지를 기준으로 앞뒤로 최대 10개씩 캔버스 렌더링
@@ -135,8 +135,14 @@ const OniPdf = ({
   ) => {
     const totalWidth = (width * totalPages * divisor) * scale + PAGE_MARGIN
     
-    context.rootElement.style.width = `${width}px`
-    
+    addStyles(context.rootElement, {
+      width: `${width}px`,
+      overflow: 'hidden'
+    })
+    addStyles(visualListRef.current as HTMLDivElement, {
+      display: 'flex'
+    })
+     
     setDocumentWidth(totalWidth)
     setVisualListHeight(height)
   }
@@ -149,13 +155,11 @@ const OniPdf = ({
   ) => {
     const totalHeight = (totalPages / divisor) * height
     
-    context.rootElement.style.width = ''
+    removeStyles(context.rootElement)
+    removeStyles(visualListRef.current as HTMLElement)
 
     setDocumentWidth(scaledWidth)
-
-    if (visualListContainerRef.current) {
-      setVisualListHeight(totalHeight)
-    }
+    setVisualListHeight(totalHeight)
   }
 
   useEffect(() => {
@@ -224,10 +228,6 @@ const OniPdf = ({
     const handleReflow = () => {
       oniPDF.goToPage(context.options.page)
 
-      addStyles(context.rootElement, {
-        overflow: oniPDF.layout().flow === 'paginated' ? 'hidden' : ''
-      })
-
       updateDimensions(scale)
     }
 
@@ -277,7 +277,6 @@ const OniPdf = ({
       >
         <div
           className={clsx('visual-list-body', classes.VisualListBody)}
-          style={{ display: context.presentation.layout().flow === 'paginated' ? 'flex' : ''  }}
           ref={visualListRef}
         />
       </div>
