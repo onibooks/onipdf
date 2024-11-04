@@ -8,7 +8,7 @@ const renderOptions = {
   page: 0,
   layout: {
     flow: 'scrolled',
-    spread: 'double',
+    spread: 'single',
     zoom: 1
   }
 } as const

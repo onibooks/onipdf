@@ -33,7 +33,7 @@ export class PageView {
         
     this.canvasNode = this.createElement('canvas', 'canvasNode', 'canvasNode' + (this.index + 1)) as HTMLCanvasElement
     this.canvasContext = this.canvasNode.getContext('2d')
-    // this.pageSection.appendChild(this.canvasNode)
+    this.pageSection.appendChild(this.canvasNode)
 
     this.applyStyles()
   }
@@ -82,7 +82,11 @@ export class PageView {
   
     // 4. 스타일 적용하기
     this.setSizeStyles(this.rootPageSize)
-    this.setSizeStyles(this.canvasSize)
+    
+    addStyles(this.canvasNode, {
+      width: `${this.canvasSize.width}px`,
+      height: `${this.canvasSize.height}px`,
+    })
   }
 
   async updatePageSize () {
@@ -175,13 +179,8 @@ export class PageView {
       width: `${size.width}px`,
       height: `${size.height}px`,
     })
-
+    
     addStyles(this.pageContainer, {
-      width: `${size.width}px`,
-      height: `${size.height}px`,
-    })
-
-    addStyles(this.canvasNode, {
       width: `${size.width}px`,
       height: `${size.height}px`,
     })
@@ -198,14 +197,13 @@ export class PageView {
 
   private applyStyles () {
     addStyles(this.pageSection, {
-      float: 'left',
       position: 'relative',
+      margin: '0 auto'
     })
 
     addStyles(this.pageContainer, {
       position: 'relative',
-      top: '0',
-      margin: '0 auto',
+      top: '0'
     })
 
     addStyles(this.canvasNode, {

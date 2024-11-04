@@ -112,14 +112,50 @@ const OniPdf = ({
     const targetPageView = pageViews[targetPageNumber]
     if (!targetPageView) return
   
-    const { divisor } = context.presentation.layout()
+    const { divisor, flow } = context.presentation.layout()
     const { width, height } = targetPageView.rootPageSize
 
     const scaledWidth = (width * divisor) * scale + PAGE_MARGIN
-    const totalHeight = (totalPages / divisor) * height
 
-    if (documentRef.current) setDocumentWidth(scaledWidth)
-    if (visualListContainerRef.current) setVisualListHeight(totalHeight)
+    if (documentRef.current) {
+      if (flow === 'paginated') {
+        updatePaginatedLayout(width, height, totalPages, divisor, scale)
+      } else {
+        updateScrolledLayout(scaledWidth, height, totalPages, divisor);
+      }
+    }
+  }
+
+  const updatePaginatedLayout = (
+    width: number,
+    height: number,
+    totalPages: number,
+    divisor: number,
+    scale: number
+  ) => {
+    const totalWidth = (width * totalPages * divisor) * scale + PAGE_MARGIN
+    
+    context.rootElement.style.width = `${width}px`
+    
+    setDocumentWidth(totalWidth)
+    setVisualListHeight(height)
+  }
+
+  const updateScrolledLayout = (
+    scaledWidth: number,
+    height: number,
+    totalPages: number,
+    divisor: number
+  ) => {
+    const totalHeight = (totalPages / divisor) * height
+    
+    context.rootElement.style.width = ''
+
+    setDocumentWidth(scaledWidth)
+
+    if (visualListContainerRef.current) {
+      setVisualListHeight(totalHeight)
+    }
   }
 
   useEffect(() => {
@@ -167,11 +203,7 @@ const OniPdf = ({
           if (index % 2 === 0) {
             const spread = document.createElement('div')
             addClass(spread, 'spread')
-            addStyles(spread, {
-              // height: '100%',
-              // display: 'flex',
-              // justifyContent: 'center'
-            })
+            
             acc.push(spread)
             fragment.appendChild(spread)
           }
@@ -206,7 +238,6 @@ const OniPdf = ({
     // 현재 페이지를 기준으로 계산되도록 수정하기
     let pageIndex = 0
     const handleArrowKey = (event: KeyboardEvent) => {
-      console.log(pageIndex)
       if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
         if (pageIndex < context.totalPages - 1) {
           pageIndex++
@@ -246,6 +277,7 @@ const OniPdf = ({
       >
         <div
           className={clsx('visual-list-body', classes.VisualListBody)}
+          style={{ display: context.presentation.layout().flow === 'paginated' ? 'flex' : ''  }}
           ref={visualListRef}
         />
       </div>
