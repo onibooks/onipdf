@@ -23,7 +23,6 @@ const OniPdf = ({
   const visualListContainerRef = useRef<HTMLDivElement>(null)  
   const visualListRef = useRef<HTMLDivElement>(null)
   
-  const [documentWidth, setDocumentWidth] = useState<number>(0)
   const [visualListWidth, setVisualListWidth] = useState<number>(0)
   const [visualListHeight, setVisualListHeight] = useState<number>(0)
 
@@ -133,16 +132,18 @@ const OniPdf = ({
     divisor: number,
     scale: number
   ) => {
+    removeStyles(documentRef.current as HTMLElement)
+    removeStyles(visualListContainerRef.current as HTMLElement)
     
     const documentWidth = (width * divisor) * scale
-    setDocumentWidth(documentWidth)
     
     const visualListWidth= (width * totalPages * divisor) * scale + PAGE_MARGIN
     const visualListHeight = height
     setVisualListWidth(visualListWidth)
     setVisualListHeight(visualListHeight)
-    
+
     addStyles(documentRef.current as HTMLDivElement, {
+      width: `${documentWidth}px`,
       overflow: 'hidden'
     })
     addStyles(visualListRef.current as HTMLDivElement, {
@@ -156,14 +157,19 @@ const OniPdf = ({
     totalPages: number,
     divisor: number
   ) => {
-    const totalHeight = (totalPages / divisor) * height
-    
     removeStyles(context.rootElement as HTMLElement)
     removeStyles(documentRef.current as HTMLElement)
     removeStyles(visualListRef.current as HTMLElement)
-
-    setDocumentWidth(scaledWidth)
-
+    
+    addStyles(documentRef.current as HTMLDivElement, {
+      width: '100%',
+      overflow: 'auto'
+    })
+    addStyles(visualListContainerRef.current as HTMLDivElement, {
+      margin: '0 auto'
+    })
+    
+    const totalHeight = (totalPages / divisor) * height
     setVisualListWidth(scaledWidth)
     setVisualListHeight(totalHeight)
   }
@@ -275,7 +281,6 @@ const OniPdf = ({
     <div
       class={clsx('document', classes.Document)}
       ref={documentRef}
-      style={{ width: `${documentWidth}px` }}
     >
       <div
         className={clsx('visual-list-container', classes.VisualListContainer)}

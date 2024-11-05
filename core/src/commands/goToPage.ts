@@ -9,6 +9,6 @@ export const goToPage = (context: GlobalContext) => (index: number = 0) => {
     //바껴야하나
     requestAnimationFrame(() => context.documentElement.scrollLeft = index * width)
   } else {
-    requestAnimationFrame(() => context.rootElement.scrollTop = index * height)
+    requestAnimationFrame(() => context.documentElement.scrollTop = index * height)
   }
 }

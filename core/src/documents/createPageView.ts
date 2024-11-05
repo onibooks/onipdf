@@ -198,7 +198,7 @@ export class PageView {
   private applyStyles () {
     addStyles(this.pageSection, {
       position: 'relative',
-      margin: '0 auto'
+      // margin: '0 auto'
     })
 
     addStyles(this.pageContainer, {
