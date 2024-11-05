@@ -134,7 +134,7 @@ const OniPdf = ({
     scale: number
   ) => {
     
-    const documentWidth = (width * divisor) * scale + PAGE_MARGIN
+    const documentWidth = (width * divisor) * scale
     setDocumentWidth(documentWidth)
     
     const visualListWidth= (width * totalPages * divisor) * scale + PAGE_MARGIN
@@ -142,18 +142,12 @@ const OniPdf = ({
     setVisualListWidth(visualListWidth)
     setVisualListHeight(visualListHeight)
     
-    // const totalWidth = (width * totalPages * divisor) * scale + PAGE_MARGIN
-    
-    // addStyles(context.rootElement, {
-    //   width: `${width}px`,
-    //   overflow: 'hidden'
-    // })
+    addStyles(documentRef.current as HTMLDivElement, {
+      overflow: 'hidden'
+    })
     addStyles(visualListRef.current as HTMLDivElement, {
       display: 'flex'
     })
-     
-    // setDocumentWidth(totalWidth)
-    // setVisualListHeight(height)
   }
 
   const updateScrolledLayout = (
@@ -164,10 +158,13 @@ const OniPdf = ({
   ) => {
     const totalHeight = (totalPages / divisor) * height
     
-    removeStyles(context.rootElement)
+    removeStyles(context.rootElement as HTMLElement)
+    removeStyles(documentRef.current as HTMLElement)
     removeStyles(visualListRef.current as HTMLElement)
 
     setDocumentWidth(scaledWidth)
+
+    setVisualListWidth(scaledWidth)
     setVisualListHeight(totalHeight)
   }
 
@@ -282,7 +279,10 @@ const OniPdf = ({
     >
       <div
         className={clsx('visual-list-container', classes.VisualListContainer)}
-        style={{ width: `${visualListWidth}px`, height: `${visualListHeight}px` }}
+        style={{
+          width: `${visualListWidth}px`,
+          height: `${visualListHeight}px`
+        }}
         ref={visualListContainerRef}
       >
         <div
