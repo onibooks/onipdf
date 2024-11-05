@@ -24,6 +24,7 @@ const OniPdf = ({
   const visualListRef = useRef<HTMLDivElement>(null)
   
   const [documentWidth, setDocumentWidth] = useState<number>(0)
+  const [visualListWidth, setVisualListWidth] = useState<number>(0)
   const [visualListHeight, setVisualListHeight] = useState<number>(0)
 
   const cachedPages = new Set<number>()
@@ -120,7 +121,7 @@ const OniPdf = ({
       if (flow === 'paginated') {
         updatePaginatedLayout(width, height, totalPages, divisor, scale)
       } else {
-        updateScrolledLayout(scaledWidth, height, totalPages, divisor);
+        updateScrolledLayout(scaledWidth, height, totalPages, divisor)
       }
     }
   }
@@ -132,18 +133,27 @@ const OniPdf = ({
     divisor: number,
     scale: number
   ) => {
-    const totalWidth = (width * totalPages * divisor) * scale + PAGE_MARGIN
     
-    addStyles(context.rootElement, {
-      width: `${width}px`,
-      overflow: 'hidden'
-    })
+    const documentWidth = (width * divisor) * scale + PAGE_MARGIN
+    setDocumentWidth(documentWidth)
+    
+    const visualListWidth= (width * totalPages * divisor) * scale + PAGE_MARGIN
+    const visualListHeight = height
+    setVisualListWidth(visualListWidth)
+    setVisualListHeight(visualListHeight)
+    
+    // const totalWidth = (width * totalPages * divisor) * scale + PAGE_MARGIN
+    
+    // addStyles(context.rootElement, {
+    //   width: `${width}px`,
+    //   overflow: 'hidden'
+    // })
     addStyles(visualListRef.current as HTMLDivElement, {
       display: 'flex'
     })
      
-    setDocumentWidth(totalWidth)
-    setVisualListHeight(height)
+    // setDocumentWidth(totalWidth)
+    // setVisualListHeight(height)
   }
 
   const updateScrolledLayout = (
@@ -272,7 +282,7 @@ const OniPdf = ({
     >
       <div
         className={clsx('visual-list-container', classes.VisualListContainer)}
-        style={{ height: `${visualListHeight}px` }}
+        style={{ width: `${visualListWidth}px`, height: `${visualListHeight}px` }}
         ref={visualListContainerRef}
       >
         <div
