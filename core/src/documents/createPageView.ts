@@ -33,7 +33,7 @@ export class PageView {
         
     this.canvasNode = this.createElement('canvas', 'canvasNode', 'canvasNode' + (this.index + 1)) as HTMLCanvasElement
     this.canvasContext = this.canvasNode.getContext('2d')
-    this.pageSection.appendChild(this.canvasNode)
+    this.pageContainer.appendChild(this.canvasNode)
 
     this.applyStyles()
   }
@@ -197,8 +197,7 @@ export class PageView {
 
   private applyStyles () {
     addStyles(this.pageSection, {
-      position: 'relative',
-      // margin: '0 auto'
+      position: 'relative'
     })
 
     addStyles(this.pageContainer, {

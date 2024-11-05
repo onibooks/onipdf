@@ -136,7 +136,6 @@ const OniPdf = ({
     removeStyles(visualListContainerRef.current as HTMLElement)
     
     const documentWidth = (width * divisor) * scale
-    
     const visualListWidth= (width * totalPages * divisor) * scale + PAGE_MARGIN
     const visualListHeight = height
     setVisualListWidth(visualListWidth)

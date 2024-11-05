@@ -6,7 +6,6 @@ export const goToPage = (context: GlobalContext) => (index: number = 0) => {
   const { width, height } = pageView.rootPageSize
 
   if (presentation.layout().flow === 'paginated') {
-    //바껴야하나
     requestAnimationFrame(() => context.documentElement.scrollLeft = index * width)
   } else {
     requestAnimationFrame(() => context.documentElement.scrollTop = index * height)
