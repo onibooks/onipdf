@@ -7,7 +7,7 @@ type ViewElement = 'scrolled' | 'paginated' | 'single' | 'double' | 'coverFacing
 const renderOptions = {
   page: 10,
   layout: {
-    flow: 'scrolled',
+    flow: 'paginated',
     spread: 'single',
     zoom: 1
   }

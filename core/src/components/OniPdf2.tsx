@@ -265,14 +265,31 @@ const OniPdf = ({
       sangte.setState({ currentIndex: pageIndex })
     }
 
+    const handleResize = () => {
+      console.log('handleResize')
+    }
+
+    const handleResized = debounce((event?: Event) => {
+      if (event) {
+        console.log('handleResized')
+      }
+    }, 250)
+
     oniPDF.on(EVENTS.REFLOW, handleReflow)
     oniPDF.on(EVENTS.UPDATESCALE, handleScale)
     window.addEventListener('keydown', handleArrowKey)
+
+    console.log(context.rootElement)
+    window.addEventListener('resize', handleResize)
+    window.addEventListener('resize', handleResized)
 
     return () => {
       oniPDF.off(EVENTS.REFLOW, handleReflow)
       oniPDF.off(EVENTS.UPDATESCALE, handleScale)
       window.removeEventListener('keydown', handleArrowKey)
+
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('resize', handleResized)
     }
   }, [])
 
