@@ -1,14 +1,12 @@
 import clsx from 'clsx'
 import { useState, useRef, useMemo, useEffect } from 'preact/hooks'
-import { EVENTS } from '../constants'
+
+import { debounce } from '../utils/debounce'
+import PageView from './PageView'
 
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
 import type { Options } from '../commands/render'
-import { debounce } from '../utils/debounce'
-import { addClass, addStyles, removeStyles } from '../utils'
-import PageView from './PageView'
-import { render, h } from 'preact'
 
 type OniPDFProps = {
   context: GlobalContext
@@ -30,6 +28,23 @@ const OniPDF = ({
       const totalPages = await oniPDF.getTotalPages()
       setTotalPages(totalPages)
     })()
+  }, [])
+  
+  useEffect(() => {
+    const handleResize = () => {
+      // context.rootElementSize = context.oniPDF.getRootElementSize()
+    }
+    
+    const handleResized = debounce(() => {
+      console.log(context.rootElementSize)
+    }, 250)
+
+    window.addEventListener('resize', handleResize)
+    window.addEventListener('resize', handleResized)
+
+    return () => {
+      window.removeEventListener('resize', handleResized)
+    }
   }, [])
 
   return (
@@ -78,7 +93,7 @@ const createClasses = (
   `,
 
   OniDocument: css`
-    margin: auto;
+    /* margin: auto; */
     outline: none;
     cursor: default;
     box-sizing: border-box;  

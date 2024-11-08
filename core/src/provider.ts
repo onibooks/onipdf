@@ -22,9 +22,12 @@ export type GlobalContext = {
   documentElement: HTMLElement
   options: Options
   pageViews: PageView[]
-  renderedPageViews: PageView[]
   presentation: Presentation
   totalPages: number
+  rootElementSize: {
+    width: number
+    height: number
+  }
   uid: number
 }
 
@@ -42,9 +45,9 @@ export const createContext = () => {
     documentElement: null as any,
     options: null as any,
     pageViews: [] as PageView[],
-    renderedPageViews: [] as PageView[],
     presentation: null as any,
     totalPages: -1 as number,
+    rootElementSize: null as any,
     uid,
   }
 

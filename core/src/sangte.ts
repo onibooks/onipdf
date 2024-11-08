@@ -5,8 +5,6 @@ export type Sangte = {
   isLoad: boolean
   currentIndex: number
   scale: number
-  pageViewSections: PageView[]
-  renderedPageViews: PageView[]
 }
 
 export const createSangte = () => {
@@ -14,8 +12,6 @@ export const createSangte = () => {
     isLoad: false,
     currentIndex: 0,
     scale: 1,
-    pageViewSections: [],
-    renderedPageViews: []
   }))
 
   return sangte
