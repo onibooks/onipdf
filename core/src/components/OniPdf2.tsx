@@ -267,6 +267,22 @@ const OniPdf = ({
 
     const handleResize = () => {
       console.log('handleResize')
+      const targetPageNumber = Math.min(Math.max(0, options.page!), context.totalPages - 1)
+      const targetPageView = pageViews[targetPageNumber]
+      if (!targetPageView) return
+      
+      const { width, height } = targetPageView.resizePage()
+
+      addStyles(documentRef.current as HTMLElement, {
+        width: `${width}px`
+      })
+      
+      addStyles(visualListContainerRef.current as HTMLElement, {
+        height: `${height}px`
+      })
+
+
+      // Promise.all(context.pageViews.map((pageView) => pageView.resizePage()))
     }
 
     const handleResized = debounce((event?: Event) => {

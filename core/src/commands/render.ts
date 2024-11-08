@@ -1,7 +1,7 @@
 import createEmotion from '@emotion/css/create-instance'
 import { h, render as prender } from 'preact'
 import { warn } from '../helpers'
-import OniPdf from '../components/OniPdf2'
+import OniPDF from '../components/OniPDF3'
 
 import type { GlobalContext } from '../provider'
 import type { LayoutOptions } from '../presentation/layout/createLayout'
@@ -49,7 +49,7 @@ export const render = (context: GlobalContext) => {
     context.sangte.setState({ currentIndex: page })
 
     const fragment = document.createElement('div')
-    const Component = h(OniPdf, { context })
+    const Component = h(OniPDF, { context })
     prender(Component, fragment)
     
     element.appendChild(fragment.firstChild as HTMLElement)

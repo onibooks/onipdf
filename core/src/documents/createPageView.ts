@@ -89,6 +89,25 @@ export class PageView {
     })
   }
 
+  resizePage () {
+    const rootRect = this.context.rootElement.getBoundingClientRect()
+    const rootWidth = rootRect.width
+    const rootHeight = rootRect.height
+
+    const { scale } = this.context.sangte.getState()
+    const { divisor } = this.context.presentation.layout()
+    const pageWidthScale = rootWidth / (this.scaledSize.width * divisor)
+    const pageHeightScale = rootHeight / this.scaledSize.height
+    const minRootScale = Math.min(pageWidthScale, pageHeightScale)
+    
+    this.rootPageSize = {
+      width: this.scaledSize.width * (scale === 1 ? minRootScale : 1),
+      height: this.scaledSize.height * (scale === 1 ? minRootScale : 1)
+    }
+
+    return this.rootPageSize
+  }
+
   async updatePageSize () {
     const { scale } = this.context.sangte.getState()
 

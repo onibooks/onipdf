@@ -22,6 +22,7 @@ export declare class PageView {
     get context(): GlobalContext;
     get pageNumber(): number;
     init(): Promise<void>;
+    resizePage(): PageSize;
     updatePageSize(): Promise<void>;
     load(): Promise<this | undefined>;
     drawPageAsPixmap(): Promise<void>;
