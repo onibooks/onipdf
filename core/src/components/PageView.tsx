@@ -21,21 +21,25 @@ const PageView = ({
   pageIndex
 }: PageViewProps) => {
   const classes = useMemo(() => createClasses(context.emotion.css), [])
-  const [getScaledPageSize, setGetScaledPageSize] = useState<() => Size>(() => () => null)
-  const [getPageSize, setGetPageSize] = useState<() => Size>(() => () => null)
   const pageSectionRef = useRef(null)
 
   const setScaledPageSize = async () => {
     const { width, height } = await context.worker.getPageSize(pageIndex)
-    setGetScaledPageSize(() => {
-      return () => {
-        const { scale } = context.sangte.getState()
-        return {
-          width: width * scale,
-          height: height * scale,
-        }
-      }
+    context.presentation.layout({
+      defaultPageWidth: width,
+      defaultPageHeight: height
     })
+
+    const { pageWidth, pageHeight } = context.presentation.layout()
+  
+    const variables = {
+      pageWidth: `${pageWidth}px`,
+      pageHeight: `${pageHeight}px`,
+    }
+
+    if (pageSectionRef.current) {
+      setCssVariables(variables, pageSectionRef.current)
+    }
   }
 
   useEffect(() => {
@@ -43,30 +47,17 @@ const PageView = ({
       await setScaledPageSize()
     })()
   }, [])
-
+  
   useEffect(() => {
-    if (getScaledPageSize()) {
-      const pageSize = getScaledPageSize()
-      if (pageSize) {
-        // 이 값이 바뀌면 여기도 같이 업데이트 되어야 한다.
-        const { rootWidth, rootHeight } = context.presentation.layout()
-
-        const pageWidth = rootWidth / pageSize.width
-        const pageHeight = rootHeight / pageSize.height
-        const minRootScale = Math.min(pageWidth, pageHeight)
-        const { scale } = context.sangte.getState()
-        
-        const variables = {
-          pageWidth: `${pageSize.width * (scale === 1 ? minRootScale : 1)}px`,
-          pageHeight: `${pageSize.height * (scale === 1 ? minRootScale : 1)}px`,
-        }
-
-        if (pageSectionRef.current) {
-          setCssVariables(variables, pageSectionRef.current)
-        }
-      }
+    const handleResize = async (event?: Event) => {
+      await setScaledPageSize()
     }
-  }, [getScaledPageSize])
+
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   return (
     <div 

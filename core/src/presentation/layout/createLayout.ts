@@ -7,6 +7,8 @@ import { provider } from '../../provider'
 export type LayoutOptions = {
   width?: number
   height?: number
+  defaultPageWidth?: number
+  defaultPageHeight?: number
   flow?: 'paginated' | 'scrolled'
   spread?: 'single' | 'double' | 'coverFacing' 
   zoom?: number
@@ -16,6 +18,8 @@ export type Layout = LayoutOptions & {
   divisor: number
   rootWidth: number
   rootHeight: number
+  pageWidth: number
+  pageHeight: number
 }
 
 export const createLayout = () => provider((context) => {
@@ -27,6 +31,8 @@ export const createLayout = () => provider((context) => {
       zoom: 1,
       rootWidth: 0,
       rootHeight: 0,
+      pageWidth: 0,
+      pageHeight: 0,
     }))
   )
 
@@ -50,6 +56,8 @@ export const createLayout = () => provider((context) => {
   ) => {
     const width = options.width || 0
     const height= options.height || 0
+    const defaultPageWidth = options.defaultPageWidth || 0
+    const defaultPageHeight = options.defaultPageHeight || 0
 
     if (options.spread === 'single') {
       options.divisor = 1
@@ -62,6 +70,18 @@ export const createLayout = () => provider((context) => {
     options.rootWidth = width
     options.rootHeight = height
 
+    const { scale } = context.sangte.getState()
+    const scaledPageWidth = defaultPageWidth * scale
+    const scaledPageHeight = defaultPageHeight * scale
+
+    console.log(defaultPageWidth)
+
+    const pageWidth = width / scaledPageWidth
+    const pageHeight = height / scaledPageHeight
+    const minRootScale = Math.min(pageWidth, pageHeight)
+
+    options.pageWidth = scaledPageWidth * (scale === 1 ? minRootScale : 1),
+    options.pageHeight = scaledPageHeight * (scale === 1 ? minRootScale : 1)
 
     return options
   }
