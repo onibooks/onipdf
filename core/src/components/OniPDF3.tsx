@@ -1,7 +1,9 @@
 import clsx from 'clsx'
 import { useState, useRef, useMemo, useEffect } from 'preact/hooks'
-
+import { EVENTS } from '../constants'
 import { debounce } from '../utils/debounce'
+import { setCssVariables } from '../helpers'
+
 import PageView from './PageView'
 
 import type { Emotion } from '@emotion/css/types/create-instance'
@@ -24,26 +26,54 @@ const OniPDF = ({
   const [totalPages, setTotalPages] = useState(0)
 
   useEffect(() => {
+    if (oniDocumentRef.current) {
+      context.documentElement = oniDocumentRef.current
+    }
+  }, [])
+
+  useEffect(() => {
     ;(async () => {
       const totalPages = await oniPDF.getTotalPages()
       setTotalPages(totalPages)
     })()
   }, [])
+
+  useEffect(() => {
+    const { layout } = context.options
+    
+    presentation.layout({
+      width: 0,
+      height: 0,
+      ...layout
+    })
+  }, [])
   
   useEffect(() => {
-    const handleResize = () => {
+    const handleResize = (event?: Event) => {
       // context.rootElementSize = context.oniPDF.getRootElementSize()
+      const {
+        rootWidth,
+        rootHeight
+      } = presentation.layout({
+        width: context.rootElement.clientWidth,
+        height: context.rootElement.clientHeight
+      })
+
+      const variables = {
+        rootWidth: `${rootWidth}px`,
+        rootHeight: `${rootHeight}px`,
+      }
+
+      setCssVariables(variables, context.rootElement)
+
+      oniPDF.emit(EVENTS.RESIZE, event)
     }
-    
-    const handleResized = debounce(() => {
-      console.log(context.rootElementSize)
-    }, 250)
+
+    handleResize()
 
     window.addEventListener('resize', handleResize)
-    window.addEventListener('resize', handleResized)
-
     return () => {
-      window.removeEventListener('resize', handleResized)
+      window.removeEventListener('resize', handleResize)
     }
   }, [])
 

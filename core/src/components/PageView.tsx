@@ -1,5 +1,7 @@
 import clsx from 'clsx'
-import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useEffect, useState, useRef } from 'react'
+import { EVENTS } from '../constants'
+import { setCssVariables } from '../helpers'
 
 import type { GlobalContext } from '../provider'
 import type { Emotion } from '@emotion/css/types/create-instance'
@@ -21,6 +23,7 @@ const PageView = ({
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   const [getScaledPageSize, setGetScaledPageSize] = useState<() => Size>(() => () => null)
   const [getPageSize, setGetPageSize] = useState<() => Size>(() => () => null)
+  const pageSectionRef = useRef(null)
 
   const setScaledPageSize = async () => {
     const { width, height } = await context.worker.getPageSize(pageIndex)
@@ -35,28 +38,6 @@ const PageView = ({
     })
   }
 
-  const updatePageSize = () => {
-    const scaledPageSize = getScaledPageSize()
-    if (scaledPageSize) {
-      const { width: scaledWidth, height: scaledHeight } = scaledPageSize
-      const { width: rootWidth, height: rootHeight} = context.rootElementSize
-
-      const pageWidth = rootWidth / scaledWidth
-      const pageHeight = rootHeight / scaledHeight
-      const minRootScale = Math.min(pageWidth, pageHeight)
-
-      setGetPageSize(() => {
-        return () => {
-          const { scale } = context.sangte.getState()
-          return {
-            width: scaledWidth * (scale === 1 ? minRootScale : 1),
-            height: scaledHeight * (scale === 1 ? minRootScale : 1),
-          }
-        }
-      })
-    }
-  }
-
   useEffect(() => {
     ;(async () => {
       await setScaledPageSize()
@@ -65,29 +46,33 @@ const PageView = ({
 
   useEffect(() => {
     if (getScaledPageSize()) {
-      updatePageSize()
+      const pageSize = getScaledPageSize()
+      if (pageSize) {
+        // 이 값이 바뀌면 여기도 같이 업데이트 되어야 한다.
+        const { rootWidth, rootHeight } = context.presentation.layout()
+
+        const pageWidth = rootWidth / pageSize.width
+        const pageHeight = rootHeight / pageSize.height
+        const minRootScale = Math.min(pageWidth, pageHeight)
+        const { scale } = context.sangte.getState()
+        
+        const variables = {
+          pageWidth: `${pageSize.width * (scale === 1 ? minRootScale : 1)}px`,
+          pageHeight: `${pageSize.height * (scale === 1 ? minRootScale : 1)}px`,
+        }
+
+        if (pageSectionRef.current) {
+          setCssVariables(variables, pageSectionRef.current)
+        }
+      }
     }
   }, [getScaledPageSize])
 
   return (
     <div 
       className={clsx('page-section', classes.PageSection)}
-      style={
-        getPageSize() ? {
-          width: getPageSize()!.width,
-          height: getPageSize()!.height
-        } : undefined
-      }
+      ref={pageSectionRef}
     >
-      <div 
-        className={clsx('page-container', classes.PageContainer)}
-        style={
-          getPageSize() ? {
-            width: getPageSize()!.width,
-            height: getPageSize()!.height
-          } : undefined
-        }
-      ></div>
     </div>
   )
 }

@@ -20,9 +20,12 @@ export type GlobalContext = {
     documentElement: HTMLElement;
     options: Options;
     pageViews: PageView[];
-    renderedPageViews: PageView[];
     presentation: Presentation;
     totalPages: number;
+    rootElementSize: {
+        width: number;
+        height: number;
+    };
     uid: number;
 };
 export declare const createContext: () => GlobalContext;

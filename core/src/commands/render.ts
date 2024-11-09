@@ -35,7 +35,7 @@ export const render = (context: GlobalContext) => {
     
     context.rootElement = element
 
-    context.rootElementSize = context.oniPDF.getRootElementSize()
+    // context.rootElementSize = context.oniPDF.getRootElementSize()
 
     context.emotion = createEmotion({
       key: `onipdf`,

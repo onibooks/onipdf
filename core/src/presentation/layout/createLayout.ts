@@ -5,6 +5,8 @@ import * as commands from './index'
 import { provider } from '../../provider'
 
 export type LayoutOptions = {
+  width?: number
+  height?: number
   flow?: 'paginated' | 'scrolled'
   spread?: 'single' | 'double' | 'coverFacing' 
   zoom?: number
@@ -12,6 +14,8 @@ export type LayoutOptions = {
 
 export type Layout = LayoutOptions & {
   divisor: number
+  rootWidth: number
+  rootHeight: number
 }
 
 export const createLayout = () => provider((context) => {
@@ -20,7 +24,9 @@ export const createLayout = () => provider((context) => {
       divisor: 0,
       flow: 'scrolled',
       spread: 'single',
-      zoom: 1
+      zoom: 1,
+      rootWidth: 0,
+      rootHeight: 0,
     }))
   )
 
@@ -42,6 +48,9 @@ export const createLayout = () => provider((context) => {
   const configure = (
     options: Layout
   ) => {
+    const width = options.width || 0
+    const height= options.height || 0
+
     if (options.spread === 'single') {
       options.divisor = 1
     } else if (options.spread === 'double') {
@@ -49,6 +58,10 @@ export const createLayout = () => provider((context) => {
     } else if (options.spread === 'coverFacing') {
       options.divisor = 2
     }
+
+    options.rootWidth = width
+    options.rootHeight = height
+
 
     return options
   }

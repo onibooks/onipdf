@@ -8,7 +8,7 @@ const renderOptions = {
   page: 10,
   layout: {
     flow: 'paginated',
-    spread: 'single',
+    spread: 'double',
     zoom: 1
   }
 } as const
