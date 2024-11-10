@@ -66,14 +66,16 @@ const OniPDF = ({
 
       setCssVariables(variables, context.rootElement)
 
-      oniPDF.emit(EVENTS.RESIZE, event)
+      if (event) {
+        oniPDF.emit(EVENTS.RESIZE, event)
+      }
     }
 
     handleResize()
 
-    window.addEventListener('resize', handleResize)
+    window.addEventListener(EVENTS.RESIZE, handleResize)
     return () => {
-      window.removeEventListener('resize', handleResize)
+      window.removeEventListener(EVENTS.RESIZE, handleResize)
     }
   }, [])
 

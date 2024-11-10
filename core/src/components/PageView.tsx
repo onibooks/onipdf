@@ -23,39 +23,44 @@ const PageView = ({
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   const pageSectionRef = useRef(null)
 
-  const setScaledPageSize = async () => {
-    const { width, height } = await context.worker.getPageSize(pageIndex)
-    context.presentation.layout({
-      defaultPageWidth: width,
-      defaultPageHeight: height
-    })
+  const defaultPageSize = useRef<Size>(null)
 
-    const { pageWidth, pageHeight } = context.presentation.layout()
+  const setPageSize = async () => {
+    const currentPageSize = defaultPageSize.current || await context.worker.getPageSize(pageIndex)
+    if (!defaultPageSize.current) {
+      defaultPageSize.current = currentPageSize
+    }
   
-    const variables = {
-      pageWidth: `${pageWidth}px`,
-      pageHeight: `${pageHeight}px`,
-    }
+    const { scale } = context.sangte.getState()
+    const scaledWidth = currentPageSize.width * scale
+    const scaledHeight = currentPageSize.height * scale
 
-    if (pageSectionRef.current) {
-      setCssVariables(variables, pageSectionRef.current)
+    const { rootWidth, rootHeight } = context.presentation.layout()
+    const widthRatio = rootWidth / scaledWidth
+    const heightRatio = rootHeight / scaledHeight
+  
+    const rootScale = scale === 1 
+      ? Math.min(widthRatio, heightRatio)
+      : 1
+  
+    const cssVariables = {
+      pageWidth: `${scaledWidth * rootScale}px`,
+      pageHeight: `${scaledHeight * rootScale}px`,
     }
+  
+    setCssVariables(cssVariables, pageSectionRef.current!)
   }
 
   useEffect(() => {
-    ;(async () => {
-      await setScaledPageSize()
-    })()
-  }, [])
-  
-  useEffect(() => {
-    const handleResize = async (event?: Event) => {
-      await setScaledPageSize()
+    const handleResize = (event?: Event) => {
+      setPageSize()
     }
 
-    window.addEventListener('resize', handleResize)
+    handleResize()
+
+    context.oniPDF.on(EVENTS.RESIZE, handleResize)
     return () => {
-      window.removeEventListener('resize', handleResize)
+      context.oniPDF.off(EVENTS.RESIZE, handleResize)
     }
   }, [])
 

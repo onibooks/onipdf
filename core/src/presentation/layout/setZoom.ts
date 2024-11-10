@@ -17,13 +17,9 @@ export const setZoom = (context: GlobalContext) => (value: LayoutOptions['zoom']
   }
 
   const { scale: updatedScale } = sangte.getState()
-  oniPDF.emit((EVENTS.UPDATESCALE), { scale: updatedScale })
-
-  // renderedPage만 돌도록 수정해야함
-
   if (scale !== updatedScale) {
-    context.pageViews.forEach((pageView) => pageView.updatePageSize())
+    oniPDF.emit((EVENTS.UPDATESCALE), { scale: updatedScale })
   }
-  
+
   return updatedScale
 }
