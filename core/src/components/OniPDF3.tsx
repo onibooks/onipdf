@@ -1,10 +1,10 @@
 import clsx from 'clsx'
 import { useState, useRef, useMemo, useEffect } from 'preact/hooks'
 import { EVENTS } from '../constants'
-import { debounce } from '../utils/debounce'
 import { setCssVariables } from '../helpers'
 
-import PageView from './PageView'
+import Single from './Spread/Single'
+import Double from './Spread/Double'
 
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
@@ -17,13 +17,13 @@ type OniPDFProps = {
 const OniPDF = ({
   context
 }: OniPDFProps) => {
-  const { oniPDF, pageViews, presentation, options, sangte } = context
+  const { oniPDF, presentation, options } = context
   const classes = useMemo(() => createClasses(context.emotion.css, options), [options])
 
   const oniDocumentRef = useRef<HTMLDivElement>(null)
   const oniBodyRef = useRef<HTMLDivElement>(null)
 
-  const [totalPages, setTotalPages] = useState(0)
+  const [spread, setSpread] = useState('')
 
   useEffect(() => {
     if (oniDocumentRef.current) {
@@ -32,25 +32,20 @@ const OniPDF = ({
   }, [])
 
   useEffect(() => {
-    ;(async () => {
-      const totalPages = await oniPDF.getTotalPages()
-      setTotalPages(totalPages)
-    })()
-  }, [])
-
-  useEffect(() => {
     const { layout } = context.options
     
-    presentation.layout({
+    const { flow, spread } = presentation.layout({
       width: 0,
       height: 0,
       ...layout
     })
+
+    setSpread(spread!)
+    console.log(spread)
   }, [])
   
   useEffect(() => {
     const handleResize = (event?: Event) => {
-      // context.rootElementSize = context.oniPDF.getRootElementSize()
       const {
         rootWidth,
         rootHeight
@@ -86,23 +81,14 @@ const OniPDF = ({
     >
       <div
         className={clsx('oni-container', classes.OniContainer)}
-        // style={{
-        //   width: `${visualListWidth}px`,
-        //   height: `${visualListHeight}px`
-        // }}
-        // ref={visualListContainerRef}
       >
         <div
           className={clsx('oni-body', classes.OniBody)}
           ref={oniBodyRef}
         >
-          {totalPages && 
-            Array(totalPages).fill(null).map((_, pageIndex) => (
-              <PageView
-                context={context}
-                pageIndex={pageIndex}
-              />
-            ))
+          {spread === 'single'
+            ? <Single context={context} />
+            : <Double context={context} />
           }
         </div>
       </div>
