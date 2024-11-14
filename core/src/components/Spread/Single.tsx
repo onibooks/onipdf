@@ -6,10 +6,12 @@ import type { GlobalContext } from '../../provider'
 
 type SingleProps = {
   context: GlobalContext
+  observer: IntersectionObserver | null
 }
 
 const Single = ({
-  context
+  context,
+  observer
 }: SingleProps) => {
   const { oniPDF } = context
   const [totalPages, setTotalPages] = useState(0)
@@ -29,6 +31,7 @@ const Single = ({
             key={pageIndex}
             context={context}
             pageIndex={pageIndex}
+            observer={observer}
           />
         ))
       }

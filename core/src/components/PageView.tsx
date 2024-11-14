@@ -14,17 +14,20 @@ type Size = {
 type PageViewProps = {
   context: GlobalContext
   pageIndex: number
+  observer: IntersectionObserver | null
 }
 
 const PageView = ({
   context,
-  pageIndex
+  pageIndex,
+  observer
 }: PageViewProps) => {
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   
   const defaultPageSize = useRef<Size>(null)
-  const pageSectionRef = useRef(null)
-  const pageContainerRef = useRef(null)
+  const pageSectionRef = useRef<HTMLDivElement | null>(null)
+  const pageContainerRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   const setPageSize = async () => {
     const currentPageSize = defaultPageSize.current || await context.worker.getPageSize(pageIndex)
@@ -56,6 +59,27 @@ const PageView = ({
     setCssVariables(sectionVariables, pageSectionRef.current!)
     setCssVariables(containerVariables, pageContainerRef.current!)
   }
+  
+  useEffect(() => {
+    if (observer && pageSectionRef.current) {
+      pageSectionRef.current.dataset.pageIndex = pageIndex.toString()
+      observer.observe(pageSectionRef.current)
+    }
+
+    return () => {
+      if (observer && pageSectionRef.current) {
+        observer.unobserve(pageSectionRef.current)
+      }
+    }
+  }, [observer, pageIndex])
+
+  const drawPageAsPixmap = () => {
+    try {
+
+    } catch (error) {
+
+    }
+  }
 
   useEffect(() => {
     const handleResize = (event?: Event) => {
@@ -71,14 +95,16 @@ const PageView = ({
   }, [])
 
   return (
-    <div 
+    <div
       className={clsx('page-section', classes.PageSection)}
       ref={pageSectionRef}
     >
       <div 
         className={clsx('page-container', classes.PageContainer)}
         ref={pageContainerRef}
-      ></div>
+      >
+        <canvas ref={canvasRef} />
+      </div>
     </div>
   )
 }
