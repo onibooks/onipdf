@@ -26,17 +26,6 @@ const OniPDF = ({
   const [flow, setFlow] = useState('scrolled')
   const [spread, setSpread] = useState('single')
 
-  const setTotalSize = () => {
-    const { rootWidth, rootHeight } = presentation.layout()
-
-    const variables = {
-      totalWidth: `${rootWidth * context.totalPages}px`,
-      totalHeight: `${rootHeight * context.totalPages}px`,
-    }
-
-    setCssVariables(variables, oniDocumentRef.current as HTMLElement)
-  }
-
   useEffect(() => {
     if (oniDocumentRef.current) {
       context.documentElement = oniDocumentRef.current
@@ -60,19 +49,27 @@ const OniPDF = ({
     const handleResize = (event?: Event) => {
       const {
         rootWidth,
-        rootHeight
+        rootHeight,
+        totalWidth,
+        totalHeight
       } = presentation.layout({
         width: context.rootElement.clientWidth,
-        height: context.rootElement.clientHeight
+        height: context.rootElement.clientHeight,
+        totalWidth: context.rootElement.clientWidth * context.totalPages,
+        totalHeight: context.rootElement.clientHeight * context.totalPages
       })
-
-      const variables = {
+      
+      const rootVariables = {
         rootWidth: `${rootWidth}px`,
         rootHeight: `${rootHeight}px`,
       }
-
-      setCssVariables(variables, context.rootElement)
-      setTotalSize()
+      const totalVariables = {
+        totalWidth: `${totalWidth}px`,
+        totalHeight: `${totalHeight}px`,
+      }
+      
+      setCssVariables(rootVariables, context.rootElement as HTMLElement)
+      setCssVariables(totalVariables, oniDocumentRef.current as HTMLElement)
       
       if (event) {
         oniPDF.emit(EVENTS.RESIZE, event)
