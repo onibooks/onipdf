@@ -23,7 +23,19 @@ const OniPDF = ({
   const oniDocumentRef = useRef<HTMLDivElement>(null)
   const oniBodyRef = useRef<HTMLDivElement>(null)
 
-  const [spread, setSpread] = useState('')
+  const [flow, setFlow] = useState('scrolled')
+  const [spread, setSpread] = useState('single')
+
+  const setTotalSize = () => {
+    const { rootWidth, rootHeight } = presentation.layout()
+
+    const variables = {
+      totalWidth: `${rootWidth * context.totalPages}px`,
+      totalHeight: `${rootHeight * context.totalPages}px`,
+    }
+
+    setCssVariables(variables, oniDocumentRef.current as HTMLElement)
+  }
 
   useEffect(() => {
     if (oniDocumentRef.current) {
@@ -40,8 +52,8 @@ const OniPDF = ({
       ...layout
     })
 
+    setFlow(flow!)
     setSpread(spread!)
-    console.log(spread)
   }, [])
   
   useEffect(() => {
@@ -60,7 +72,8 @@ const OniPDF = ({
       }
 
       setCssVariables(variables, context.rootElement)
-
+      setTotalSize()
+      
       if (event) {
         oniPDF.emit(EVENTS.RESIZE, event)
       }
@@ -76,7 +89,7 @@ const OniPDF = ({
 
   return (
     <div
-      class={clsx('oni-document', classes.OniDocument)}
+      class={clsx('oni-document', classes.OniDocument, flow)}
       ref={oniDocumentRef}
     >
       <div
@@ -111,10 +124,17 @@ const createClasses = (
   `,
 
   OniDocument: css`
-    /* margin: auto; */
     outline: none;
     cursor: default;
     box-sizing: border-box;  
+
+    &.scrolled {
+      width: 100%;
+      overflow: auto;
+    }
+    &.paginated {
+      overflow: hidden;
+    }
   `,
 
   OniContainer: css`
@@ -122,6 +142,10 @@ const createClasses = (
     overflow: hidden;
     will-change: transform;
     width: 100%;
+  
+    .scrolled & {
+      margin: 0 auto;
+    }
   `,
 
   OniBody: css`
@@ -131,6 +155,10 @@ const createClasses = (
     height: 100%;
     width: 100%;
     overflow: visible;
+
+    .paginated & {
+      display : flex;
+    }
   `
 })
 

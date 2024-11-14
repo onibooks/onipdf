@@ -9,4 +9,3 @@ export * from './goToPage';
 export * from './getZoom';
 export * from './layout';
 export * from './locate';
-export * from './getRootElementSize';

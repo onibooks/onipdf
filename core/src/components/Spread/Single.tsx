@@ -12,7 +12,6 @@ const Single = ({
   context
 }: SingleProps) => {
   const { oniPDF } = context
-  
   const [totalPages, setTotalPages] = useState(0)
 
   useEffect(() => {
@@ -25,8 +24,9 @@ const Single = ({
   return (
     <>
       {totalPages && 
-        Array(totalPages).fill(null).map((_, pageIndex) => (
+        Array.from({ length: totalPages }).map((_, pageIndex) => (
           <PageView
+            key={pageIndex}
             context={context}
             pageIndex={pageIndex}
           />

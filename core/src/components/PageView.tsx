@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useMemo, useEffect, useState, useRef } from 'react'
+import { useMemo, useEffect, useRef } from 'react'
 import { EVENTS } from '../constants'
 import { setCssVariables } from '../helpers'
 
@@ -69,6 +69,7 @@ const PageView = ({
       className={clsx('page-section', classes.PageSection)}
       ref={pageSectionRef}
     >
+      <div className={clsx('page-container', classes.PageContainer)}></div>
     </div>
   )
 }
@@ -78,11 +79,16 @@ const createClasses = (
 ) => ({
   PageSection: css`
     position: relative;
+    width: var(--page-width) !important;
+    height: var(--page-height) !important;
   `,
 
   PageContainer: css`
     position: relative;
     top: 0;
+    width: var(--page-width) !important;
+    height: var(--page-height) !important;
+    background-color: red;
   `
 })
 

@@ -1,12 +1,14 @@
 import createEmotion from '@emotion/css/create-instance'
 import { h, render as prender } from 'preact'
 import { warn } from '../helpers'
+import { EVENTS } from '../constants'
+
+// import OniPDF from '../components/OniPdf2'
 import OniPDF from '../components/OniPDF3'
 
 import type { GlobalContext } from '../provider'
 import type { LayoutOptions } from '../presentation/layout/createLayout'
 import type { LocateOptions } from '../presentation/locate/createLocate'
-import { EVENTS } from '../constants'
 
 export type Options = {
   type?: 'image' | 'canvas' | 'svg'

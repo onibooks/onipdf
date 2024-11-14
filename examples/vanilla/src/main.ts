@@ -8,13 +8,14 @@ const renderOptions = {
   page: 10,
   layout: {
     flow: 'paginated',
-    spread: 'double' ,
+    spread: 'single' ,
     zoom: 1
   }
 } as const
 
 async function initializePdfViewer(): Promise<OniPDF> {
   const oniPdf: OniPDF = await createBook('/books/대치동 아이들은 이렇게 공부합니다.pdf', {
+  // const oniPdf: OniPDF = await createBook('/books/179489140.pdf', {
     muPDFSrc: '/lib/mupdf/mupdf.js',
   })
 
