@@ -26,13 +26,11 @@ export const createLayout = () => provider((context) => {
   const layout = createStore(
     subscribeWithSelector<Layout>(() => ({
       divisor: 0,
-      flow: 'scrolled',
-      spread: 'single',
-      zoom: 1,
-      rootWidth: 0,
-      rootHeight: 0,
-      totalWidth: 0,
-      totalHeight: 0,
+      zoom: -1,
+      rootWidth: -1,
+      rootHeight: -1,
+      totalWidth: -1,
+      totalHeight: -1,
     }))
   )
 

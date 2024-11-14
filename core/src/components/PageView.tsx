@@ -21,9 +21,10 @@ const PageView = ({
   pageIndex
 }: PageViewProps) => {
   const classes = useMemo(() => createClasses(context.emotion.css), [])
-  const pageSectionRef = useRef(null)
-
+  
   const defaultPageSize = useRef<Size>(null)
+  const pageSectionRef = useRef(null)
+  const pageContainerRef = useRef(null)
 
   const setPageSize = async () => {
     const currentPageSize = defaultPageSize.current || await context.worker.getPageSize(pageIndex)
@@ -35,7 +36,7 @@ const PageView = ({
     const scaledWidth = currentPageSize.width * scale
     const scaledHeight = currentPageSize.height * scale
 
-    const { rootWidth, rootHeight } = context.presentation.layout()
+    const { flow, rootWidth, rootHeight } = context.presentation.layout()
     const widthRatio = rootWidth / scaledWidth
     const heightRatio = rootHeight / scaledHeight
   
@@ -43,12 +44,17 @@ const PageView = ({
       ? Math.min(widthRatio, heightRatio)
       : 1
   
-    const cssVariables = {
+    const sectionVariables = {
+      pageWidth: `${rootWidth}px`,
+      pageHeight: flow === 'scrolled' ? `${scaledHeight * rootScale}px` : `${rootHeight}px`
+    }
+    const containerVariables = {
       pageWidth: `${scaledWidth * rootScale}px`,
-      pageHeight: `${scaledHeight * rootScale}px`,
+      pageHeight: `${scaledHeight * rootScale}px`
     }
   
-    setCssVariables(cssVariables, pageSectionRef.current!)
+    setCssVariables(sectionVariables, pageSectionRef.current!)
+    setCssVariables(containerVariables, pageContainerRef.current!)
   }
 
   useEffect(() => {
@@ -69,7 +75,10 @@ const PageView = ({
       className={clsx('page-section', classes.PageSection)}
       ref={pageSectionRef}
     >
-      <div className={clsx('page-container', classes.PageContainer)}></div>
+      <div 
+        className={clsx('page-container', classes.PageContainer)}
+        ref={pageContainerRef}
+      ></div>
     </div>
   )
 }

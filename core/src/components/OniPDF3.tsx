@@ -21,10 +21,10 @@ const OniPDF = ({
   const classes = useMemo(() => createClasses(context.emotion.css, options), [options])
 
   const oniDocumentRef = useRef<HTMLDivElement>(null)
+  const oniContainerRef = useRef<HTMLDivElement>(null)
   const oniBodyRef = useRef<HTMLDivElement>(null)
 
-  const [flow, setFlow] = useState('scrolled')
-  const [spread, setSpread] = useState('single')
+  const [spread, setSpread] = useState('')
 
   useEffect(() => {
     if (oniDocumentRef.current) {
@@ -35,19 +35,19 @@ const OniPDF = ({
   useEffect(() => {
     const { layout } = context.options
     
-    const { flow, spread } = presentation.layout({
+    const { spread } = presentation.layout({
       width: 0,
       height: 0,
       ...layout
     })
 
-    setFlow(flow!)
     setSpread(spread!)
   }, [])
   
   useEffect(() => {
     const handleResize = (event?: Event) => {
       const {
+        flow,
         rootWidth,
         rootHeight,
         totalWidth,
@@ -61,15 +61,16 @@ const OniPDF = ({
       
       const rootVariables = {
         rootWidth: `${rootWidth}px`,
-        rootHeight: `${rootHeight}px`,
+        rootHeight: `${rootHeight}px`
       }
+      
       const totalVariables = {
-        totalWidth: `${totalWidth}px`,
-        totalHeight: `${totalHeight}px`,
+        totalWidth: flow === 'paginated' ? `${totalWidth}px` : `${rootWidth}px`,
+        totalHeight: flow === 'scrolled' ? `${totalHeight}px` : `${rootHeight}px`
       }
       
       setCssVariables(rootVariables, context.rootElement as HTMLElement)
-      setCssVariables(totalVariables, oniDocumentRef.current as HTMLElement)
+      setCssVariables(totalVariables, oniContainerRef.current as HTMLElement)
       
       if (event) {
         oniPDF.emit(EVENTS.RESIZE, event)
@@ -86,11 +87,12 @@ const OniPDF = ({
 
   return (
     <div
-      class={clsx('oni-document', classes.OniDocument, flow)}
+      class={clsx('oni-document', classes.OniDocument)}
       ref={oniDocumentRef}
-    >
+      >
       <div
         className={clsx('oni-container', classes.OniContainer)}
+        ref={oniContainerRef}
       >
         <div
           className={clsx('oni-body', classes.OniBody)}
@@ -138,7 +140,8 @@ const createClasses = (
     position: relative;
     overflow: hidden;
     will-change: transform;
-    width: 100%;
+    width: var(--total-width) !important;
+    height: var(--total-height) !important;
   
     .scrolled & {
       margin: 0 auto;
