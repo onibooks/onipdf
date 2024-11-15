@@ -14,5 +14,7 @@ export const createSangte = () => {
     scale: 1,
   }))
 
+  // currentIndex가 바뀔때마다 실행될 구독함수..필요
+
   return sangte
 }

@@ -1,5 +1,6 @@
 import clsx from 'clsx'
-import { useMemo, useEffect, useRef } from 'react'
+import { useMemo, useEffect, useRef, useImperativeHandle } from 'react'
+import { forwardRef } from 'preact/compat'
 import { EVENTS } from '../constants'
 import { setCssVariables } from '../helpers'
 
@@ -17,17 +18,59 @@ type PageViewProps = {
   observer: IntersectionObserver | null
 }
 
-const PageView = ({
+const PageView = forwardRef(({
   context,
   pageIndex,
   observer
-}: PageViewProps) => {
+}: PageViewProps, ref) => {
+  const { worker, sangte } = context
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   
   const defaultPageSize = useRef<Size>(null)
   const pageSectionRef = useRef<HTMLDivElement | null>(null)
   const pageContainerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const isRendered = useRef<boolean>(false)
+  
+  let canvasPixels: ImageData
+  let canvasContext: CanvasRenderingContext2D | null
+
+  useImperativeHandle(ref, () => ({
+    drawPageAsPixmap: async () => {
+      if (isRendered.current) return
+      const zoom = sangte.getInitialState().scale * 96
+      const canvas = await worker.getCanvasPixels(pageIndex, zoom * devicePixelRatio)
+      if (!canvas) {
+        throw new Error('Fail getCanvasPixels')
+      }
+
+      if (!canvasRef.current) return
+      canvasRef.current.width = canvas.width
+      canvasRef.current.height = canvas.height
+      canvasContext = canvasRef.current?.getContext('2d')
+      canvasContext?.putImageData(canvas, 0, 0)
+      
+      canvasPixels = canvas
+    },
+    restoreCanvasSize: () => {
+      // 캐싱 데이터 사용
+      if (!canvasRef.current) return
+
+      canvasRef.current.width = canvasPixels.width
+      canvasRef.current.height = canvasPixels.height
+
+      if (canvasContext) {
+        canvasContext?.putImageData(canvasPixels, 0, 0)
+      }
+    },
+    clearCanvasSize: () => {
+      // 캔버스 크기 제거
+      if (!canvasRef.current) return
+      
+      canvasRef.current.width = 0
+      canvasRef.current.height = 0
+    }
+  }))
 
   const setPageSize = async () => {
     const currentPageSize = defaultPageSize.current || await context.worker.getPageSize(pageIndex)
@@ -46,6 +89,7 @@ const PageView = ({
     const rootScale = scale === 1 
       ? Math.min(widthRatio, heightRatio)
       : 1
+      console.log(rootScale)
   
     const sectionVariables = {
       pageWidth: `${rootWidth}px`,
@@ -58,6 +102,7 @@ const PageView = ({
   
     setCssVariables(sectionVariables, pageSectionRef.current!)
     setCssVariables(containerVariables, pageContainerRef.current!)
+    setCssVariables(containerVariables, canvasRef.current!)
   }
   
   useEffect(() => {
@@ -72,14 +117,6 @@ const PageView = ({
       }
     }
   }, [observer, pageIndex])
-
-  const drawPageAsPixmap = () => {
-    try {
-
-    } catch (error) {
-
-    }
-  }
 
   useEffect(() => {
     const handleResize = (event?: Event) => {
@@ -103,11 +140,14 @@ const PageView = ({
         className={clsx('page-container', classes.PageContainer)}
         ref={pageContainerRef}
       >
-        <canvas ref={canvasRef} />
+        <canvas 
+          className={clsx('page-canvas', classes.PageCanvas)}
+          ref={canvasRef}
+        />
       </div>
     </div>
   )
-}
+})
 
 const createClasses = (
   css: Emotion['css']
@@ -123,7 +163,12 @@ const createClasses = (
     top: 0;
     width: var(--page-width) !important;
     height: var(--page-height) !important;
-    background-color: red;
+    background-color: #bbb;
+  `,
+
+  PageCanvas: css`
+    width: var(--page-width) !important;
+    height: var(--page-height) !important;
   `
 })
 

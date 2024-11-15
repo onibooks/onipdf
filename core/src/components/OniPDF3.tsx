@@ -10,6 +10,7 @@ import Double from './Spread/Double'
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
 import type { Options } from '../commands/render'
+import { PageView } from '../documents/createPageView'
 
 type OniPDFProps = {
   context: GlobalContext
@@ -28,54 +29,49 @@ const OniPDF = ({
 
   const [spread, setSpread] = useState('')
 
-
   const cachedPages = new Set<number>()
   const renderedPages = new Set<number>()
   const renderingPages = new Set<number>()
 
-  const renderPage = (index: number) => {
-    // if (!context.pageViews[index]) return
+  const pageViewRefs = useRef(new Map<number, PageView>())
+
+  const renderPage = async (index: number) => {
+    const pageView = pageViewRefs.current.get(index)
+    if (!pageView) return
 
     if (cachedPages.has(index)) {
-      console.log('restoreCanvasSize')
-      // context.pageViews[index].restoreCanvasSize()
+      pageView.restoreCanvasSize()
+      
       renderedPages.add(index)
-
-      console.log('캐싱 데이터 사용:', index)
     } else if (!renderingPages.has(index)) {
       renderingPages.add(index)
-
-      console.log('drawPageAsPixmap')
-      // await context.pageViews[index].drawPageAsPixmap()
+      await pageView.drawPageAsPixmap()
       
       cachedPages.add(index)
       renderedPages.add(index)
-      console.log('페이지 렌더링:', index)
-      
       renderingPages.delete(index)
     }
   }
 
   const removePage = (index: number) => {
-    if (renderedPages.has(index)) {
-      console.log('캔버스 크기 제거:', index)
+    const pageView = pageViewRefs.current.get(index)
+    if (pageView && renderedPages.has(index)) {
+      pageView.clearCanvasSize()
       
-      // context.pageViews[index].clearCanvasSize()
-      console.log('clearCanvasSize')
       renderedPages.delete(index) // 화면에서 제거
     }
   }
 
   const setupIntersectionObserver = () => {
     observer.current = new IntersectionObserver(debounce((entries) => {
-      entries.forEach((entry: IntersectionObserverEntry) => {
+      entries.forEach(async (entry: IntersectionObserverEntry) => {
         const target = entry.target as HTMLDivElement
         const pageIndex = parseInt(target.dataset.pageIndex!, 10)
         
         if (entry.isIntersecting) {
           sangte.setState({ currentIndex: pageIndex })
 
-          renderPage(pageIndex)
+          await renderPage(pageIndex)
 
           // 현재 페이지를 기준으로 앞뒤로 최대 10개씩 캔버스 렌더링
           const startIndex = Math.max(0, pageIndex - 10)
@@ -88,7 +84,7 @@ const OniPDF = ({
             }
           }
 
-          Promise.all(pageRenderPromises)
+          await Promise.all(pageRenderPromises)
 
           renderedPages.forEach((index) => {
             if (index < startIndex || index > endIndex) {
@@ -134,7 +130,7 @@ const OniPDF = ({
         width: context.rootElement.clientWidth,
         height: context.rootElement.clientHeight,
         totalWidth: context.rootElement.clientWidth * context.totalPages,
-        totalHeight: context.rootElement.clientHeight * context.totalPages
+        totalHeight: context.rootElement.clientHeight * context.totalPages // 스크롤일때는 페이지 크기만큼,,,
       })
       
       const rootVariables = {
@@ -180,6 +176,7 @@ const OniPDF = ({
             ? (<Single
                 context={context}
                 observer={observer.current}
+                pageViewRefs={pageViewRefs}
               />)
             : <Double context={context} />
           }
