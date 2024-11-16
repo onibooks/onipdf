@@ -2,7 +2,6 @@ import clsx from 'clsx'
 import { useState, useRef, useMemo, useEffect } from 'preact/hooks'
 import { EVENTS } from '../constants'
 import { setCssVariables } from '../helpers'
-import { debounce } from '../utils/debounce'
 
 import Single from './Spread/Single'
 import Double from './Spread/Double'
@@ -10,7 +9,6 @@ import Double from './Spread/Double'
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
 import type { Options } from '../commands/render'
-import { PageView } from '../documents/createPageView'
 
 type OniPDFProps = {
   context: GlobalContext
@@ -24,82 +22,8 @@ const OniPDF = ({
 
   const oniDocumentRef = useRef<HTMLDivElement>(null)
   const oniContainerRef = useRef<HTMLDivElement>(null)
-  const oniBodyRef = useRef<HTMLDivElement>(null)
-  const observer = useRef<IntersectionObserver | null>(null)
 
   const [spread, setSpread] = useState('')
-
-  const cachedPages = new Set<number>()
-  const renderedPages = new Set<number>()
-  const renderingPages = new Set<number>()
-
-  const pageViewRefs = useRef(new Map<number, PageView>())
-
-  const renderPage = async (index: number) => {
-    const pageView = pageViewRefs.current.get(index)
-    if (!pageView) return
-
-    if (cachedPages.has(index)) {
-      pageView.restoreCanvasSize()
-      
-      renderedPages.add(index)
-    } else if (!renderingPages.has(index)) {
-      renderingPages.add(index)
-      await pageView.drawPageAsPixmap()
-      
-      cachedPages.add(index)
-      renderedPages.add(index)
-      renderingPages.delete(index)
-    }
-  }
-
-  const removePage = (index: number) => {
-    const pageView = pageViewRefs.current.get(index)
-    if (pageView && renderedPages.has(index)) {
-      pageView.clearCanvasSize()
-      
-      renderedPages.delete(index) // 화면에서 제거
-    }
-  }
-
-  const setupIntersectionObserver = () => {
-    observer.current = new IntersectionObserver(debounce((entries) => {
-      entries.forEach(async (entry: IntersectionObserverEntry) => {
-        const target = entry.target as HTMLDivElement
-        const pageIndex = parseInt(target.dataset.pageIndex!, 10)
-        
-        if (entry.isIntersecting) {
-          sangte.setState({ currentIndex: pageIndex })
-
-          await renderPage(pageIndex)
-
-          // 현재 페이지를 기준으로 앞뒤로 최대 10개씩 캔버스 렌더링
-          const startIndex = Math.max(0, pageIndex - 10)
-          const endIndex = Math.min(pageIndex + 10, context.totalPages - 1)
-            
-          const pageRenderPromises = []
-          for (let i = startIndex; i <= endIndex; i++) {
-            if (i !== pageIndex && !renderedPages.has(i) && !renderingPages.has(i)) {
-              pageRenderPromises.push(renderPage(i))
-            }
-          }
-
-          await Promise.all(pageRenderPromises)
-
-          renderedPages.forEach((index) => {
-            if (index < startIndex || index > endIndex) {
-              removePage(index)
-            }
-          })
-        }
-      })
-    }, 100), {
-      root: context.rootElement,
-      threshold: 0.5
-    })
-
-    return () => observer.current?.disconnect()
-  }
 
   useEffect(() => {
     if (oniDocumentRef.current) {
@@ -113,9 +37,8 @@ const OniPDF = ({
       height: 0,
       ...options.layout
     })
-    setSpread(spread!)
     
-    setupIntersectionObserver()
+    setSpread(spread!)
   }, [])
   
   useEffect(() => {
@@ -168,19 +91,10 @@ const OniPDF = ({
         className={clsx('oni-container', classes.OniContainer)}
         ref={oniContainerRef}
       >
-        <div
-          className={clsx('oni-body', classes.OniBody)}
-          ref={oniBodyRef}
-        >
-          {spread === 'single'
-            ? (<Single
-                context={context}
-                observer={observer.current}
-                pageViewRefs={pageViewRefs}
-              />)
-            : <Double context={context} />
-          }
-        </div>
+        {spread === 'single'
+          ? (<Single context={context} />)
+          : <Double context={context} />
+        }
       </div>
     </div>
   )

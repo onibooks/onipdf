@@ -3,6 +3,7 @@ import { useMemo, useEffect, useRef, useImperativeHandle } from 'react'
 import { forwardRef } from 'preact/compat'
 import { EVENTS } from '../constants'
 import { setCssVariables } from '../helpers'
+import { debounce } from '../utils/debounce'
 
 import type { GlobalContext } from '../provider'
 import type { Emotion } from '@emotion/css/types/create-instance'
@@ -10,77 +11,81 @@ import type { Emotion } from '@emotion/css/types/create-instance'
 type Size = {
   width: number
   height: number
-} | null
+}
 
 type PageViewProps = {
   context: GlobalContext
+  pageSize: Size
   pageIndex: number
-  observer: IntersectionObserver | null
+  pageRender: (value: unknown) => void
 }
 
-const PageView = forwardRef(({
+const PageView = ({
   context,
+  pageSize,
   pageIndex,
-  observer
-}: PageViewProps, ref) => {
-  const { worker, sangte } = context
+  pageRender
+}: PageViewProps) => {
+  const { worker } = context
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   
-  const defaultPageSize = useRef<Size>(null)
   const pageSectionRef = useRef<HTMLDivElement | null>(null)
   const pageContainerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const isRendered = useRef<boolean>(false)
-  
+
   let canvasPixels: ImageData
   let canvasContext: CanvasRenderingContext2D | null
 
-  useImperativeHandle(ref, () => ({
-    drawPageAsPixmap: async () => {
-      if (isRendered.current) return
-      const zoom = sangte.getInitialState().scale * 96
-      const canvas = await worker.getCanvasPixels(pageIndex, zoom * devicePixelRatio)
-      if (!canvas) {
-        throw new Error('Fail getCanvasPixels')
-      }
-
-      if (!canvasRef.current) return
-      canvasRef.current.width = canvas.width
-      canvasRef.current.height = canvas.height
-      canvasContext = canvasRef.current?.getContext('2d')
+  const drawPageAsPixmap = async () => {
+    if (isRendered.current) return
+    try {
+      const canvas = await worker.getCanvasPixels(pageIndex, 96 * devicePixelRatio)
+      const canvasNode = canvasRef.current!
+      const canvasContext = canvasRef.current?.getContext('2d')
+      
+      canvasNode.width = canvas.width
+      canvasNode.height = canvas.height
       canvasContext?.putImageData(canvas, 0, 0)
-      
-      canvasPixels = canvas
-    },
-    restoreCanvasSize: () => {
-      // 캐싱 데이터 사용
-      if (!canvasRef.current) return
 
-      canvasRef.current.width = canvasPixels.width
-      canvasRef.current.height = canvasPixels.height
-
-      if (canvasContext) {
-        canvasContext?.putImageData(canvasPixels, 0, 0)
-      }
-    },
-    clearCanvasSize: () => {
-      // 캔버스 크기 제거
-      if (!canvasRef.current) return
-      
-      canvasRef.current.width = 0
-      canvasRef.current.height = 0
+      isRendered.current = true
+    } catch (error) {
+      console.error('Error rendering to canvas:', error)
     }
-  }))
+  }
 
-  const setPageSize = async () => {
-    const currentPageSize = defaultPageSize.current || await context.worker.getPageSize(pageIndex)
-    if (!defaultPageSize.current) {
-      defaultPageSize.current = currentPageSize
-    }
-  
+  const clearPageAsPixmap = () => {
+    if (!isRendered.current) return
+
+    const canvasNode = canvasRef.current!
+    canvasNode.width = 0
+    canvasNode.height = 0
+
+    isRendered.current = false
+  }
+
+  const setupIntersectionObserver = () => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(async (entry) => {
+        
+        if (entry.isIntersecting) {
+          drawPageAsPixmap()
+        } else {
+          clearPageAsPixmap()
+        }
+      })
+    }, {
+      root: context.documentElement,
+      rootMargin: '200%'
+    })
+
+    observer.observe(pageSectionRef.current!)
+  }
+
+  const setPageSize = () => {
     const { scale } = context.sangte.getState()
-    const scaledWidth = currentPageSize.width * scale
-    const scaledHeight = currentPageSize.height * scale
+    const scaledWidth = pageSize.width * scale
+    const scaledHeight = pageSize.height * scale
 
     const { flow, rootWidth, rootHeight } = context.presentation.layout()
     const widthRatio = rootWidth / scaledWidth
@@ -89,7 +94,6 @@ const PageView = forwardRef(({
     const rootScale = scale === 1 
       ? Math.min(widthRatio, heightRatio)
       : 1
-      console.log(rootScale)
   
     const sectionVariables = {
       pageWidth: `${rootWidth}px`,
@@ -103,27 +107,21 @@ const PageView = forwardRef(({
     setCssVariables(sectionVariables, pageSectionRef.current!)
     setCssVariables(containerVariables, pageContainerRef.current!)
     setCssVariables(containerVariables, canvasRef.current!)
-  }
-  
-  useEffect(() => {
-    if (observer && pageSectionRef.current) {
-      pageSectionRef.current.dataset.pageIndex = pageIndex.toString()
-      observer.observe(pageSectionRef.current)
-    }
 
-    return () => {
-      if (observer && pageSectionRef.current) {
-        observer.unobserve(pageSectionRef.current)
-      }
+    return Promise.resolve()
+  }
+
+  const preRender = () => {
+    // 앞뒤로 몇개 더 렌더링하기
+    if (context.options.page === pageIndex) {
+      drawPageAsPixmap()
     }
-  }, [observer, pageIndex])
+  }
 
   useEffect(() => {
     const handleResize = (event?: Event) => {
       setPageSize()
     }
-
-    handleResize()
 
     context.oniPDF.on(EVENTS.RESIZE, handleResize)
     return () => {
@@ -131,8 +129,23 @@ const PageView = forwardRef(({
     }
   }, [])
 
+  useEffect(() => {
+    setPageSize()
+      .then(() => pageRender(null))
+      .then(() => preRender())
+  }, [])
+
+  useEffect(() => {
+    const handleReady = () => {
+      setupIntersectionObserver()
+    }
+
+    context.oniPDF.on(EVENTS.READY, handleReady)
+  }, [])
+
   return (
     <div
+      data-index={pageIndex}
       className={clsx('page-section', classes.PageSection)}
       ref={pageSectionRef}
     >
@@ -147,7 +160,7 @@ const PageView = forwardRef(({
       </div>
     </div>
   )
-})
+}
 
 const createClasses = (
   css: Emotion['css']

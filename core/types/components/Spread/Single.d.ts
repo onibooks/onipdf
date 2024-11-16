@@ -1,7 +1,8 @@
 import type { GlobalContext } from '../../provider';
 type SingleProps = {
     context: GlobalContext;
-    onRendered?: () => void;
+    observer: IntersectionObserver | null;
+    pageViewRefs: any;
 };
-declare const Single: ({ context, onRendered }: SingleProps) => import("preact").JSX.Element;
+declare const Single: ({ context, observer, pageViewRefs }: SingleProps) => import("preact").JSX.Element;
 export default Single;

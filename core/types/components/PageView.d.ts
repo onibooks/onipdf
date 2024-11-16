@@ -2,7 +2,9 @@ import type { GlobalContext } from '../provider';
 type PageViewProps = {
     context: GlobalContext;
     pageIndex: number;
-    onRendered?: () => void;
+    observer: IntersectionObserver | null;
 };
-declare const PageView: ({ context, pageIndex, onRendered }: PageViewProps) => import("preact").JSX.Element;
+declare const PageView: import("preact").FunctionalComponent<import("preact/compat").PropsWithoutRef<PageViewProps> & {
+    ref?: import("preact").Ref<unknown> | undefined;
+}>;
 export default PageView;
