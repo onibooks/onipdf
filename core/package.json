@@ -13,7 +13,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "dev": "tsc && NODE_ENV=development vite build --mode development --watch",
+    "dev": "tsc || true && NODE_ENV=development vite build --mode development --watch",
     "build": "tsc && vite build"
   },
   "publishConfig": {
