@@ -5,7 +5,6 @@ import type { GlobalContext } from '../../provider'
 import type { LayoutOptions } from './createLayout'
 
 export const setFlow = (context: GlobalContext) => (value: LayoutOptions['flow']) => {
-  console.log(context)
   const { oniPDF, documentElement } = context
 
   removeClass(documentElement, 'paginated')

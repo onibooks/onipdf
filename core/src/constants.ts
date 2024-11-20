@@ -6,4 +6,5 @@ export const EVENTS = {
   RESIZE: 'resize',
   RENDERED: 'rendered',
   UPDATESCALE: 'updatescale',
+  KEYDOWN: 'keydown',
 }

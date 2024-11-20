@@ -26,7 +26,7 @@ const OniPDF = ({
   const [spread, setSpread] = useState('')
 
   const updateTotalSize = () => {
-    if (context.totalHeights) {
+    if (context.totalHeights > 0) {
       const {
         flow,
         rootWidth,
@@ -72,11 +72,13 @@ const OniPDF = ({
         width: context.rootElement.clientWidth,
         height: context.rootElement.clientHeight
       })
-
+      
       const rootVariables = {
         rootWidth: `${rootWidth}px`,
         rootHeight: `${rootHeight}px`
       }
+      
+      updateTotalSize()
       
       setCssVariables(rootVariables, context.rootElement as HTMLElement)
       
@@ -84,18 +86,36 @@ const OniPDF = ({
         oniPDF.emit(EVENTS.RESIZE, event)
       }
     }
-    
-    const handleReady = () => {
-      updateTotalSize()
-    }
 
     handleResize()
 
+    const handleArrowKey = (event: KeyboardEvent) => {
+      let { currentIndex: pageIndex } = sangte.getState()
+      
+      if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+        if (pageIndex < context.totalPages - 1) {
+          pageIndex++
+          oniPDF.goToPage(pageIndex)
+        }
+      } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+        if (pageIndex > 0) {
+          pageIndex--
+          oniPDF.goToPage(pageIndex)
+        }
+      }
+
+      sangte.setState({ currentIndex: pageIndex })
+    }
+
+    window.addEventListener('keydown', handleArrowKey)
     window.addEventListener(EVENTS.RESIZE, handleResize)
-    context.oniPDF.on(EVENTS.READY, handleReady)
+    context.oniPDF.on(EVENTS.READY, updateTotalSize)
+    context.oniPDF.on(EVENTS.REFLOW, updateTotalSize)
     return () => {
+      window.removeEventListener('keydown', handleArrowKey)
       window.removeEventListener(EVENTS.RESIZE, handleResize)
-      context.oniPDF.off(EVENTS.READY, handleReady)
+      context.oniPDF.off(EVENTS.READY, updateTotalSize)
+      context.oniPDF.off(EVENTS.REFLOW, updateTotalSize)
     }
   }, [])
 
@@ -134,10 +154,9 @@ const createClasses = (
   OniDocument: css`
     outline: none;
     cursor: default;
-    box-sizing: border-box;  
+    box-sizing: border-box;
 
     &.scrolled {
-      width: 100%;
       overflow: auto;
     }
     &.paginated {
@@ -147,26 +166,13 @@ const createClasses = (
 
   OniContainer: css`
     position: relative;
-    overflow: hidden;
-    will-change: transform;
+    /* overflow: hidden; */
+    /* will-change: transform; */
     width: var(--total-width) !important;
     height: var(--total-height) !important;
   
     .scrolled & {
       margin: 0 auto;
-    }
-  `,
-
-  OniBody: css`
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    overflow: visible;
-
-    .paginated & {
-      display : flex;
     }
   `
 })

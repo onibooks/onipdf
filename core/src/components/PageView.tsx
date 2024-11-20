@@ -1,12 +1,11 @@
 import clsx from 'clsx'
-import { useMemo, useEffect, useRef, useImperativeHandle } from 'react'
-import { forwardRef } from 'preact/compat'
+import { useMemo, useEffect, useRef } from 'react'
 import { EVENTS } from '../constants'
 import { setCssVariables } from '../helpers'
-import { debounce } from '../utils/debounce'
 
 import type { GlobalContext } from '../provider'
 import type { Emotion } from '@emotion/css/types/create-instance'
+import { debounce } from '../utils/debounce'
 
 type Size = {
   width: number
@@ -34,13 +33,17 @@ const PageView = ({
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const isRendered = useRef<boolean>(false)
 
+  const renderedPages = new Set<number>()
+  const renderingPages = new Set<number>()
+
   let canvasPixels: ImageData
   let canvasContext: CanvasRenderingContext2D | null
 
-  const drawPageAsPixmap = async () => {
+  const drawPageAsPixmap = async (page = pageIndex) => {
     if (isRendered.current) return
+    
     try {
-      const canvas = await worker.getCanvasPixels(pageIndex, 96 * devicePixelRatio)
+      const canvas = await worker.getCanvasPixels(page, 96 * devicePixelRatio)
       const canvasNode = canvasRef.current!
       const canvasContext = canvasRef.current?.getContext('2d')
       
@@ -65,16 +68,15 @@ const PageView = ({
   }
 
   const setupIntersectionObserver = () => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(async (entry) => {
-        
+    const observer = new IntersectionObserver(debounce((entries) => {
+      entries.forEach(async (entry: IntersectionObserverEntry) => {
         if (entry.isIntersecting) {
           drawPageAsPixmap()
         } else {
           clearPageAsPixmap()
         }
       })
-    }, {
+    }, 200), {
       root: context.documentElement,
       rootMargin: '200%'
     })
@@ -99,6 +101,7 @@ const PageView = ({
       pageWidth: `${rootWidth}px`,
       pageHeight: flow === 'scrolled' ? `${scaledHeight * rootScale}px` : `${rootHeight}px`
     }
+
     const containerVariables = {
       pageWidth: `${scaledWidth * rootScale}px`,
       pageHeight: `${scaledHeight * rootScale}px`
@@ -114,7 +117,6 @@ const PageView = ({
   }
 
   const preRender = () => {
-    // 앞뒤로 몇개 더 렌더링하기
     if (context.options.page === pageIndex) {
       drawPageAsPixmap()
     }
@@ -171,6 +173,9 @@ const createClasses = (
     position: relative;
     width: var(--page-width) !important;
     height: var(--page-height) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   `,
 
   PageContainer: css`

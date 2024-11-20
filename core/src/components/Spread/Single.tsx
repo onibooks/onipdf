@@ -70,7 +70,8 @@ const createClasses = (
     left: 0;
     height: 100%;
     width: 100%;
-    overflow: visible;
+    /* overflow: visible; */
+    /* background-color: #bbb; */
     .paginated & {
       display : flex;
     }
