@@ -103,6 +103,8 @@ const PageView = ({
       pageWidth: `${scaledWidth * rootScale}px`,
       pageHeight: `${scaledHeight * rootScale}px`
     }
+
+    context.totalHeights += scaledHeight * rootScale
   
     setCssVariables(sectionVariables, pageSectionRef.current!)
     setCssVariables(containerVariables, pageContainerRef.current!)

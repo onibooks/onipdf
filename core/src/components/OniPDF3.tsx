@@ -25,6 +25,28 @@ const OniPDF = ({
 
   const [spread, setSpread] = useState('')
 
+  const updateTotalSize = () => {
+    if (context.totalHeights) {
+      const {
+        flow,
+        rootWidth,
+        rootHeight,
+        totalWidth,
+        totalHeight
+      } = presentation.layout({
+        totalWidth: context.rootElement.clientWidth * context.totalPages,
+        totalHeight: context.totalHeights
+      })
+        
+      const totalVariables = {
+        totalWidth: flow === 'paginated' ? `${totalWidth}px` : `${rootWidth}px`,
+        totalHeight: flow === 'scrolled' ? `${totalHeight}px` : `${rootHeight}px`
+      }
+
+      setCssVariables(totalVariables, oniContainerRef.current as HTMLElement)  
+    }
+  }
+
   useEffect(() => {
     if (oniDocumentRef.current) {
       context.documentElement = oniDocumentRef.current
@@ -44,41 +66,36 @@ const OniPDF = ({
   useEffect(() => {
     const handleResize = (event?: Event) => {
       const {
-        flow,
         rootWidth,
-        rootHeight,
-        totalWidth,
-        totalHeight
+        rootHeight
       } = presentation.layout({
         width: context.rootElement.clientWidth,
-        height: context.rootElement.clientHeight,
-        totalWidth: context.rootElement.clientWidth * context.totalPages,
-        totalHeight: context.rootElement.clientHeight * context.totalPages // 스크롤일때는 페이지 크기만큼,,,
+        height: context.rootElement.clientHeight
       })
-      
+
       const rootVariables = {
         rootWidth: `${rootWidth}px`,
         rootHeight: `${rootHeight}px`
       }
       
-      const totalVariables = {
-        totalWidth: flow === 'paginated' ? `${totalWidth}px` : `${rootWidth}px`,
-        totalHeight: flow === 'scrolled' ? `${totalHeight}px` : `${rootHeight}px`
-      }
-      
       setCssVariables(rootVariables, context.rootElement as HTMLElement)
-      setCssVariables(totalVariables, oniContainerRef.current as HTMLElement)
       
       if (event) {
         oniPDF.emit(EVENTS.RESIZE, event)
       }
     }
+    
+    const handleReady = () => {
+      updateTotalSize()
+    }
 
     handleResize()
 
     window.addEventListener(EVENTS.RESIZE, handleResize)
+    context.oniPDF.on(EVENTS.READY, handleReady)
     return () => {
       window.removeEventListener(EVENTS.RESIZE, handleResize)
+      context.oniPDF.off(EVENTS.READY, handleReady)
     }
   }, [])
 
