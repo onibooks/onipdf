@@ -85,29 +85,54 @@ const PageView = ({
   }
 
   const setPageSize = () => {
-    const { rootWidth } = context.presentation.layout()
-    const baseWidth = pageSize.width
-    const baseHeight = pageSize.height
+    const { flow } = context.presentation.layout()
+    const { rootWidth, rootHeight } = context.presentation.layout()
+    
+    if (flow === 'scrolled') {
+      const baseWidth = pageSize.width
+      const baseHeight = pageSize.height
+      const ratioDifference = (rootWidth - baseWidth) / baseWidth
+      
+      let pageWidth = rootWidth
 
-    const ratioDifference = (rootWidth - baseWidth) / baseWidth
-    let pageWidth = rootWidth
-    if (ratioDifference >= 0.8) {
-      pageWidth = rootWidth * 0.6 // rootWidth의 최대 60%까지만 허용
+      if (ratioDifference >= 0.8) {
+        pageWidth = rootWidth * 0.6 // rootWidth의 최대 60%까지만 허용
+      }
+      const pageHeight = pageWidth * (baseHeight / baseWidth)
+  
+      const sectionVariables = {
+        pageWidth: `${rootWidth}px`,
+        pageHeight: `${pageHeight}px`
+      }
+  
+      const containerVariables = {
+        pageWidth: `${pageWidth}px`,
+        pageHeight: `${pageHeight}px`
+      }
+  
+      setCssVariables(sectionVariables, pageSectionRef.current!)
+      setCssVariables(containerVariables, pageContainerRef.current!)
+    } else {
+      const baseWidth = pageSize.width
+      const baseHeight = pageSize.height
+      const widthRatio = rootWidth / baseWidth
+      const heightRatio = rootHeight / baseHeight
+
+      const rootScale = Math.min(widthRatio, heightRatio)
+
+      const sectionVariables = {
+        pageWidth: `${rootWidth}px`,
+        pageHeight: `${rootHeight}px`
+      }
+
+      const containerVariables = {
+        pageWidth: `${baseWidth * rootScale}px`,
+        pageHeight: `${baseHeight * rootScale}px`
+      }
+
+      setCssVariables(sectionVariables, pageSectionRef.current!)
+      setCssVariables(containerVariables, pageContainerRef.current!)
     }
-    const pageHeight = pageWidth * (baseHeight / baseWidth)
-
-    const sectionVariables = {
-      pageWidth: `${rootWidth}px`,
-      pageHeight: `${pageHeight}px`
-    }
-
-    const containerVariables = {
-      pageWidth: `${pageWidth}px`,
-      pageHeight: `${pageHeight}px`
-    }
-
-    setCssVariables(sectionVariables, pageSectionRef.current!)
-    setCssVariables(containerVariables, pageContainerRef.current!)
 
     return Promise.resolve()
   }

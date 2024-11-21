@@ -7,15 +7,15 @@ type ViewElement = 'scrolled' | 'paginated' | 'single' | 'double' | 'coverFacing
 const renderOptions = {
   page: 0,
   layout: {
-    flow: 'scrolled',
+    flow: 'paginated',
     spread: 'single' ,
     zoom: 1
   }
 } as const
 
 async function initializePdfViewer(): Promise<OniPDF> {
-  // const oniPdf: OniPDF = await createBook('/books/대치동 아이들은 이렇게 공부합니다.pdf', {
-  const oniPdf: OniPDF = await createBook('/books/179489140.pdf', {
+  const oniPdf: OniPDF = await createBook('/books/대치동 아이들은 이렇게 공부합니다.pdf', {
+  // const oniPdf: OniPDF = await createBook('/books/179489140.pdf', {
     muPDFSrc: '/lib/mupdf/mupdf.js',
   })
 
