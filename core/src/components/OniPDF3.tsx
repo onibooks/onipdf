@@ -9,6 +9,7 @@ import Double from './Spread/Double'
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
 import type { Options } from '../commands/render'
+import PageView from './PageView'
 
 type OniPDFProps = {
   context: GlobalContext
@@ -26,25 +27,24 @@ const OniPDF = ({
   const [spread, setSpread] = useState('')
 
   const updateTotalSize = () => {
-    if (context.totalHeights > 0) {
-      const {
-        flow,
-        rootWidth,
-        rootHeight,
-        totalWidth,
-        totalHeight
-      } = presentation.layout({
-        totalWidth: context.rootElement.clientWidth * context.totalPages,
-        totalHeight: context.totalHeights
-      })
-        
-      const totalVariables = {
-        totalWidth: flow === 'paginated' ? `${totalWidth}px` : `${rootWidth}px`,
-        totalHeight: flow === 'scrolled' ? `${totalHeight}px` : `${rootHeight}px`
-      }
-
-      setCssVariables(totalVariables, oniContainerRef.current as HTMLElement)  
+    const { pageHeight } = presentation.layout()
+    const {
+      flow,
+      rootWidth,
+      rootHeight,
+      totalWidth,
+      totalHeight
+    } = presentation.layout({
+      totalWidth: context.rootElement.clientWidth * context.totalPages,
+      totalHeight: pageHeight! * context.totalPages
+    })
+      
+    const totalVariables = {
+      totalWidth: flow === 'paginated' ? `${totalWidth}px` : `${rootWidth}px`,
+      totalHeight: flow === 'scrolled' ? `${totalHeight}px` : `${rootHeight}px`
     }
+
+    setCssVariables(totalVariables, oniContainerRef.current as HTMLElement)  
   }
 
   useEffect(() => {
@@ -89,6 +89,10 @@ const OniPDF = ({
 
     handleResize()
 
+    const handleReady = () => {
+      updateTotalSize()
+    }
+
     const handleArrowKey = (event: KeyboardEvent) => {
       let { currentIndex: pageIndex } = sangte.getState()
       
@@ -109,8 +113,9 @@ const OniPDF = ({
 
     window.addEventListener('keydown', handleArrowKey)
     window.addEventListener(EVENTS.RESIZE, handleResize)
-    context.oniPDF.on(EVENTS.READY, updateTotalSize)
+    context.oniPDF.on(EVENTS.READY, handleReady)
     context.oniPDF.on(EVENTS.REFLOW, updateTotalSize)
+
     return () => {
       window.removeEventListener('keydown', handleArrowKey)
       window.removeEventListener(EVENTS.RESIZE, handleResize)
@@ -155,6 +160,8 @@ const createClasses = (
     outline: none;
     cursor: default;
     box-sizing: border-box;
+    width:  var(--root-width) !important;
+    height:  var(--root-height) !important;
 
     &.scrolled {
       overflow: auto;
@@ -169,7 +176,7 @@ const createClasses = (
     /* overflow: hidden; */
     /* will-change: transform; */
     width: var(--total-width) !important;
-    height: var(--total-height) !important;
+    /* height: 100%; */
   
     .scrolled & {
       margin: 0 auto;

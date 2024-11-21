@@ -9,6 +9,7 @@ export type LayoutOptions = {
   height?: number
   totalWidth?: number
   totalHeight?: number
+  pageHeight?: number
   flow?: 'paginated' | 'scrolled'
   spread?: 'single' | 'double' | 'coverFacing' 
   zoom?: number
@@ -31,6 +32,7 @@ export const createLayout = () => provider((context) => {
       rootHeight: -1,
       totalWidth: -1,
       totalHeight: -1,
+      pageHeight: -1,
     }))
   )
 
@@ -56,6 +58,7 @@ export const createLayout = () => provider((context) => {
     const height= options.height || 0
     const totalWidth = options.totalWidth || 0
     const totalHeight= options.totalHeight || 0
+    const pageHeight = options.pageHeight || 0
     
     if (options.spread === 'single') {
       options.divisor = 1
@@ -70,6 +73,8 @@ export const createLayout = () => provider((context) => {
     
     options.totalWidth = totalWidth
     options.totalHeight = totalHeight
+    
+    options.pageHeight = pageHeight
 
     return options
   }

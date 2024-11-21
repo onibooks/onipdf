@@ -85,33 +85,29 @@ const PageView = ({
   }
 
   const setPageSize = () => {
-    const { scale } = context.sangte.getState()
-    const scaledWidth = pageSize.width * scale
-    const scaledHeight = pageSize.height * scale
+    const { rootWidth } = context.presentation.layout()
+    const baseWidth = pageSize.width
+    const baseHeight = pageSize.height
 
-    const { flow, rootWidth, rootHeight } = context.presentation.layout()
-    const widthRatio = rootWidth / scaledWidth
-    const heightRatio = rootHeight / scaledHeight
-  
-    const rootScale = scale === 1 
-      ? Math.min(widthRatio, heightRatio)
-      : 1
-  
+    const ratioDifference = (rootWidth - baseWidth) / baseWidth
+    let pageWidth = rootWidth
+    if (ratioDifference >= 0.8) {
+      pageWidth = rootWidth * 0.6 // rootWidth의 최대 60%까지만 허용
+    }
+    const pageHeight = pageWidth * (baseHeight / baseWidth)
+
     const sectionVariables = {
       pageWidth: `${rootWidth}px`,
-      pageHeight: flow === 'scrolled' ? `${scaledHeight * rootScale}px` : `${rootHeight}px`
+      pageHeight: `${pageHeight}px`
     }
 
     const containerVariables = {
-      pageWidth: `${scaledWidth * rootScale}px`,
-      pageHeight: `${scaledHeight * rootScale}px`
+      pageWidth: `${pageWidth}px`,
+      pageHeight: `${pageHeight}px`
     }
 
-    context.totalHeights += scaledHeight * rootScale
-  
     setCssVariables(sectionVariables, pageSectionRef.current!)
     setCssVariables(containerVariables, pageContainerRef.current!)
-    setCssVariables(containerVariables, canvasRef.current!)
 
     return Promise.resolve()
   }
@@ -176,19 +172,24 @@ const createClasses = (
     display: flex;
     align-items: center;
     justify-content: center;
-  `,
+    background-color: #ddd;
+    
+    .scrolled & {
+      font-size: 0;
+    }
+    `,
 
   PageContainer: css`
     position: relative;
     top: 0;
     width: var(--page-width) !important;
     height: var(--page-height) !important;
-    background-color: #bbb;
+    background-color: pink;
   `,
 
   PageCanvas: css`
-    width: var(--page-width) !important;
-    height: var(--page-height) !important;
+    width: 100%;
+    height: 100%;
   `
 })
 

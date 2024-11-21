@@ -26,6 +26,7 @@ const Single = ({
         ))
 
       const pageSizes = await Promise.all(promises)
+      
       const rendered = pageSizes.map((pageSize, pageIndex) => (
         new Promise((resolve, reject) => {
           const fragment = document.createElement('div')
@@ -65,13 +66,6 @@ const createClasses = (
   css: Emotion['css'],
 ) => ({
   OniBody: css`
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    /* overflow: visible; */
-    /* background-color: #bbb; */
     .paginated & {
       display : flex;
     }
