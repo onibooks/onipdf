@@ -6,4 +6,5 @@ export declare const EVENTS: {
     RESIZE: string;
     RENDERED: string;
     UPDATESCALE: string;
+    KEYDOWN: string;
 };

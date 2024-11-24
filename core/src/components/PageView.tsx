@@ -14,6 +14,7 @@ type Size = {
 
 type PageViewProps = {
   context: GlobalContext
+  pageMaxSize: Size
   pageSize: Size
   pageIndex: number
   pageRender: (value: unknown) => void
@@ -21,6 +22,7 @@ type PageViewProps = {
 
 const PageView = ({
   context,
+  pageMaxSize,
   pageSize,
   pageIndex,
   pageRender
@@ -35,6 +37,7 @@ const PageView = ({
 
   const renderedPages = new Set<number>()
   const renderingPages = new Set<number>()
+  let aspectRatio
 
   let canvasPixels: ImageData
   let canvasContext: CanvasRenderingContext2D | null
@@ -84,34 +87,37 @@ const PageView = ({
     observer.observe(pageSectionRef.current!)
   }
 
+  const updatePageSize = () => {
+    const { rootWidth } = context.presentation.layout()
+    
+    const pageWidth = rootWidth * aspectRatio!
+    const pageHeight = (pageWidth / pageSize.width) * pageSize.height
+
+    const sectionVariables = {
+      pageWidth: `${rootWidth}px`,
+      pageHeight: `${pageHeight}px`
+    }
+    const containerVariables = {
+      pageWidth: `${pageWidth}px`,
+      pageHeight: `${pageHeight}px`
+    }
+
+    setCssVariables(sectionVariables, pageSectionRef.current!)
+    setCssVariables(containerVariables, pageContainerRef.current!)
+  }
+
   const setPageSize = () => {
     const { flow } = context.presentation.layout()
     const { rootWidth, rootHeight } = context.presentation.layout()
     
     if (flow === 'scrolled') {
+      const maxWidth = pageMaxSize.width
       const baseWidth = pageSize.width
-      const baseHeight = pageSize.height
-      const ratioDifference = (rootWidth - baseWidth) / baseWidth
       
-      let pageWidth = rootWidth
+      // 현재 pdf에서 몇 퍼센트를 차지하고 있는지
+      aspectRatio = baseWidth / maxWidth
 
-      if (ratioDifference >= 0.8) {
-        pageWidth = rootWidth * 0.6 // rootWidth의 최대 60%까지만 허용
-      }
-      const pageHeight = pageWidth * (baseHeight / baseWidth)
-  
-      const sectionVariables = {
-        pageWidth: `${rootWidth}px`,
-        pageHeight: `${pageHeight}px`
-      }
-  
-      const containerVariables = {
-        pageWidth: `${pageWidth}px`,
-        pageHeight: `${pageHeight}px`
-      }
-  
-      setCssVariables(sectionVariables, pageSectionRef.current!)
-      setCssVariables(containerVariables, pageContainerRef.current!)
+      updatePageSize()
     } else {
       const baseWidth = pageSize.width
       const baseHeight = pageSize.height
@@ -145,7 +151,7 @@ const PageView = ({
 
   useEffect(() => {
     const handleResize = (event?: Event) => {
-      setPageSize()
+      updatePageSize()
     }
 
     context.oniPDF.on(EVENTS.RESIZE, handleResize)
@@ -192,24 +198,24 @@ const createClasses = (
 ) => ({
   PageSection: css`
     position: relative;
+    /* width, height 지정 안해주는게 좀 더 빠른 것 같기도... */
     width: var(--page-width) !important;
     height: var(--page-height) !important;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #ddd;
-    
+    background-color: #DDD;
+
     .scrolled & {
       font-size: 0;
     }
-    `,
+  `,
 
   PageContainer: css`
     position: relative;
     top: 0;
     width: var(--page-width) !important;
     height: var(--page-height) !important;
-    background-color: pink;
   `,
 
   PageCanvas: css`

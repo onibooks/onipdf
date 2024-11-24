@@ -3,6 +3,7 @@ export type LayoutOptions = {
     height?: number;
     totalWidth?: number;
     totalHeight?: number;
+    pageHeight?: number;
     flow?: 'paginated' | 'scrolled';
     spread?: 'single' | 'double' | 'coverFacing';
     zoom?: number;

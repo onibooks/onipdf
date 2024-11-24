@@ -3,7 +3,5 @@ export type LocateOptions = {
 };
 export type Locate = LocateOptions & {
     totalPages: number;
-    chapterIndex: number;
-    chapterTitle: string;
 };
 export declare const createLocate: () => (options?: LocateOptions) => Locate;

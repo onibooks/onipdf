@@ -9,5 +9,5 @@ type PageViewProps = {
     pageIndex: number;
     pageRender: (value: unknown) => void;
 };
-declare const PageView: ({ context, pageSize, pageIndex, pageRender }: PageViewProps) => import("preact/compat").JSX.Element;
+declare const PageView: ({ context, pageSize, pageIndex, pageRender }: PageViewProps) => import("preact").JSX.Element;
 export default PageView;

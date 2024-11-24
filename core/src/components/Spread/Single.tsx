@@ -26,6 +26,10 @@ const Single = ({
         ))
 
       const pageSizes = await Promise.all(promises)
+      const pageMaxSize = {
+        width: Math.round(Math.max(...pageSizes.map(p => p.width)) * 10) / 10,
+        height: Math.round(Math.max(...pageSizes.map(p => p.height)) * 10) / 10,
+      }
       
       const rendered = pageSizes.map((pageSize, pageIndex) => (
         new Promise((resolve, reject) => {
@@ -34,6 +38,7 @@ const Single = ({
           prender(
             <PageView
               context={context}
+              pageMaxSize={pageMaxSize}
               pageSize={pageSize}
               pageIndex={pageIndex}
               pageRender={resolve}
@@ -50,7 +55,7 @@ const Single = ({
       await Promise.all(rendered)
 
       // PDF 렌더링 준비 완료
-      context.oniPDF.emit(EVENTS.READY)
+      context.oniPDF.emit(EVENTS.READY, oniBodyRef.current)
     })()
   }, [])
 
