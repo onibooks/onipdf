@@ -59,6 +59,10 @@ const OniPDF = ({
       height: 0,
       ...options.layout
     })
+
+    presentation.locate({
+      ...options.locate
+    })
     
     setSpread(spread!)
   }, [])
@@ -94,33 +98,44 @@ const OniPDF = ({
     }
 
     const handleArrowKey = (event: KeyboardEvent) => {
-      let { currentIndex: pageIndex } = sangte.getState()
-      
       if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
-        if (pageIndex < context.totalPages - 1) {
-          pageIndex++
-          oniPDF.goToPage(pageIndex)
-        }
+        goToNextPage()
       } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
-        if (pageIndex > 0) {
-          pageIndex--
-          oniPDF.goToPage(pageIndex)
-        }
+        goToPrevPage()
       }
+    }
 
-      sangte.setState({ currentIndex: pageIndex })
+    const goToPrevPage = () => {
+      const { currentPage } = presentation.locate()
+      presentation.locate({
+        currentPage: Math.max(currentPage! - 1, 0)
+      })
+    }
+
+    const goToNextPage = () => {
+      const { currentPage, totalPages } = presentation.locate()
+      presentation.locate({
+        currentPage: Math.min(currentPage! + 1, context.totalPages)
+      })
+    }
+
+    const handleScroll = (event?: Event) => {
+      if (event) {
+        context.oniPDF.emit(EVENTS.SCROLL)
+      }
     }
 
     window.addEventListener('keydown', handleArrowKey)
     window.addEventListener(EVENTS.RESIZE, handleResize)
     context.oniPDF.on(EVENTS.READY, handleReady)
-    context.oniPDF.on(EVENTS.REFLOW, updateTotalSize)
+    context.documentElement.addEventListener('scroll', handleScroll)
+    // context.oniPDF.on(EVENTS.REFLOW, updateTotalSize)
 
     return () => {
       window.removeEventListener('keydown', handleArrowKey)
       window.removeEventListener(EVENTS.RESIZE, handleResize)
       context.oniPDF.off(EVENTS.READY, updateTotalSize)
-      context.oniPDF.off(EVENTS.REFLOW, updateTotalSize)
+      // context.oniPDF.off(EVENTS.REFLOW, updateTotalSize)
     }
   }, [])
 

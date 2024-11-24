@@ -34,6 +34,7 @@ const PageView = ({
   const pageContainerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const isRendered = useRef<boolean>(false)
+  const pageSizeRef = useRef<Size>({ width: 0, height: 0 })
 
   const renderedPages = new Set<number>()
   const renderingPages = new Set<number>()
@@ -92,6 +93,11 @@ const PageView = ({
     
     const pageWidth = rootWidth * aspectRatio!
     const pageHeight = (pageWidth / pageSize.width) * pageSize.height
+    
+    pageSizeRef.current = {
+      width: pageWidth,
+      height: pageHeight
+    }
 
     const sectionVariables = {
       pageWidth: `${rootWidth}px`,
