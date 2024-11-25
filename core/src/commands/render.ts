@@ -11,8 +11,6 @@ import type { LayoutOptions } from '../presentation/layout/createLayout'
 import type { LocateOptions } from '../presentation/locate/createLocate'
 
 export type Options = {
-  type?: 'image' | 'canvas' | 'svg'
-  page?: number
   zoom?: number
   layout?: LayoutOptions
   locate?: LocateOptions
@@ -44,14 +42,12 @@ export const render = (context: GlobalContext) => {
       ...options
     }
 
-    console.log(context.options)
-
     const fragment = document.createElement('div')
     const Component = h(OniPDF, { context })
     prender(Component, fragment)
     
     element.appendChild(fragment.firstChild as HTMLElement)
 
-    context.oniPDF.emit(EVENTS.RENDERED)
+    // context.oniPDF.emit(EVENTS.RENDERED)
   }
 }

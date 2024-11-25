@@ -2,15 +2,17 @@ import './style.css'
 import { createBook, EVENTS, OniPDF } from '@onipdf/core'
 
 type ViewType = 'flow' | 'spread'
-type ViewElement = 'scrolled' | 'paginated' | 'single' | 'double' | 'coverFacing'
+type FlowType = 'scrolled' | 'paginated'
+type SpreadType = 'single' | 'double' | 'coverFacing'
+type ViewElement = FlowType | SpreadType
 
 const renderOptions = {
   locate: {
-    currentPage: 0,
+    currentPage: 3,
   },
   layout: {
-    flow: 'paginated',
-    spread: 'single' ,
+    flow: 'paginated' as FlowType,
+    spread: 'single' as SpreadType,
     zoom: 1
   }
 } as const
@@ -31,7 +33,11 @@ async function initializePdfViewer(): Promise<OniPDF> {
 
   oniPdf.on(EVENTS.RENDERED, async () => {
     console.log('Rendered page')
-    
+    // @ts-ignore
+    const oniPdf = window.oniPdf as OniPDF
+    const { flow, spread } = oniPdf.layout()
+    updateRadioButtons(flow!, spread!)
+
     updateZoomDisplay()
   })
 
@@ -60,6 +66,20 @@ function setViewControls(viewElement: ViewElement, viewType: ViewType) {
     const { flow, spread } = oniPdf.layout({ [viewType]: viewElement })
     console.log(`flow: ${flow}`, `spread: ${spread}`)
   }
+}
+
+function updateRadioButtons(flow: FlowType, spread: SpreadType): void {
+  const radios = document.querySelectorAll('.switch-field input[type="radio"]')
+
+  radios.forEach((radio) => {
+    const input = radio as HTMLInputElement
+    if (input.name === 'flow' && input.value === flow) {
+      input.checked = true
+    }
+    if (input.name === 'spread' && input.value === spread) {
+      input.checked = true
+    }
+  })
 }
 
 function updateZoomDisplay (): void {

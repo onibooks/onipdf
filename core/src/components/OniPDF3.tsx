@@ -23,7 +23,7 @@ const OniPDF = ({
 
   const oniDocumentRef = useRef<HTMLDivElement>(null)
   const oniContainerRef = useRef<HTMLDivElement>(null)
-
+  
   const [spread, setSpread] = useState('')
 
   useEffect(() => {
@@ -33,17 +33,18 @@ const OniPDF = ({
   }, [])
 
   useEffect(() => {
-    const { spread } = presentation.layout({
-      width: 0,
+    const { spread } = context.presentation.layout({
+      width: 0, 
       height: 0,
       ...options.layout
     })
-
-    presentation.locate({
+    context.presentation.locate({
       ...options.locate
     })
-    
+
     setSpread(spread!)
+
+    context.oniPDF.emit(EVENTS.RENDERED)
   }, [])
   
   useEffect(() => {
