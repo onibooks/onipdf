@@ -36,10 +36,16 @@ async function initializePdfViewer(): Promise<OniPDF> {
     // @ts-ignore
     const oniPdf = window.oniPdf as OniPDF
     const { flow, spread } = oniPdf.layout()
-    updateRadioButtons(flow!, spread!)
-
+    
+    updateRadioButtons(flow!, spread!)  
     updateZoomDisplay()
   })
+  
+  // oniPdf.on(EVENTS.READY, async () => {
+  //   const { flow, spread } = oniPdf.layout()
+  //   console.log(flow, spread)
+  //   updateRadioButtons(flow!, spread!)
+  // })
 
   return oniPdf
 }
@@ -85,20 +91,12 @@ function updateRadioButtons(flow: FlowType, spread: SpreadType): void {
 function updateZoomDisplay (): void {
   // @ts-ignore
   const oniPdf = window.oniPdf as OniPDF
-  const currentZoom = oniPdf.getZoom()
-
-  console.log(Math.round(currentZoom * 100).toString())
-}
-
-function initializeSettings(): void {
-  // @ts-ignore
-  const oniPdf: OniPDF = window.oniPdf
-
-  updateZoomDisplay()
+  const { zoom } = oniPdf.layout()
+  
+  console.log(Math.round(zoom! * 100).toString())
 }
 
 (async () => {
   await initializePdfViewer()
-  initializeSettings()
   setupEventHandlers()
 })()

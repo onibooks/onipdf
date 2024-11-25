@@ -26,25 +26,24 @@ const OniPDF = ({
   
   const [spread, setSpread] = useState('')
 
-  useEffect(() => {
-    if (oniDocumentRef.current) {
-      context.documentElement = oniDocumentRef.current
-    }
-  }, [])
+  // useEffect(() => {
+  //   if (oniDocumentRef.current) {
+  //     context.documentElement = oniDocumentRef.current
+  //   }
+  // }, [])
 
   useEffect(() => {
-    const { spread } = context.presentation.layout({
-      width: 0, 
-      height: 0,
-      ...options.layout
-    })
-    context.presentation.locate({
-      ...options.locate
-    })
+    const { spread } = context.presentation.layout()
+    // const { spread } = context.presentation.layout({
+    //   width: 0, 
+    //   height: 0,
+    //   ...options.layout
+    // })
+    // context.presentation.locate({
+    //   ...options.locate
+    // })
 
     setSpread(spread!)
-
-    context.oniPDF.emit(EVENTS.RENDERED)
   }, [])
   
   useEffect(() => {
