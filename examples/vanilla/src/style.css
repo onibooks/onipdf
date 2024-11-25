@@ -5,30 +5,6 @@
   transition: background-color .25s ease;
 }
 
-input[type="text"] {
-  appearance: none;
-  user-select: text !important;
-  resize: none;
-  border: none;
-  outline: none;
-  background-color: transparent;
-}
-
-button {
-  padding: 0;
-  border: none;
-  background-color: transparent;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  border-radius: 4px;
-  width: 32px;
-  height: 32px;
-  color: #DDE6EE;
-}
-
 .main-content {
   min-height: calc(100vh - 210px)
 }
@@ -130,7 +106,6 @@ button {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  height: 36px;
   background-color: #F8F9FA;
   z-index: 71;
 }
@@ -141,66 +116,53 @@ button {
   align-items: center;
   width: 100%;
   height: 100%;
-  padding: 0 4px;
+  padding: 8px 4px;
+  gap: 4px;
 }
 
-.header-items>button {
-  margin: 0 6px;
+.switch-field {
+  height: 100%;
+  display: flex;
+  overflow: hidden;
 }
 
-.header-items>button.active {
-  background-color: #DDE6EE
+.switch-field input {
+  position: absolute !important;
+  clip: rect(0, 0, 0, 0);
+  height: 1px;
+  width: 1px;
+  border: 0;
+  overflow: hidden;
 }
 
-.header-items>button>.icon {
-  width: 24px;
-  height: 24px;
-  color: #1A4971;
-  pointer-events: none;
-}
-
-.zoom {
+.switch-field label {
+  background-color: #f4f2f2;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 28px;
-  background-color: #F1F3F5;
-  border-radius: 4px;
+  gap: 2px;
+  font-size: 10px;
+  line-height: 1;
+  padding: 4px 8px;
+  transition: all 0.1s ease-in-out;
 }
 
-.zoom-text {
-  display: flex;
-  align-items: center;
-  height: 100%;
+.switch-field label:hover {
+  cursor: pointer;
 }
 
-.textarea {
-  font-weight: 700;
-  width: 2rem;
-  text-align: center;
+.switch-field input:checked+label {
+  background-color: #fbe0f1;
+  color: #232022;
+  box-shadow: none;
 }
 
-.action-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  height: 100%;
+.switch-field label:first-of-type {
+  border-radius: 4px 0 0 4px;
 }
 
-.action-button>.icon {
-  display: flex;
-  align-items: center;
-  color: #868E96;
-}
-
-.ribbons-container {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
+.switch-field label:last-of-type {
+  border-radius: 0 4px 4px 0;
 }
 
 .header-border {
@@ -209,113 +171,12 @@ button {
   background-color: #E8E8E9;
 }
 
-.overlay-menu {
-  visibility: hidden;
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 6px 0;
-  background-color: #FFFFFF;
-  box-shadow: 0 0 3px 0 #868E96;
-  border-radius: 4px;
-  z-index: 95;
-
-  left: 55px;
-  right: auto;
-  top: 39.5078px;
-  max-height: 172.492px;
-  overflow-y: auto;
-}
-
-.overlay-menu>button {
-  color: #485056;
-}
-
-.overlay-menu>button>.title {
-  margin-left: 4px;
-  flex: 1;
-  padding-right: 1.2rem;
-}
-
-.overlay-menu.close {
-  visibility: hidden;
-}
-
-.overlay-menu>.divider {
-  margin: 8px;
-}
-
-.overlay-menu>.type {
-  width: 100%;
-  margin-top: 2px;
-  margin-bottom: 8px;
-  padding-left: 12px;
-  padding-right: 18px;
-}
-
-.overlay-menu.active {
-  visibility: visible;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 32px;
-  margin: 2px 0;
-  padding-left: 12px;
-  padding-right: 18px;
-  cursor: pointer;
-}
-
 /* reader 영역 */
 .content {
   display: flex;
   flex-direction: row;
   flex: 1;
   overflow: auto;
-}
-
-.left-panel {
-  position: fixed;
-  left: 0;
-  display: flex;
-  flex-direction: row;
-  background-color: #f8f9fa;
-}
-
-.left-panel-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.right-panel {
-  position: fixed;
-  right: 0;
-  display: flex;
-  flex-direction: row;
-  background-color: #f8f9fa;
-}
-
-.document-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  transition: all .3s ease-in-out;
-}
-
-.measure-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
 }
 
 .document-container {

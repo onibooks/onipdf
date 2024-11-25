@@ -32,8 +32,6 @@ export const render = (context: GlobalContext) => {
       )
     }
     rendered = true
-
-    const { type = 'canvas', page = 0 } = options || {}
     
     context.rootElement = element
 
@@ -43,12 +41,10 @@ export const render = (context: GlobalContext) => {
     })
 
     context.options = {
-      ...options,
-      page,
-      type
+      ...options
     }
 
-    context.sangte.setState({ currentIndex: page })
+    console.log(context.options)
 
     const fragment = document.createElement('div')
     const Component = h(OniPDF, { context })
