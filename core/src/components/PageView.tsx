@@ -215,6 +215,10 @@ const createClasses = (
     .scrolled & {
       font-size: 0;
     }
+
+    .paginated & {
+      flex-shrink: 0;
+    }
   `,
 
   PageContainer: css`

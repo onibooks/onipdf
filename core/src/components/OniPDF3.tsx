@@ -26,28 +26,6 @@ const OniPDF = ({
 
   const [spread, setSpread] = useState('')
 
-  const updateTotalSize = () => {
-    const { pageHeight } = presentation.layout()
-    const { totalPages } = presentation.locate()
-    const {
-      flow,
-      rootWidth,
-      rootHeight,
-      totalWidth,
-      totalHeight
-    } = presentation.layout({
-      totalWidth: context.rootElement.clientWidth * totalPages!,
-      totalHeight: pageHeight! * totalPages!
-    })
-      
-    const totalVariables = {
-      totalWidth: flow === 'paginated' ? `${totalWidth}px` : `${rootWidth}px`,
-      totalHeight: flow === 'scrolled' ? `${totalHeight}px` : `${rootHeight}px`
-    }
-
-    setCssVariables(totalVariables, oniContainerRef.current as HTMLElement)  
-  }
-
   useEffect(() => {
     if (oniDocumentRef.current) {
       context.documentElement = oniDocumentRef.current
@@ -83,8 +61,6 @@ const OniPDF = ({
         rootHeight: `${rootHeight}px`
       }
       
-      updateTotalSize()
-      
       setCssVariables(rootVariables, context.rootElement as HTMLElement)
       
       if (event) {
@@ -94,14 +70,11 @@ const OniPDF = ({
 
     handleResize()
 
-    const handleReady = () => {
-      updateTotalSize()
-    }
-
-    const handleArrowKey = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+    const handleArrowKey = (event?: Event) => {
+      const eventType = (event as KeyboardEvent)
+      if (eventType.key === 'ArrowDown' || eventType.key === 'ArrowRight') {
         goToNextPage()
-      } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+      } else if (eventType.key === 'ArrowUp' || eventType.key === 'ArrowLeft') {
         goToPrevPage()
       }
     }
@@ -115,7 +88,6 @@ const OniPDF = ({
 
     const goToNextPage = () => {
       const { currentPage, totalPages } = presentation.locate()
-      console.log(totalPages)
       presentation.locate({
         currentPage: Math.min(currentPage! + 1, totalPages!)
       })
@@ -127,17 +99,14 @@ const OniPDF = ({
       }
     }
 
-    window.addEventListener('keydown', handleArrowKey)
+    window.addEventListener(EVENTS.KEYDOWN, handleArrowKey)
     window.addEventListener(EVENTS.RESIZE, handleResize)
-    context.oniPDF.on(EVENTS.READY, handleReady)
-    context.documentElement.addEventListener('scroll', handleScroll)
-    // context.oniPDF.on(EVENTS.REFLOW, updateTotalSize)
+    context.documentElement.addEventListener(EVENTS.SCROLL, handleScroll)
 
     return () => {
-      window.removeEventListener('keydown', handleArrowKey)
+      window.removeEventListener(EVENTS.KEYDOWN, handleArrowKey)
       window.removeEventListener(EVENTS.RESIZE, handleResize)
-      context.oniPDF.off(EVENTS.READY, updateTotalSize)
-      // context.oniPDF.off(EVENTS.REFLOW, updateTotalSize)
+      context.documentElement.removeEventListener(EVENTS.SCROLL, handleScroll)
     }
   }, [])
 
