@@ -7,10 +7,11 @@ import { EVENTS } from '../../constants'
 
 export type LocateOptions = {
   currentPage?: number
+  totalPages?: number
 }
 
 export type Locate = LocateOptions & {
-  totalPages: number
+  
 }
 
 export const createLocate = () => provider((context) => {
@@ -37,6 +38,8 @@ export const createLocate = () => provider((context) => {
 
     if (flow === 'paginated') {
       requestAnimationFrame(() => documentElement.scrollLeft = value * rootWidth)
+    } else if (flow === 'scrolled') {
+      // requestAnimationFrame(() => documentElement.scrollTop = value * pageHeight)
     }
   }
   
@@ -59,7 +62,7 @@ export const createLocate = () => provider((context) => {
     const currentPage = getCurrentPage()
 
     locate.setState({
-      currentPage
+      currentPage,
     })
 
     if (event) {

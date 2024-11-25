@@ -28,6 +28,7 @@ const OniPDF = ({
 
   const updateTotalSize = () => {
     const { pageHeight } = presentation.layout()
+    const { totalPages } = presentation.locate()
     const {
       flow,
       rootWidth,
@@ -35,8 +36,8 @@ const OniPDF = ({
       totalWidth,
       totalHeight
     } = presentation.layout({
-      totalWidth: context.rootElement.clientWidth * context.totalPages,
-      totalHeight: pageHeight! * context.totalPages
+      totalWidth: context.rootElement.clientWidth * totalPages!,
+      totalHeight: pageHeight! * totalPages!
     })
       
     const totalVariables = {
@@ -114,8 +115,9 @@ const OniPDF = ({
 
     const goToNextPage = () => {
       const { currentPage, totalPages } = presentation.locate()
+      console.log(totalPages)
       presentation.locate({
-        currentPage: Math.min(currentPage! + 1, context.totalPages)
+        currentPage: Math.min(currentPage! + 1, totalPages!)
       })
     }
 

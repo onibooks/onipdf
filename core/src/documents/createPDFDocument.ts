@@ -22,12 +22,16 @@ const fetchFileFromURL = async (url: string): Promise<File> => {
 }
 
 export const initPageView = () => provider(async (context) => {
-  const totalPages = await context.oniPDF.getTotalPages()
+  // const totalPages = await context.oniPDF.getTotalPages()
+  const total = await context.oniPDF.getTotalPages()
+  const { totalPages } = context.presentation.locate({
+    totalPages: total
+  })
   const pageViews = Promise.all(Array(totalPages)
   .fill(null)
   .map((_, index) => createPageView(index)))
 
-  context.totalPages = await totalPages
+  // context.totalPages = await totalPages
   context.pageViews = await pageViews
 })
 

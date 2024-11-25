@@ -20,7 +20,8 @@ const Single = ({
 
   useEffect(() => {
     ;(async () => {
-      const promises = Array.from({ length: context.totalPages })
+      const { totalPages } = context.presentation.locate()
+      const promises = Array.from({ length: totalPages! })
         .map((_, pageIndex) => (
           context.worker.getPageSize(pageIndex)
         ))
