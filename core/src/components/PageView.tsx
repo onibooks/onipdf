@@ -34,11 +34,11 @@ const PageView = ({
   const pageContainerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const isRendered = useRef<boolean>(false)
+  const aspectRatioRef = useRef<number>(-1)
   const pageSizeRef = useRef<Size>({ width: 0, height: 0 })
 
   const renderedPages = new Set<number>()
   const renderingPages = new Set<number>()
-  let aspectRatio
 
   let canvasPixels: ImageData
   let canvasContext: CanvasRenderingContext2D | null
@@ -89,47 +89,35 @@ const PageView = ({
   }
 
   const updatePageSize = () => {
-    const { rootWidth } = context.presentation.layout()
-    
-    const pageWidth = rootWidth * aspectRatio!
-    const pageHeight = (pageWidth / pageSize.width) * pageSize.height
-    
-    pageSizeRef.current = {
-      width: pageWidth,
-      height: pageHeight
-    }
-
-    const sectionVariables = {
-      pageWidth: `${rootWidth}px`,
-      pageHeight: `${pageHeight}px`
-    }
-    const containerVariables = {
-      pageWidth: `${pageWidth}px`,
-      pageHeight: `${pageHeight}px`
-    }
-
-    setCssVariables(sectionVariables, pageSectionRef.current!)
-    setCssVariables(containerVariables, pageContainerRef.current!)
-  }
-
-  const setPageSize = () => {
-    const { flow } = context.presentation.layout()
-    const { rootWidth, rootHeight } = context.presentation.layout()
+    const {
+      flow,
+      rootWidth,
+      rootHeight
+    } = context.presentation.layout()
     
     if (flow === 'scrolled') {
-      const maxWidth = pageMaxSize.width
-      const baseWidth = pageSize.width
+      const pageWidth = rootWidth * aspectRatioRef.current!
+      const pageHeight = (pageWidth / pageSize.width) * pageSize.height
       
-      // 현재 pdf에서 몇 퍼센트를 차지하고 있는지
-      aspectRatio = baseWidth / maxWidth
-
-      updatePageSize()
-    } else {
-      const baseWidth = pageSize.width
-      const baseHeight = pageSize.height
-      const widthRatio = rootWidth / baseWidth
-      const heightRatio = rootHeight / baseHeight
-
+      pageSizeRef.current = {
+        width: pageWidth,
+        height: pageHeight
+      }
+  
+      const sectionVariables = {
+        pageWidth: `${rootWidth}px`,
+        pageHeight: `${pageHeight}px`
+      }
+      const containerVariables = {
+        pageWidth: `${pageWidth}px`,
+        pageHeight: `${pageHeight}px`
+      }
+  
+      setCssVariables(sectionVariables, pageSectionRef.current!)
+      setCssVariables(containerVariables, pageContainerRef.current!)
+    } else if (flow === 'paginated') {
+      const widthRatio = rootWidth / pageSize.width
+      const heightRatio = rootHeight / pageSize.height
       const rootScale = Math.min(widthRatio, heightRatio)
 
       const sectionVariables = {
@@ -138,12 +126,26 @@ const PageView = ({
       }
 
       const containerVariables = {
-        pageWidth: `${baseWidth * rootScale}px`,
-        pageHeight: `${baseHeight * rootScale}px`
+        pageWidth: `${pageSize.width * rootScale}px`,
+        pageHeight: `${pageSize.height * rootScale}px`
       }
 
       setCssVariables(sectionVariables, pageSectionRef.current!)
       setCssVariables(containerVariables, pageContainerRef.current!)
+    }
+  }
+
+  const setPageSize = () => {
+    const { flow } = context.presentation.layout()
+    if (flow === 'scrolled') {
+      const maxWidth = pageMaxSize.width
+      const baseWidth = pageSize.width
+      // 현재 pdf에서 몇 퍼센트를 차지하고 있는지
+      aspectRatioRef.current = baseWidth / maxWidth
+
+      updatePageSize()
+    } else if (flow === 'paginated') {
+      updatePageSize()
     }
 
     return Promise.resolve()

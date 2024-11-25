@@ -60,7 +60,7 @@ export const createLocate = () => provider((context) => {
 
   const handleRelocate = (event?: Event) => {
     const currentPage = getCurrentPage()
-
+    
     locate.setState({
       currentPage,
     })
@@ -70,7 +70,13 @@ export const createLocate = () => provider((context) => {
     }
   }
 
+  const handleResize = (event?: Event) => {
+    const { currentPage } = locate.getState()
+    moveToPage(currentPage!)
+  }
+
   context.oniPDF.on(EVENTS.SCROLL, handleRelocate)
+  context.oniPDF.on(EVENTS.RESIZE, handleResize)
 
   const configure = (
     options: Locate

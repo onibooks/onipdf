@@ -18,7 +18,7 @@ type OniPDFProps = {
 const OniPDF = ({
   context
 }: OniPDFProps) => {
-  const { oniPDF, presentation, options, sangte } = context
+  const { oniPDF, presentation, options } = context
   const classes = useMemo(() => createClasses(context.emotion.css, options), [options])
 
   const oniDocumentRef = useRef<HTMLDivElement>(null)
