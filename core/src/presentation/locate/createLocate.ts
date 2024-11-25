@@ -30,16 +30,20 @@ export const createLocate = () => provider((context) => {
   )
 
   const moveToPage = (value: number) => {
-    const { presentation, documentElement } = context
-    const {
-      flow,
-      rootWidth
-    } = presentation.layout()
-
-    if (flow === 'paginated') {
-      requestAnimationFrame(() => documentElement.scrollLeft = value * rootWidth)
-    } else if (flow === 'scrolled') {
-      // requestAnimationFrame(() => documentElement.scrollTop = value * pageHeight)
+    if (value > 0) {
+      const { presentation, documentElement } = context
+      const {
+        flow,
+        rootWidth
+      } = presentation.layout()
+  
+      if (flow === 'paginated') {
+        setTimeout(() => {
+          requestAnimationFrame(() => documentElement.scrollLeft = value * rootWidth)
+        }, 1000)
+      } else if (flow === 'scrolled') {
+        // requestAnimationFrame(() => documentElement.scrollTop = value * pageHeight)
+      }
     }
   }
   
@@ -53,23 +57,23 @@ export const createLocate = () => provider((context) => {
     if (flow === 'paginated') {
       const { scrollLeft } = documentElement
       const currentPage = Math.round(scrollLeft / rootWidth)
-
+      
       return currentPage
     }
   }
-
+  
   const handleRelocate = (event?: Event) => {
     const currentPage = getCurrentPage()
     
     locate.setState({
       currentPage,
     })
-
+    
     if (event) {
       context.oniPDF.emit(EVENTS.RELOCATE)
     }
   }
-
+  
   const handleResize = (event?: Event) => {
     const { currentPage } = locate.getState()
     moveToPage(currentPage!)
@@ -77,6 +81,7 @@ export const createLocate = () => provider((context) => {
 
   context.oniPDF.on(EVENTS.SCROLL, handleRelocate)
   context.oniPDF.on(EVENTS.RESIZE, handleResize)
+  context.oniPDF.on(EVENTS.RENDERED, handleResize)
 
   const configure = (
     options: Locate

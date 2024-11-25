@@ -56,13 +56,16 @@ export const render = (context: GlobalContext) => {
     context.documentElement = element.querySelector('.oni-document') as HTMLElement
 
     context.presentation.layout({
-      width: 0, 
-      height: 0,
+      // width: 0,
+      // height: 0,
+      width: context.rootElement.clientWidth,
+      height: context.rootElement.clientHeight,
       ...options?.layout
     })
     context.presentation.locate({
       ...options?.locate
     })
+    
     /*
       * 개선 필요 *
       만약 이렇게 하지 않고, oniPDF 컴포넌트에서 locate와 layout의 초기 값을 설정하게되면 사용자는 

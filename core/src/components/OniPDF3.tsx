@@ -35,13 +35,17 @@ const OniPDF = ({
   useEffect(() => {
     const { spread } = context.presentation.layout()
     // const { spread } = context.presentation.layout({
-    //   width: 0, 
-    //   height: 0,
+    //   width: context.rootElement.clientWidth,
+    //   height: context.rootElement.clientHeight,
+    //   // width: 0, 
+    //   // height: 0,
     //   ...options.layout
     // })
-    // context.presentation.locate({
+
+    // const { currentPage } = context.presentation.locate({
     //   ...options.locate
     // })
+    // console.log(currentPage)
 
     setSpread(spread!)
   }, [])
@@ -68,7 +72,7 @@ const OniPDF = ({
       }
     }
 
-    handleResize()
+    // handleResize()
 
     const handleArrowKey = (event?: Event) => {
       const eventType = (event as KeyboardEvent)
@@ -102,7 +106,6 @@ const OniPDF = ({
     window.addEventListener(EVENTS.KEYDOWN, handleArrowKey)
     window.addEventListener(EVENTS.RESIZE, handleResize)
     context.documentElement.addEventListener(EVENTS.SCROLL, handleScroll)
-
     return () => {
       window.removeEventListener(EVENTS.KEYDOWN, handleArrowKey)
       window.removeEventListener(EVENTS.RESIZE, handleResize)

@@ -34,18 +34,21 @@ async function initializePdfViewer(): Promise<OniPDF> {
   oniPdf.on(EVENTS.RENDERED, async () => {
     console.log('Rendered page')
     // @ts-ignore
+    // const oniPdf = window.oniPdf as OniPDF
+    // const { flow, spread } = oniPdf.layout()
+    
+    // updateRadioButtons(flow!, spread!)  
+    // updateZoomDisplay()
+  })
+  
+  oniPdf.on(EVENTS.READY, async () => {
+    // @ts-ignore
     const oniPdf = window.oniPdf as OniPDF
     const { flow, spread } = oniPdf.layout()
     
     updateRadioButtons(flow!, spread!)  
     updateZoomDisplay()
   })
-  
-  // oniPdf.on(EVENTS.READY, async () => {
-  //   const { flow, spread } = oniPdf.layout()
-  //   console.log(flow, spread)
-  //   updateRadioButtons(flow!, spread!)
-  // })
 
   return oniPdf
 }
