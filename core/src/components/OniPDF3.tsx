@@ -9,7 +9,6 @@ import Double from './Spread/Double'
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
 import type { Options } from '../commands/render'
-import PageView from './PageView'
 
 type OniPDFProps = {
   context: GlobalContext
@@ -18,7 +17,7 @@ type OniPDFProps = {
 const OniPDF = ({
   context
 }: OniPDFProps) => {
-  const { oniPDF, presentation, options } = context
+  const { oniPDF, presentation, options, sangte } = context
   const classes = useMemo(() => createClasses(context.emotion.css, options), [options])
 
   const oniDocumentRef = useRef<HTMLDivElement>(null)
@@ -26,28 +25,22 @@ const OniPDF = ({
   
   const [spread, setSpread] = useState('')
 
-  // useEffect(() => {
-  //   if (oniDocumentRef.current) {
-  //     context.documentElement = oniDocumentRef.current
-  //   }
-  // }, [])
-
   useEffect(() => {
-    const { spread } = context.presentation.layout()
-    // const { spread } = context.presentation.layout({
-    //   width: context.rootElement.clientWidth,
-    //   height: context.rootElement.clientHeight,
-    //   // width: 0, 
-    //   // height: 0,
-    //   ...options.layout
-    // })
+    if (oniDocumentRef.current) {
+      context.documentElement = oniDocumentRef.current
 
-    // const { currentPage } = context.presentation.locate({
-    //   ...options.locate
-    // })
-    // console.log(currentPage)
+      const { spread } = context.presentation.layout({
+        width: context.rootElement.clientWidth,
+        height: context.rootElement.clientHeight,
+        ...options.layout
+      })
+      
+      // context.presentation.locate({
+      //   ...options.locate
+      // })
 
-    setSpread(spread!)
+      setSpread(spread!)
+    }
   }, [])
   
   useEffect(() => {
@@ -71,8 +64,6 @@ const OniPDF = ({
         oniPDF.emit(EVENTS.RESIZE, event)
       }
     }
-
-    // handleResize()
 
     const handleArrowKey = (event?: Event) => {
       const eventType = (event as KeyboardEvent)
@@ -103,9 +94,20 @@ const OniPDF = ({
       }
     }
 
+    const handleRender = () => {
+      context.presentation.locate({
+        ...options.locate
+      })
+
+      sangte.setState({
+        isRendered: true
+      })
+    }
+
     window.addEventListener(EVENTS.KEYDOWN, handleArrowKey)
     window.addEventListener(EVENTS.RESIZE, handleResize)
     context.documentElement.addEventListener(EVENTS.SCROLL, handleScroll)
+    context.oniPDF.on(EVENTS.RENDER, handleRender)
     return () => {
       window.removeEventListener(EVENTS.KEYDOWN, handleArrowKey)
       window.removeEventListener(EVENTS.RESIZE, handleResize)

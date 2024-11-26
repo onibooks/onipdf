@@ -11,7 +11,7 @@ const renderOptions = {
     currentPage: 3,
   },
   layout: {
-    flow: 'paginated' as FlowType,
+    flow: 'scrolled' as FlowType,
     spread: 'single' as SpreadType,
     zoom: 1
   }
@@ -31,17 +31,8 @@ async function initializePdfViewer(): Promise<OniPDF> {
     await oniPdf.render(document.querySelector('.document-container')!, renderOptions)
   })
 
-  oniPdf.on(EVENTS.RENDERED, async () => {
+  oniPdf.on(EVENTS.RENDER, async () => {
     console.log('Rendered page')
-    // @ts-ignore
-    // const oniPdf = window.oniPdf as OniPDF
-    // const { flow, spread } = oniPdf.layout()
-    
-    // updateRadioButtons(flow!, spread!)  
-    // updateZoomDisplay()
-  })
-  
-  oniPdf.on(EVENTS.READY, async () => {
     // @ts-ignore
     const oniPdf = window.oniPdf as OniPDF
     const { flow, spread } = oniPdf.layout()
@@ -49,7 +40,7 @@ async function initializePdfViewer(): Promise<OniPDF> {
     updateRadioButtons(flow!, spread!)  
     updateZoomDisplay()
   })
-
+  
   return oniPdf
 }
 

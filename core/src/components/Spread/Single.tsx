@@ -56,7 +56,7 @@ const Single = ({
       await Promise.all(rendered)
 
       // PDF 렌더링 준비 완료
-      context.oniPDF.emit(EVENTS.READY, oniBodyRef.current)
+      context.oniPDF.emit(EVENTS.RENDER, oniBodyRef.current)
     })()
   }, [])
 

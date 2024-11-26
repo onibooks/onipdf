@@ -181,7 +181,7 @@ const PageView = ({
       setupIntersectionObserver()
     }
 
-    context.oniPDF.on(EVENTS.READY, handleReady)
+    context.oniPDF.on(EVENTS.RENDER, handleReady)
   }, [])
 
   return (

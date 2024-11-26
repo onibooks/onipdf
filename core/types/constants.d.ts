@@ -5,8 +5,7 @@ export declare const EVENTS: {
     REFLOW: string;
     RELOCATE: string;
     RESIZE: string;
-    RENDERED: string;
-    UPDATESCALE: string;
+    RENDER: string;
     KEYDOWN: string;
     SCROLL: string;
 };

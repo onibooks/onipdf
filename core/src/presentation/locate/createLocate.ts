@@ -24,26 +24,24 @@ export const createLocate = () => provider((context) => {
 
   locate.subscribe(
     (options) => options.currentPage,
-    (value) => {
-      moveToPage(value!)
+    (pageNumber) => {
+      moveToPage(pageNumber!)
     }
   )
 
-  const moveToPage = (value: number) => {
-    if (value > 0) {
-      const { presentation, documentElement } = context
-      const {
-        flow,
-        rootWidth
-      } = presentation.layout()
-  
-      if (flow === 'paginated') {
-        setTimeout(() => {
-          requestAnimationFrame(() => documentElement.scrollLeft = value * rootWidth)
-        }, 1000)
-      } else if (flow === 'scrolled') {
-        // requestAnimationFrame(() => documentElement.scrollTop = value * pageHeight)
-      }
+  const moveToPage = (pageNumber: number) => {
+    const { presentation, documentElement } = context
+    const {
+      flow,
+      rootWidth,
+      rootHeight
+    } = presentation.layout()
+
+    if (flow === 'paginated') {
+      documentElement.scrollLeft = pageNumber * rootWidth
+    } else if (flow === 'scrolled') {
+      console.log(123123, pageNumber, rootHeight)
+      documentElement.scrollTop = pageNumber * rootHeight
     }
   }
   
@@ -59,14 +57,20 @@ export const createLocate = () => provider((context) => {
       const currentPage = Math.round(scrollLeft / rootWidth)
       
       return currentPage
+    } else {
+      // offset으로 설정하기
+      const { currentPage } = locate.getState()
+      
+      return currentPage
     }
   }
   
   const handleRelocate = (event?: Event) => {
     const currentPage = getCurrentPage()
-    
+    console.log('currentPage', currentPage)
+
     locate.setState({
-      currentPage,
+      currentPage
     })
     
     if (event) {
@@ -75,13 +79,15 @@ export const createLocate = () => provider((context) => {
   }
   
   const handleResize = (event?: Event) => {
+    const { isRendered } = context.sangte.getState()
+    if (!isRendered) return
+
     const { currentPage } = locate.getState()
     moveToPage(currentPage!)
   }
 
   context.oniPDF.on(EVENTS.SCROLL, handleRelocate)
   context.oniPDF.on(EVENTS.RESIZE, handleResize)
-  context.oniPDF.on(EVENTS.RENDERED, handleResize)
 
   const configure = (
     options: Locate

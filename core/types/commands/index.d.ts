@@ -5,7 +5,6 @@ export * from './loadPage';
 export * from './render';
 export * from './drawPageAsPixmap';
 export * from './getPDFPage';
-export * from './goToPage';
 export * from './getZoom';
 export * from './layout';
 export * from './locate';
