@@ -1,6 +1,5 @@
 import { EVENTS } from '../constants'
 import { provider } from '../provider'
-import { createPageView } from './createPageView'
 
 const fetchBlobFromURL = async (url: string): Promise<Blob> => {
   const response = await fetch(url)
@@ -21,17 +20,16 @@ const fetchFileFromURL = async (url: string): Promise<File> => {
   return file
 }
 
-export const initPageView = () => provider(async (context) => {
-  const total = await context.oniPDF.getTotalPages()
-  const { totalPages } = context.presentation.locate({
-    totalPages: total
-  })
-  const pageViews = Promise.all(Array(totalPages)
-  .fill(null)
-  .map((_, index) => createPageView(index)))
+export const loadPages = () => provider(async (context) => {
+  const totalPages = context.presentation.locate({
+    totalPages: await context.oniPDF.getTotalPages()
+  }).totalPages
 
-  context.pageViews = await pageViews
+  await Promise.all([...Array(totalPages)].map((_, index) => context.worker.loadPage(index)))
+
+  context.oniPDF.emit(EVENTS.LOAD)
 })
+
 
 export const createPDFDocument = (url: string) => provider(async (context) => {
   try {
@@ -40,7 +38,7 @@ export const createPDFDocument = (url: string) => provider(async (context) => {
     
     context.oniPDF.openDocument(arrayBuffer)
       .then(async () => {
-        await initPageView()
+        await loadPages()
         context.oniPDF.emit(EVENTS.OPEN, { document })
       })
   }

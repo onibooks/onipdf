@@ -9,7 +9,6 @@ import type { StoreApi } from 'zustand/vanilla'
 import type { Sangte } from './sangte'
 import type { MuPDFWorker } from './workers/createWorker'
 import type { Options } from './commands/render'
-import type { PageView } from './documents/createPageView'
 import type { Presentation } from './presentation'
 
 type Size = {
@@ -26,7 +25,6 @@ export type GlobalContext = {
   rootElement: HTMLElement
   documentElement: HTMLElement
   options: Options
-  pageViews: PageView[]
   pageSizes: Size[]
   presentation: Presentation
   uid: number
@@ -45,7 +43,6 @@ export const createContext = () => {
     rootElement: null as any,
     documentElement: null as any,
     options: null as any,
-    pageViews: [] as PageView[],
     pageSizes: [] as Size[],
     presentation: null as any,
     uid,
