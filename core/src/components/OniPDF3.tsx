@@ -53,7 +53,7 @@ const OniPDF = ({
         rootHeight: `${rootHeight}px`
       }
       
-      setCssVariables(rootVariables, context.rootElement as HTMLElement)
+      setCssVariables(rootVariables, oniDocumentRef.current as HTMLElement)
       
       if (event) {
         oniPDF.emit(EVENTS.RESIZE, event)

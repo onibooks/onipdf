@@ -8,7 +8,7 @@ type ViewElement = FlowType | SpreadType
 
 const renderOptions = {
   locate: {
-    currentPage: 10,
+    currentPage: 4,
   },
   layout: {
     flow: 'scrolled' as FlowType,

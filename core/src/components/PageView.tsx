@@ -164,8 +164,7 @@ const PageView = ({
   }
 
   const preRender = () => {
-    // const { currentPage } = context.presentation.locate()
-    const currentPage = context.options.locate?.currentPage
+    const { currentPage } = context.options.locate!
     if (currentPage === pageIndex) {
       drawPageAsPixmap()
     }

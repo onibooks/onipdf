@@ -18,9 +18,10 @@ export type LocateOptions = {
 export type Locate = LocateOptions & {}
 
 export const createLocate = () => provider((context) => {
+  let lastPage = 0
   const locate = createStore(
     subscribeWithSelector<Locate>(() => ({
-      currentPage: -1,
+      currentPage: 0,
       totalPages: 0
     }))
   )
@@ -31,8 +32,18 @@ export const createLocate = () => provider((context) => {
       moveToPage(pageNumber!)
     }
   )
+  
+  const getValidPageNumber = (pageNumber: number) => {
+    const { totalPages } = locate.getState()
+    if (isNaN(pageNumber) || pageNumber === undefined || totalPages === undefined) {
+      return lastPage
+    }
+  
+    return lastPage = Math.min(Math.max(0, Math.floor(pageNumber)), totalPages - 1)
+  }
 
   const moveToPage = (pageNumber: number) => {
+    const currentPage = getValidPageNumber(pageNumber)
     const { presentation, documentElement } = context
     const {
       flow,
@@ -40,11 +51,11 @@ export const createLocate = () => provider((context) => {
     } = presentation.layout()
     
     if (flow === 'paginated') {
-      documentElement.scrollLeft = pageNumber * rootWidth
+      documentElement.scrollLeft = currentPage * rootWidth
     } else if (flow === 'scrolled') {
       const { isResize } = context.sangte.getState()
       if (!isResize) {
-        documentElement.scrollTop = context.pageSizes[pageNumber]?.top
+        documentElement.scrollTop = context.pageSizes[currentPage]?.top
       }
     }
   }
@@ -69,6 +80,7 @@ export const createLocate = () => provider((context) => {
     const { documentElement } = context
     const { scrollTop } = documentElement
     const pageSizes = context.pageSizes
+    const { totalPages } = locate.getState()
   
     for (let i = 0; i < pageSizes.length; i++) {
       const currentPageTop = pageSizes[i].top

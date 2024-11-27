@@ -27,7 +27,7 @@ const Single = ({
         ))
 
       const pageSizes = await Promise.all(promises)
-      context.pageSizes = pageSizes.map(() => ({ width: 0, height: 0 }))
+      context.pageSizes = pageSizes.map(() => ({ top: 0, width: 0, height: 0 }))
 
       const pageMaxSize = {
         width: Math.round(Math.max(...pageSizes.map(p => p.width)) * 10) / 10,
