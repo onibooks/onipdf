@@ -1,5 +1,4 @@
 import { createStore } from 'zustand/vanilla'
-import { PageView } from './documents/createPageView'
 
 export type Sangte = {
   isLoad: boolean

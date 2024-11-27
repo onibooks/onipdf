@@ -1,5 +1,6 @@
 export type Sangte = {
     isLoad: boolean;
+    isResize: boolean;
     isRendered: boolean;
     scale: number;
 };

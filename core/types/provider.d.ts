@@ -9,8 +9,12 @@ import type { StoreApi } from 'zustand/vanilla';
 import type { Sangte } from './sangte';
 import type { MuPDFWorker } from './workers/createWorker';
 import type { Options } from './commands/render';
-import type { PageView } from './documents/createPageView';
 import type { Presentation } from './presentation';
+type Size = {
+    top: number;
+    width: number;
+    height: number;
+};
 export type GlobalContext = {
     oniPDF: OniPDF;
     worker: MuPDFWorker;
@@ -19,13 +23,8 @@ export type GlobalContext = {
     rootElement: HTMLElement;
     documentElement: HTMLElement;
     options: Options;
-    pageViews: PageView[];
+    pageSizes: Size[];
     presentation: Presentation;
-    totalPages: number;
-    rootElementSize: {
-        width: number;
-        height: number;
-    };
     uid: number;
 };
 export declare const createContext: () => GlobalContext;
@@ -35,3 +34,4 @@ export declare const createContext: () => GlobalContext;
  * consumer의 매개변수로 context를 넣어주면 현재 context를 return하게된다.
  */
 export declare const provider: <T>(consumer: (context: GlobalContext) => T) => T;
+export {};
