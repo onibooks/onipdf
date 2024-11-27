@@ -8,7 +8,7 @@ type ViewElement = FlowType | SpreadType
 
 const renderOptions = {
   locate: {
-    currentPage: 3,
+    currentPage: 10,
   },
   layout: {
     flow: 'scrolled' as FlowType,
@@ -29,6 +29,10 @@ async function initializePdfViewer(): Promise<OniPDF> {
   oniPdf.on(EVENTS.OPEN, async () => {
     console.log('Document opened')
     await oniPdf.render(document.querySelector('.document-container')!, renderOptions)
+  })
+
+  oniPdf.on(EVENTS.READY, () => {
+    console.log('Document ready')
   })
 
   oniPdf.on(EVENTS.RENDER, async () => {

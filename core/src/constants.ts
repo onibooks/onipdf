@@ -5,7 +5,9 @@ export const EVENTS = {
   REFLOW: 'reflow',
   RELOCATE: 'relocate',
   RESIZE: 'resize',
+  RESIZED: 'resize',
   RENDER: 'render',
   KEYDOWN: 'keydown',
   SCROLL: 'scroll',
+  SCROLLED: 'scrolled',
 }

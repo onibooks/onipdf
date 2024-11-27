@@ -9,6 +9,7 @@ import Double from './Spread/Double'
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
 import type { Options } from '../commands/render'
+import { debounce } from '../utils/debounce'
 
 type OniPDFProps = {
   context: GlobalContext
@@ -30,14 +31,8 @@ const OniPDF = ({
       context.documentElement = oniDocumentRef.current
 
       const { spread } = context.presentation.layout({
-        width: context.rootElement.clientWidth,
-        height: context.rootElement.clientHeight,
         ...options.layout
       })
-      
-      // context.presentation.locate({
-      //   ...options.locate
-      // })
 
       setSpread(spread!)
     }
@@ -64,6 +59,23 @@ const OniPDF = ({
         oniPDF.emit(EVENTS.RESIZE, event)
       }
     }
+    handleResize()
+
+    const handleResized = debounce((event?: Event) => {
+      if (event) {
+        oniPDF.emit(EVENTS.RESIZED, event)
+      }
+    }, 250)
+
+    const handleReady = (event?: Event) => {
+      context.presentation.locate({
+        ...options.locate
+      })
+
+      if (event) {
+        oniPDF.emit(EVENTS.RENDER, event)
+      }
+    }
 
     const handleArrowKey = (event?: Event) => {
       const eventType = (event as KeyboardEvent)
@@ -88,29 +100,40 @@ const OniPDF = ({
       })
     }
 
-    const handleScroll = (event?: Event) => {
-      if (event) {
-        context.oniPDF.emit(EVENTS.SCROLL)
-      }
-    }
-
     const handleRender = () => {
-      context.presentation.locate({
-        ...options.locate
-      })
-
       sangte.setState({
         isRendered: true
       })
     }
 
-    window.addEventListener(EVENTS.KEYDOWN, handleArrowKey)
+    const handleScroll = (event?: Event) => {
+      sangte.setState({ isResize: true })
+      
+      if (event) {
+        context.oniPDF.emit(EVENTS.SCROLL)
+      }
+    }
+    
+    const handleScrolled = debounce((event?: Event) => {
+      sangte.setState({ isResize: false })
+
+      if (event) {
+        context.oniPDF.emit(EVENTS.SCROLL)
+      }
+    }, 250)
+
     window.addEventListener(EVENTS.RESIZE, handleResize)
-    context.documentElement.addEventListener(EVENTS.SCROLL, handleScroll)
+    window.addEventListener(EVENTS.RESIZED, handleResized)
+    context.oniPDF.on(EVENTS.READY, handleReady)
+    window.addEventListener(EVENTS.KEYDOWN, handleArrowKey)
     context.oniPDF.on(EVENTS.RENDER, handleRender)
+    context.documentElement.addEventListener(EVENTS.SCROLL, handleScroll)
+    context.documentElement.addEventListener(EVENTS.SCROLLED, handleScrolled)
     return () => {
-      window.removeEventListener(EVENTS.KEYDOWN, handleArrowKey)
       window.removeEventListener(EVENTS.RESIZE, handleResize)
+      context.oniPDF.off(EVENTS.READY, handleReady)
+      window.removeEventListener(EVENTS.KEYDOWN, handleArrowKey)
+      context.oniPDF.off(EVENTS.RENDER, handleRender)
       context.documentElement.removeEventListener(EVENTS.SCROLL, handleScroll)
     }
   }, [])

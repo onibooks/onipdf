@@ -12,6 +12,12 @@ import type { Options } from './commands/render'
 import type { PageView } from './documents/createPageView'
 import type { Presentation } from './presentation'
 
+type Size = {
+  top: number
+  width: number
+  height: number
+}
+
 export type GlobalContext = {
   oniPDF: OniPDF
   worker: MuPDFWorker
@@ -21,13 +27,8 @@ export type GlobalContext = {
   documentElement: HTMLElement
   options: Options
   pageViews: PageView[]
+  pageSizes: Size[]
   presentation: Presentation
-  totalPages: number
-  // totalHeights: number
-  rootElementSize: {
-    width: number
-    height: number
-  }
   uid: number
 }
 
@@ -45,10 +46,8 @@ export const createContext = () => {
     documentElement: null as any,
     options: null as any,
     pageViews: [] as PageView[],
+    pageSizes: [] as Size[],
     presentation: null as any,
-    totalPages: -1 as number,
-    // totalHeights: -1 as number,
-    rootElementSize: null as any,
     uid,
   }
 

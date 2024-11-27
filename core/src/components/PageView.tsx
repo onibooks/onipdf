@@ -35,7 +35,6 @@ const PageView = ({
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const isRendered = useRef<boolean>(false)
   const aspectRatioRef = useRef<number>(-1)
-  const pageSizeRef = useRef<Size>({ width: 0, height: 0 })
 
   const renderedPages = new Set<number>()
   const renderingPages = new Set<number>()
@@ -99,11 +98,15 @@ const PageView = ({
       const pageWidth = rootWidth * aspectRatioRef.current!
       const pageHeight = (pageWidth / pageSize.width) * pageSize.height
       
-      pageSizeRef.current = {
+      const previousPage = context.pageSizes[pageIndex - 1]
+      const top = previousPage ? previousPage.top + previousPage.height : 0
+
+      context.pageSizes[pageIndex] = {
+        top,
         width: pageWidth,
         height: pageHeight
       }
-  
+
       const sectionVariables = {
         pageWidth: `${rootWidth}px`,
         pageHeight: `${pageHeight}px`
@@ -120,14 +123,23 @@ const PageView = ({
       const heightRatio = rootHeight / pageSize.height
       const rootScale = Math.min(widthRatio, heightRatio)
 
+      const pageWidth = pageSize.width * rootScale
+      const pageHeight = pageSize.height * rootScale
+
+      context.pageSizes[pageIndex] = {
+        top: 0,
+        width: pageWidth,
+        height: pageHeight
+      }
+
       const sectionVariables = {
         pageWidth: `${rootWidth}px`,
         pageHeight: `${rootHeight}px`
       }
 
       const containerVariables = {
-        pageWidth: `${pageSize.width * rootScale}px`,
-        pageHeight: `${pageSize.height * rootScale}px`
+        pageWidth: `${pageWidth}px`,
+        pageHeight: `${pageHeight}px`
       }
 
       setCssVariables(sectionVariables, pageSectionRef.current!)

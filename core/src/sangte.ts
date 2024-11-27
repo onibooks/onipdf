@@ -3,6 +3,7 @@ import { PageView } from './documents/createPageView'
 
 export type Sangte = {
   isLoad: boolean
+  isResize: boolean
   isRendered: boolean
   scale: number
 }
@@ -10,6 +11,7 @@ export type Sangte = {
 export const createSangte = () => {
   const sangte = createStore<Sangte>((set) => ({
     isLoad: false,
+    isResize: false,
     isRendered: false,
     scale: 1
   }))

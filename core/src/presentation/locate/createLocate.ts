@@ -1,18 +1,21 @@
+// 현재 위치와 페이지정보에 대해서 관리
+
 import { provider } from '../../provider'
 import { createStore } from 'zustand/vanilla'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { EVENTS } from '../../constants'
 
-// 현재 위치와 페이지정보에 대해서 관리
+type Size = {
+  width: number
+  height: number
+}
 
 export type LocateOptions = {
   currentPage?: number
   totalPages?: number
 }
 
-export type Locate = LocateOptions & {
-  
-}
+export type Locate = LocateOptions & {}
 
 export const createLocate = () => provider((context) => {
   const locate = createStore(
@@ -33,45 +36,57 @@ export const createLocate = () => provider((context) => {
     const { presentation, documentElement } = context
     const {
       flow,
-      rootWidth,
-      rootHeight
+      rootWidth
     } = presentation.layout()
-
+    
     if (flow === 'paginated') {
       documentElement.scrollLeft = pageNumber * rootWidth
     } else if (flow === 'scrolled') {
-      console.log(123123, pageNumber, rootHeight)
-      documentElement.scrollTop = pageNumber * rootHeight
+      const { isResize } = context.sangte.getState()
+      if (!isResize) {
+        documentElement.scrollTop = context.pageSizes[pageNumber]?.top
+      }
     }
   }
-  
-  const getCurrentPage = () => {
-    const { documentElement } = context
-    const {
-      flow,
-      rootWidth
-    } = context.presentation.layout()
 
-    if (flow === 'paginated') {
-      const { scrollLeft } = documentElement
-      const currentPage = Math.round(scrollLeft / rootWidth)
-      
-      return currentPage
-    } else {
-      // offset으로 설정하기
-      const { currentPage } = locate.getState()
-      
-      return currentPage
-    }
+  const getCurrentPage = () => {
+    const { flow } = context.presentation.layout()
+  
+    return flow === 'paginated'
+      ? getPaginatedCurrentPage()
+      : getScrolledCurrentPage()
   }
   
+  const getPaginatedCurrentPage = () => {
+    const { documentElement } = context
+    const { rootWidth } = context.presentation.layout()
+    const { scrollLeft } = documentElement
+
+    return Math.round(scrollLeft / rootWidth)
+  }
+  
+  const getScrolledCurrentPage = () => {
+    const { documentElement } = context
+    const { scrollTop } = documentElement
+    const pageSizes = context.pageSizes
+  
+    for (let i = 0; i < pageSizes.length; i++) {
+      const currentPageTop = pageSizes[i].top
+      const nextPageTop = pageSizes[i + 1]?.top
+  
+      if (scrollTop >= currentPageTop && scrollTop < nextPageTop) {
+        return i
+      }
+    }
+  }
+
   const handleRelocate = (event?: Event) => {
     const currentPage = getCurrentPage()
-    console.log('currentPage', currentPage)
-
+    
     locate.setState({
       currentPage
     })
+    moveToPage(currentPage!)
     
     if (event) {
       context.oniPDF.emit(EVENTS.RELOCATE)
@@ -81,13 +96,12 @@ export const createLocate = () => provider((context) => {
   const handleResize = (event?: Event) => {
     const { isRendered } = context.sangte.getState()
     if (!isRendered) return
-
-    const { currentPage } = locate.getState()
-    moveToPage(currentPage!)
+    
+    handleRelocate()
   }
 
-  context.oniPDF.on(EVENTS.SCROLL, handleRelocate)
   context.oniPDF.on(EVENTS.RESIZE, handleResize)
+  context.oniPDF.on(EVENTS.SCROLL, handleRelocate)
 
   const configure = (
     options: Locate
