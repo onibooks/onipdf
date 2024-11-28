@@ -40,6 +40,8 @@ const OniPDF = ({
   
   useEffect(() => {
     const handleResize = (event?: Event) => {
+      sangte.setState({ isResize: true })
+      
       const {
         rootWidth,
         rootHeight
@@ -60,18 +62,22 @@ const OniPDF = ({
       }
     }
     handleResize()
-
+    
     const handleResized = debounce((event?: Event) => {
+      sangte.setState({ isResize: false })
+      
       if (event) {
         oniPDF.emit(EVENTS.RESIZED, event)
       }
     }, 250)
-
+    
     const handleReady = (event?: Event) => {
+      sangte.setState({ isResize: false })
+
       context.presentation.locate({
         ...options.locate
       })
-
+      
       if (event) {
         oniPDF.emit(EVENTS.RENDER, event)
       }
@@ -107,28 +113,28 @@ const OniPDF = ({
     }
 
     const handleScroll = (event?: Event) => {
-      sangte.setState({ isResize: true })
-      
+      sangte.setState({ isScroll: true })
+
       if (event) {
         context.oniPDF.emit(EVENTS.SCROLL)
       }
     }
     
-    const handleScrolled = debounce((event?: Event) => {
-      sangte.setState({ isResize: false })
-
+    const handleScrolled = debounce((event?: Event) => {      
       if (event) {
-        context.oniPDF.emit(EVENTS.SCROLL)
+        context.oniPDF.emit(EVENTS.SCROLLED)
       }
+
+      sangte.setState({ isScroll: false })
     }, 250)
 
     window.addEventListener(EVENTS.RESIZE, handleResize)
-    window.addEventListener(EVENTS.RESIZED, handleResized)
+    window.addEventListener(EVENTS.RESIZE, handleResized)
     context.oniPDF.on(EVENTS.READY, handleReady)
     window.addEventListener(EVENTS.KEYDOWN, handleArrowKey)
     context.oniPDF.on(EVENTS.RENDER, handleRender)
     context.documentElement.addEventListener(EVENTS.SCROLL, handleScroll)
-    context.documentElement.addEventListener(EVENTS.SCROLLED, handleScrolled)
+    context.documentElement.addEventListener(EVENTS.SCROLL, handleScrolled)
     return () => {
       window.removeEventListener(EVENTS.RESIZE, handleResize)
       context.oniPDF.off(EVENTS.READY, handleReady)

@@ -11,5 +11,5 @@ export const setFlow = (context: GlobalContext) => (value: LayoutOptions['flow']
   removeClass(documentElement, 'scrolled')
   addClass(documentElement, value!)
 
-  oniPDF.emit(EVENTS.REFLOW)
+  // oniPDF.emit(EVENTS.REFLOW)
 }

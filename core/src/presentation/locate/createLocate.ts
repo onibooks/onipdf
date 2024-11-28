@@ -44,6 +44,8 @@ export const createLocate = () => provider((context) => {
 
   const moveToPage = (pageNumber: number) => {
     const currentPage = getValidPageNumber(pageNumber)
+    console.log(currentPage)
+
     const { presentation, documentElement } = context
     const {
       flow,
@@ -53,8 +55,8 @@ export const createLocate = () => provider((context) => {
     if (flow === 'paginated') {
       documentElement.scrollLeft = currentPage * rootWidth
     } else if (flow === 'scrolled') {
-      const { isResize } = context.sangte.getState()
-      if (!isResize) {
+      const { isScroll, isResize } = context.sangte.getState()
+      if (!isScroll) {
         documentElement.scrollTop = context.pageSizes[currentPage]?.top
       }
     }
@@ -69,18 +71,23 @@ export const createLocate = () => provider((context) => {
   }
   
   const getPaginatedCurrentPage = () => {
-    const { documentElement } = context
-    const { rootWidth } = context.presentation.layout()
+    const { documentElement, presentation, sangte } = context
     const { scrollLeft } = documentElement
+    const { rootWidth } = presentation.layout()
+    const currentPage = Math.round(scrollLeft / rootWidth)
+    
+    const { isResize } = sangte.getState()
+    if (isResize) {
+      moveToPage(currentPage)
+    }
 
-    return Math.round(scrollLeft / rootWidth)
+    return currentPage
   }
   
   const getScrolledCurrentPage = () => {
     const { documentElement } = context
     const { scrollTop } = documentElement
     const pageSizes = context.pageSizes
-    const { totalPages } = locate.getState()
   
     for (let i = 0; i < pageSizes.length; i++) {
       const currentPageTop = pageSizes[i].top
@@ -93,12 +100,14 @@ export const createLocate = () => provider((context) => {
   }
 
   const handleRelocate = (event?: Event) => {
+    const { isRendered } = context.sangte.getState()
+    if (!isRendered) return
+
     const currentPage = getCurrentPage()
     
     locate.setState({
       currentPage
     })
-    moveToPage(currentPage!)
     
     if (event) {
       context.oniPDF.emit(EVENTS.RELOCATE)
@@ -108,12 +117,18 @@ export const createLocate = () => provider((context) => {
   const handleResize = (event?: Event) => {
     const { isRendered } = context.sangte.getState()
     if (!isRendered) return
-    
+
     handleRelocate()
+  }
+
+  const handleRender = () => {
+    const { currentPage } = locate.getState()
+    moveToPage(currentPage!)
   }
 
   context.oniPDF.on(EVENTS.RESIZE, handleResize)
   context.oniPDF.on(EVENTS.SCROLL, handleRelocate)
+  context.oniPDF.on(EVENTS.RENDER, handleRender)
 
   const configure = (
     options: Locate
