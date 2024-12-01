@@ -21,7 +21,7 @@ export const createLocate = () => provider((context) => {
   let lastPage = 0
   const locate = createStore(
     subscribeWithSelector<Locate>(() => ({
-      currentPage: 0,
+      currentPage: -1,
       totalPages: 0
     }))
   )
@@ -44,7 +44,6 @@ export const createLocate = () => provider((context) => {
 
   const moveToPage = (pageNumber: number) => {
     const currentPage = getValidPageNumber(pageNumber)
-    console.log(currentPage)
 
     const { presentation, documentElement } = context
     const {
@@ -88,11 +87,11 @@ export const createLocate = () => provider((context) => {
     const { documentElement } = context
     const { scrollTop } = documentElement
     const pageSizes = context.pageSizes
-  
+    
     for (let i = 0; i < pageSizes.length; i++) {
-      const currentPageTop = pageSizes[i].top
-      const nextPageTop = pageSizes[i + 1]?.top
-  
+      const currentPageTop = Math.round(pageSizes[i].top * 10) / 10
+      const nextPageTop = Math.round(pageSizes[i + 1]?.top * 10) / 10
+
       if (scrollTop >= currentPageTop && scrollTop < nextPageTop) {
         return i
       }
@@ -104,13 +103,24 @@ export const createLocate = () => provider((context) => {
     if (!isRendered) return
 
     const currentPage = getCurrentPage()
-    
     locate.setState({
       currentPage
     })
-    
+
     if (event) {
       context.oniPDF.emit(EVENTS.RELOCATE)
+    }
+  }
+
+  const handleScroll = (event?: Event) => {
+    const currentPage = getCurrentPage()
+    locate.setState({
+      currentPage
+    })
+    console.log('handleScroll', currentPage)
+
+    if (event) {
+      context.oniPDF.emit(EVENTS.SCROLL)
     }
   }
   
@@ -121,14 +131,8 @@ export const createLocate = () => provider((context) => {
     handleRelocate()
   }
 
-  const handleRender = () => {
-    const { currentPage } = locate.getState()
-    moveToPage(currentPage!)
-  }
-
   context.oniPDF.on(EVENTS.RESIZE, handleResize)
-  context.oniPDF.on(EVENTS.SCROLL, handleRelocate)
-  context.oniPDF.on(EVENTS.RENDER, handleRender)
+  context.oniPDF.on(EVENTS.SCROLL, handleScroll)
 
   const configure = (
     options: Locate

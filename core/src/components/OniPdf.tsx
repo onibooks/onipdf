@@ -27,6 +27,7 @@ const OniPDF = ({
   const [spread, setSpread] = useState('')
 
   useEffect(() => {
+    // DOM 준비
     if (oniDocumentRef.current) {
       context.documentElement = oniDocumentRef.current
 
@@ -74,12 +75,23 @@ const OniPDF = ({
     const handleReady = (event?: Event) => {
       sangte.setState({ isResize: false })
 
+      // 현재 페이지 업데이트
       context.presentation.locate({
         ...options.locate
       })
-      
+
       if (event) {
         oniPDF.emit(EVENTS.RENDER, event)
+      }
+    }
+
+    const handleRender = (event?: Event) => {
+      sangte.setState({
+        isRendered: true
+      })
+
+      if (event) {
+        oniPDF.emit(EVENTS.RENDERED, event)
       }
     }
 
@@ -106,12 +118,6 @@ const OniPDF = ({
       })
     }
 
-    const handleRender = () => {
-      sangte.setState({
-        isRendered: true
-      })
-    }
-
     const handleScroll = (event?: Event) => {
       sangte.setState({ isScroll: true })
 
@@ -121,11 +127,11 @@ const OniPDF = ({
     }
     
     const handleScrolled = debounce((event?: Event) => {      
+      sangte.setState({ isScroll: false })
+      
       if (event) {
         context.oniPDF.emit(EVENTS.SCROLLED)
       }
-
-      sangte.setState({ isScroll: false })
     }, 250)
 
     window.addEventListener(EVENTS.RESIZE, handleResize)

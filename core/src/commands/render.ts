@@ -2,7 +2,7 @@ import createEmotion from '@emotion/css/create-instance'
 import { h, render as prender } from 'preact'
 import { warn } from '../helpers'
 
-import OniPDF from '../components/OniPDF'
+import OniPDF from '../components/OniPdf'
 
 import type { GlobalContext } from '../provider'
 import type { LayoutOptions } from '../presentation/layout/createLayout'

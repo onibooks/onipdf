@@ -1,6 +1,7 @@
 export type Sangte = {
     isLoad: boolean;
     isResize: boolean;
+    isScroll: boolean;
     isRendered: boolean;
     scale: number;
 };

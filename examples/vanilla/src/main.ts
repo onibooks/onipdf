@@ -8,7 +8,7 @@ type ViewElement = FlowType | SpreadType
 
 const renderOptions = {
   locate: {
-    currentPage: 4,
+    currentPage: 2,
   },
   layout: {
     flow: 'scrolled' as FlowType,
@@ -18,8 +18,8 @@ const renderOptions = {
 } as const
 
 async function initializePdfViewer(): Promise<OniPDF> {
-  const oniPdf: OniPDF = await createBook('/books/대치동 아이들은 이렇게 공부합니다.pdf', {
-  // const oniPdf: OniPDF = await createBook('/books/179489140.pdf', {
+  // const oniPdf: OniPDF = await createBook('/books/대치동 아이들은 이렇게 공부합니다.pdf', {
+  const oniPdf: OniPDF = await createBook('/books/179489140.pdf', {
     muPDFSrc: '/lib/mupdf/mupdf.js',
   })
 
@@ -27,16 +27,16 @@ async function initializePdfViewer(): Promise<OniPDF> {
   window.oniPdf = oniPdf
 
   oniPdf.on(EVENTS.OPEN, async () => {
-    console.log('Document opened')
+    // console.log('Document opened')
     await oniPdf.render(document.querySelector('.document-container')!, renderOptions)
   })
 
   oniPdf.on(EVENTS.READY, () => {
-    console.log('Document ready')
+    // console.log('Document ready')
   })
 
   oniPdf.on(EVENTS.RENDER, async () => {
-    console.log('Rendered page')
+    // console.log('Rendered page')
     // @ts-ignore
     const oniPdf = window.oniPdf as OniPDF
     const { flow, spread } = oniPdf.layout()
@@ -91,7 +91,7 @@ function updateZoomDisplay (): void {
   const oniPdf = window.oniPdf as OniPDF
   const { zoom } = oniPdf.layout()
   
-  console.log(Math.round(zoom! * 100).toString())
+  // console.log(Math.round(zoom! * 100).toString())
 }
 
 (async () => {
