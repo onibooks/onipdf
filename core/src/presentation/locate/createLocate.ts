@@ -89,9 +89,9 @@ export const createLocate = () => provider((context) => {
     const pageSizes = context.pageSizes
     
     for (let i = 0; i < pageSizes.length; i++) {
-      const currentPageTop = Math.round(pageSizes[i].top * 10) / 10
-      const nextPageTop = Math.round(pageSizes[i + 1]?.top * 10) / 10
-
+      const currentPageTop = Math.round(pageSizes[i].top) * 10 / 10
+      const nextPageTop = Math.round(pageSizes[i + 1]?.top) * 10 / 10
+      
       if (scrollTop >= currentPageTop && scrollTop < nextPageTop) {
         return i
       }

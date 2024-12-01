@@ -75,7 +75,6 @@ const OniPDF = ({
     const handleReady = (event?: Event) => {
       sangte.setState({ isResize: false })
 
-      // 현재 페이지 업데이트
       context.presentation.locate({
         ...options.locate
       })

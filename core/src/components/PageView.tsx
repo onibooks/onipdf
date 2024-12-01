@@ -102,7 +102,7 @@ const PageView = ({
       const top = previousPage ? previousPage.top + previousPage.height : 0
 
       context.pageSizes[pageIndex] = {
-        top,
+        top: Math.round(top) * 10 / 10,
         width: pageWidth,
         height: pageHeight
       }
