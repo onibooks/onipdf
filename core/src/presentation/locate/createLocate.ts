@@ -86,16 +86,23 @@ export const createLocate = () => provider((context) => {
   const getScrolledCurrentPage = () => {
     const { documentElement } = context
     const { scrollTop } = documentElement
+    const { totalPages } = locate.getState()
     const pageSizes = context.pageSizes
     
     for (let i = 0; i < pageSizes.length; i++) {
-      const currentPageTop = Math.round(pageSizes[i].top) * 10 / 10
-      const nextPageTop = Math.round(pageSizes[i + 1]?.top) * 10 / 10
+      const currentPageTop = pageSizes[i]?.top !== undefined 
+      ? Math.round(pageSizes[i].top * 10) / 10
+      : 0
+      const nextPageTop = pageSizes[i + 1]?.top !== undefined
+      ? Math.round(pageSizes[i + 1].top * 10) / 10
+      : Math.round(pageSizes[totalPages! - 1].top * 10) / 10
       
       if (scrollTop >= currentPageTop && scrollTop < nextPageTop) {
         return i
       }
     }
+
+    return pageSizes.length - 1
   }
 
   const handleRelocate = (event?: Event) => {
@@ -117,7 +124,7 @@ export const createLocate = () => provider((context) => {
     locate.setState({
       currentPage
     })
-    console.log('handleScroll', currentPage)
+    console.log('currentPage: ', currentPage)
 
     if (event) {
       context.oniPDF.emit(EVENTS.SCROLL)
