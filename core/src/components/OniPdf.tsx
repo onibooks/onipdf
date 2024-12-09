@@ -15,6 +15,8 @@ type OniPDFProps = {
   context: GlobalContext
 }
 
+const debounceTimeoutDelay = 350
+
 const OniPDF = ({
   context
 }: OniPDFProps) => {
@@ -40,9 +42,7 @@ const OniPDF = ({
   }, [])
   
   useEffect(() => {
-    const handleResize = (event?: Event) => {
-      sangte.setState({ isResize: true })
-      
+    const handleResize = (event?: Event) => {      
       const {
         rootWidth,
         rootHeight
@@ -59,18 +59,18 @@ const OniPDF = ({
       setCssVariables(rootVariables, oniDocumentRef.current as HTMLElement)
       
       if (event) {
+        context.sangte.setState({ isResize: true })
         oniPDF.emit(EVENTS.RESIZE, event)
       }
     }
     handleResize()
-    
+
     const handleResized = debounce((event?: Event) => {
-      sangte.setState({ isResize: false })
-      
       if (event) {
-        oniPDF.emit(EVENTS.RESIZED, event)
+        context.sangte.setState({ isResize: false })
+        oniPDF.emit(EVENTS.RESIZED)
       }
-    }, 250)
+    }, debounceTimeoutDelay)
     
     const handleReady = (event?: Event) => {
       sangte.setState({ isResize: false })
@@ -118,23 +118,21 @@ const OniPDF = ({
     }
 
     const handleScroll = (event?: Event) => {
-      sangte.setState({ isScroll: true })
-
       if (event) {
+        context.sangte.setState({ isScroll: true })
         context.oniPDF.emit(EVENTS.SCROLL)
       }
     }
     
     const handleScrolled = debounce((event?: Event) => {      
-      sangte.setState({ isScroll: false })
-      
       if (event) {
+        context.sangte.setState({ isScroll: false })
         context.oniPDF.emit(EVENTS.SCROLLED)
       }
-    }, 250)
+    }, debounceTimeoutDelay)
 
-    window.addEventListener(EVENTS.RESIZE, handleResize)
-    window.addEventListener(EVENTS.RESIZE, handleResized)
+    window.addEventListener('resize', handleResize)
+    window.addEventListener('resize', handleResized)
     context.oniPDF.on(EVENTS.READY, handleReady)
     window.addEventListener(EVENTS.KEYDOWN, handleArrowKey)
     context.oniPDF.on(EVENTS.RENDER, handleRender)
@@ -185,8 +183,8 @@ const createClasses = (
     outline: none;
     cursor: default;
     box-sizing: border-box;
-    width:  var(--root-width) !important;
-    height:  var(--root-height) !important;
+    width: var(--root-width) !important;
+    height: var(--root-height) !important;
 
     &.scrolled {
       overflow: auto;

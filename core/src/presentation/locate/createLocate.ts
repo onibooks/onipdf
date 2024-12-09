@@ -55,7 +55,7 @@ export const createLocate = () => provider((context) => {
       documentElement.scrollLeft = currentPage * rootWidth
     } else if (flow === 'scrolled') {
       const { isScroll, isResize } = context.sangte.getState()
-      if (!isScroll) {
+      if (!isScroll && !isResize) {
         documentElement.scrollTop = context.pageSizes[currentPage]?.top
       }
     }
@@ -120,12 +120,17 @@ export const createLocate = () => provider((context) => {
   }
 
   const handleScroll = (event?: Event) => {
+    const { isResize, isRendered } = context.sangte.getState()
+    if (isResize || !isRendered) return
+    
+    console.log('handleScroll')
+    
     const currentPage = getCurrentPage()
     locate.setState({
       currentPage
     })
     console.log('currentPage: ', currentPage)
-
+    
     if (event) {
       context.oniPDF.emit(EVENTS.SCROLL)
     }
@@ -134,7 +139,7 @@ export const createLocate = () => provider((context) => {
   const handleResize = (event?: Event) => {
     const { isRendered } = context.sangte.getState()
     if (!isRendered) return
-
+    
     handleRelocate()
   }
 

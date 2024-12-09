@@ -7,6 +7,7 @@ export declare const EVENTS: {
     RESIZE: string;
     RESIZED: string;
     RENDER: string;
+    RENDERED: string;
     KEYDOWN: string;
     SCROLL: string;
     SCROLLED: string;

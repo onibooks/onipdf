@@ -18,6 +18,7 @@ type PageViewProps = {
   pageSize: Size
   pageIndex: number
   pageRender: (value: unknown) => void
+  onUpdateComplete?: any
 }
 
 const PageView = ({
@@ -25,11 +26,13 @@ const PageView = ({
   pageMaxSize,
   pageSize,
   pageIndex,
-  pageRender
+  pageRender,
+  onUpdateComplete
 }: PageViewProps) => {
   const { worker } = context
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   
+  const observerRef = useRef<IntersectionObserver | null>(null)
   const pageSectionRef = useRef<HTMLDivElement | null>(null)
   const pageContainerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -71,20 +74,32 @@ const PageView = ({
   }
 
   const setupIntersectionObserver = () => {
-    const observer = new IntersectionObserver(debounce((entries) => {
+    observerRef.current = new IntersectionObserver((entries) => {
       entries.forEach(async (entry: IntersectionObserverEntry) => {
         if (entry.isIntersecting) {
           drawPageAsPixmap()
         } else {
-          clearPageAsPixmap()
+          // clearPageAsPixmap()
         }
       })
-    }, 200), {
+    }, {
       root: context.documentElement,
       rootMargin: '200%'
     })
 
-    observer.observe(pageSectionRef.current!)
+    setPageObserver()
+  }
+
+  const setPageObserver = () => {
+    observerRef.current?.observe(pageSectionRef.current!)
+    
+    return Promise.resolve()
+  }
+  
+  const setPageUnobserver = () => {
+    observerRef.current?.disconnect()
+
+    return Promise.resolve()
   }
 
   const updatePageSize = () => {
@@ -145,6 +160,8 @@ const PageView = ({
       setCssVariables(sectionVariables, pageSectionRef.current!)
       setCssVariables(containerVariables, pageContainerRef.current!)
     }
+
+    return Promise.resolve()
   }
 
   const setPageSize = () => {
@@ -172,12 +189,29 @@ const PageView = ({
 
   useEffect(() => {
     const handleResize = (event?: Event) => {
+      isRendered.current = false
+      setPageUnobserver()
+
+       // 이게 완전히 끝나고 isRendered true로 바꿔주기
       updatePageSize()
+      // onUpdateComplete()
     }
 
-    context.oniPDF.on(EVENTS.RESIZE, handleResize)
+    const handleResized = debounce((event?: Event) => {
+      setPageObserver()
+    }, 350)
+
+    // context.oniPDF.on(EVENTS.RESIZE, () => {
+    //   console.log(1123)
+    // })
+    // context.oniPDF.on(EVENTS.RESIZED, handleResized) // 왜 여러번 실행되는거지?
+    window.addEventListener('resize', handleResize)
+    window.addEventListener('resize', handleResized)
     return () => {
-      context.oniPDF.off(EVENTS.RESIZE, handleResize)
+      // context.oniPDF.off(EVENTS.RESIZE, handleResize)
+      // context.oniPDF.off(EVENTS.RESIZED, handleResized)
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('resize', handleResized)
     }
   }, [])
 
@@ -191,7 +225,7 @@ const PageView = ({
     const handleReady = () => {
       setupIntersectionObserver()
     }
-
+    
     context.oniPDF.on(EVENTS.RENDER, handleReady)
   }, [])
 
@@ -220,8 +254,8 @@ const createClasses = (
   PageSection: css`
     position: relative;
     /* width, height 지정 안해주는게 좀 더 빠른 것 같기도... */
-    width: var(--page-width) !important;
-    height: var(--page-height) !important;
+    /* width: var(--page-width) !important;
+    height: var(--page-height) !important; */
     display: flex;
     align-items: center;
     justify-content: center;
