@@ -29,7 +29,7 @@ const PageView = ({
   pageRender,
   onUpdateComplete
 }: PageViewProps) => {
-  const { oniPDF, options, worker, presentation, documentElement, pageSizes } = context
+  const { oniPDF, options, worker, presentation, documentElement, pageView } = context
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   
   const observerRef = useRef<IntersectionObserver | null>(null)
@@ -39,24 +39,33 @@ const PageView = ({
   const isRendered = useRef<boolean>(false)
   const aspectRatioRef = useRef<number>(-1)
 
-  const renderedPages = new Set<number>()
-  const renderingPages = new Set<number>()
-
   let canvasPixels: ImageData
   let canvasContext: CanvasRenderingContext2D | null
 
+  const renderPage = () => {
+    if (pageView[pageIndex]?.cached) {
+      restoreCanvasSize()
+      console.log('캐싱 데이터 사용')
+    } else {
+      drawPageAsPixmap()
+      console.log('새 페이지 렌더링')
+    }
+  }
+
   const drawPageAsPixmap = async (page = pageIndex) => {
     if (isRendered.current) return
+    if (pageView[pageIndex].cached) return
     
-    try {
-      const canvas = await worker.getCanvasPixels(page, 96 * devicePixelRatio)
+    try {    
+      canvasPixels = await worker.getCanvasPixels(page, 96 * devicePixelRatio)
       const canvasNode = canvasRef.current!
-      const canvasContext = canvasRef.current?.getContext('2d')
+      canvasContext = canvasRef.current?.getContext('2d')!
       
-      canvasNode.width = canvas.width
-      canvasNode.height = canvas.height
-      canvasContext?.putImageData(canvas, 0, 0)
-
+      canvasNode.width = canvasPixels.width
+      canvasNode.height = canvasPixels.height
+      canvasContext?.putImageData(canvasPixels, 0, 0)
+  
+      context.pageView[pageIndex].cached = true
       isRendered.current = true
     } catch (error) {
       console.error('Error rendering to canvas:', error)
@@ -73,13 +82,24 @@ const PageView = ({
     isRendered.current = false
   }
 
+  const restoreCanvasSize = () => {
+    const canvasNode = canvasRef.current!
+
+    canvasNode.width = canvasPixels.width
+    canvasNode.height = canvasPixels.height
+
+    if (canvasContext) {
+      canvasContext.putImageData(canvasPixels, 0, 0)
+    }
+  }
+
   const setupIntersectionObserver = () => {
     observerRef.current = new IntersectionObserver((entries) => {
       entries.forEach(async (entry: IntersectionObserverEntry) => {
         if (entry.isIntersecting) {
-          drawPageAsPixmap()
+          renderPage()
         } else {
-          // clearPageAsPixmap()
+          clearPageAsPixmap()
         }
       })
     }, {
@@ -108,7 +128,7 @@ const PageView = ({
     const scrollValue =
       flow === 'paginated'
         ? currentPage! * rootWidth
-        : pageSizes[currentPage!]?.top
+        : pageView[currentPage!]?.size.top
 
     if (flow === 'paginated') {
       documentElement.scrollLeft = scrollValue
@@ -128,10 +148,10 @@ const PageView = ({
       const pageWidth = rootWidth * aspectRatioRef.current!
       const pageHeight = (pageWidth / pageSize.width) * pageSize.height
       
-      const previousPage = pageSizes[pageIndex - 1]
+      const previousPage = pageView[pageIndex - 1]?.size
       const top = previousPage ? previousPage.top + previousPage.height : 0
 
-      pageSizes[pageIndex] = {
+      context.pageView[pageIndex].size = {
         top: Math.round(top) * 10 / 10,
         width: pageWidth,
         height: pageHeight
@@ -156,7 +176,7 @@ const PageView = ({
       const pageWidth = pageSize.width * rootScale
       const pageHeight = pageSize.height * rootScale
 
-      pageSizes[pageIndex] = {
+      pageView[pageIndex].size = {
         top: 0,
         width: pageWidth,
         height: pageHeight

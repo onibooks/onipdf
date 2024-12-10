@@ -56,7 +56,7 @@ export const createLocate = () => provider((context) => {
     } else if (flow === 'scrolled') {
       const { isScroll, isResize } = context.sangte.getState()
       if (!isScroll && !isResize) {
-        documentElement.scrollTop = context.pageSizes[currentPage]?.top
+        documentElement.scrollTop = context.pageView[currentPage]?.size.top
       }
     }
   }
@@ -87,15 +87,15 @@ export const createLocate = () => provider((context) => {
     const { documentElement } = context
     const { scrollTop } = documentElement
     const { totalPages } = locate.getState()
-    const pageSizes = context.pageSizes
+    const pageSizes = context.pageView
     
     for (let i = 0; i < pageSizes.length; i++) {
-      const currentPageTop = pageSizes[i]?.top !== undefined 
-      ? Math.round(pageSizes[i].top * 10) / 10
+      const currentPageTop = pageSizes[i]?.size.top !== undefined 
+      ? Math.round(pageSizes[i].size.top * 10) / 10
       : 0
-      const nextPageTop = pageSizes[i + 1]?.top !== undefined
-      ? Math.round(pageSizes[i + 1].top * 10) / 10
-      : Math.round(pageSizes[totalPages! - 1].top * 10) / 10
+      const nextPageTop = pageSizes[i + 1]?.size.top !== undefined
+      ? Math.round(pageSizes[i + 1].size.top * 10) / 10
+      : Math.round(pageSizes[totalPages! - 1].size.top * 10) / 10
       
       if (scrollTop >= currentPageTop && scrollTop < nextPageTop) {
         return i
