@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useState, useRef, useMemo, useEffect } from 'preact/hooks'
 import { EVENTS } from '../constants'
 import { setCssVariables } from '../helpers'
+import { debounce, addClass, removeClass } from '../utils'
 
 import Single from './Spread/Single'
 import Double from './Spread/Double'
@@ -9,7 +10,6 @@ import Double from './Spread/Double'
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
 import type { Options } from '../commands/render'
-import { debounce } from '../utils/debounce'
 
 type OniPDFProps = {
   context: GlobalContext
@@ -20,9 +20,10 @@ const debounceTimeoutDelay = 350
 const OniPDF = ({
   context
 }: OniPDFProps) => {
-  const { oniPDF, presentation, options, sangte } = context
+  const { presentation, options } = context
   const classes = useMemo(() => createClasses(context.emotion.css, options), [options])
 
+  const oniDimRef = useRef<HTMLDivElement>(null)
   const oniDocumentRef = useRef<HTMLDivElement>(null)
   const oniContainerRef = useRef<HTMLDivElement>(null)
   
@@ -33,7 +34,7 @@ const OniPDF = ({
     if (oniDocumentRef.current) {
       context.documentElement = oniDocumentRef.current
 
-      const { spread } = context.presentation.layout({
+      const { spread } = presentation.layout({
         ...options.layout
       })
 
@@ -42,13 +43,27 @@ const OniPDF = ({
   }, [])
   
   useEffect(() => {
+    const { oniPDF, rootElement, documentElement, sangte, presentation } = context
+    const dimElement = oniDimRef.current as Element
+    console.log(dimElement)
+
+    const setResizeState = () => {
+      sangte.setState({ isResize: true })
+      addClass(dimElement, 'is-resize')
+    }
+
+    const unsetResizeState = () => {
+      sangte.setState({ isResize: false })
+      removeClass(dimElement, 'is-resize')
+    }
+
     const handleResize = (event?: Event) => {      
       const {
         rootWidth,
         rootHeight
       } = presentation.layout({
-        width: context.rootElement.clientWidth,
-        height: context.rootElement.clientHeight
+        width: rootElement.clientWidth,
+        height: rootElement.clientHeight
       })
       
       const rootVariables = {
@@ -59,7 +74,7 @@ const OniPDF = ({
       setCssVariables(rootVariables, oniDocumentRef.current as HTMLElement)
       
       if (event) {
-        context.sangte.setState({ isResize: true })
+        setResizeState()
         oniPDF.emit(EVENTS.RESIZE, event)
       }
     }
@@ -67,7 +82,7 @@ const OniPDF = ({
 
     const handleResized = debounce((event?: Event) => {
       if (event) {
-        context.sangte.setState({ isResize: false })
+        unsetResizeState()
         oniPDF.emit(EVENTS.RESIZED)
       }
     }, debounceTimeoutDelay)
@@ -75,7 +90,7 @@ const OniPDF = ({
     const handleReady = (event?: Event) => {
       sangte.setState({ isResize: false })
 
-      context.presentation.locate({
+      presentation.locate({
         ...options.locate
       })
 
@@ -119,31 +134,32 @@ const OniPDF = ({
 
     const handleScroll = (event?: Event) => {
       if (event) {
-        context.sangte.setState({ isScroll: true })
-        context.oniPDF.emit(EVENTS.SCROLL)
+        sangte.setState({ isScroll: true })
+        oniPDF.emit(EVENTS.SCROLL)
       }
     }
     
     const handleScrolled = debounce((event?: Event) => {      
       if (event) {
-        context.sangte.setState({ isScroll: false })
-        context.oniPDF.emit(EVENTS.SCROLLED)
+        sangte.setState({ isScroll: false })
+        oniPDF.emit(EVENTS.SCROLLED)
       }
     }, debounceTimeoutDelay)
 
     window.addEventListener('resize', handleResize)
     window.addEventListener('resize', handleResized)
-    context.oniPDF.on(EVENTS.READY, handleReady)
+    oniPDF.on(EVENTS.READY, handleReady)
     window.addEventListener(EVENTS.KEYDOWN, handleArrowKey)
-    context.oniPDF.on(EVENTS.RENDER, handleRender)
-    context.documentElement.addEventListener(EVENTS.SCROLL, handleScroll)
-    context.documentElement.addEventListener(EVENTS.SCROLL, handleScrolled)
+    oniPDF.on(EVENTS.RENDER, handleRender)
+    documentElement.addEventListener(EVENTS.SCROLL, handleScroll)
+    documentElement.addEventListener(EVENTS.SCROLL, handleScrolled)
+
     return () => {
       window.removeEventListener(EVENTS.RESIZE, handleResize)
-      context.oniPDF.off(EVENTS.READY, handleReady)
+      oniPDF.off(EVENTS.READY, handleReady)
       window.removeEventListener(EVENTS.KEYDOWN, handleArrowKey)
-      context.oniPDF.off(EVENTS.RENDER, handleRender)
-      context.documentElement.removeEventListener(EVENTS.SCROLL, handleScroll)
+      oniPDF.off(EVENTS.RENDER, handleRender)
+      documentElement.removeEventListener(EVENTS.SCROLL, handleScroll)
     }
   }, [])
 
@@ -151,11 +167,16 @@ const OniPDF = ({
     <div
       class={clsx('oni-document', classes.OniDocument)}
       ref={oniDocumentRef}
-      >
+    >
+      <div 
+        class={clsx('oni-dim', classes.OniDim)}
+        ref={oniDimRef}
+      / >
+
       <div
         className={clsx('oni-container', classes.OniContainer)}
         ref={oniContainerRef}
-      >
+        >
         {spread === 'single'
           ? (<Single context={context} />)
           : <Double context={context} />
@@ -180,6 +201,7 @@ const createClasses = (
   `,
 
   OniDocument: css`
+    position: relative;
     outline: none;
     cursor: default;
     box-sizing: border-box;
@@ -196,13 +218,27 @@ const createClasses = (
 
   OniContainer: css`
     position: relative;
-    /* overflow: hidden; */
-    /* will-change: transform; */
     width: var(--total-width) !important;
-    /* height: 100%; */
   
     .scrolled & {
       margin: 0 auto;
+    }
+  `,
+
+  OniDim: css`
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .75);
+    pointer-events: auto;
+    opacity: 0;
+    transition: opacity 0.45s;
+
+    &.is-resize {
+      opacity: 1;
     }
   `
 })

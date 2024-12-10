@@ -1,5 +1,7 @@
 import { createStore } from 'zustand/vanilla'
 
+import { subscribeWithSelector } from 'zustand/middleware'
+
 export type Sangte = {
   isLoad: boolean
   isResize: boolean

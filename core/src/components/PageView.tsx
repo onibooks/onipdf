@@ -192,26 +192,19 @@ const PageView = ({
       isRendered.current = false
       setPageUnobserver()
 
-       // 이게 완전히 끝나고 isRendered true로 바꿔주기
       updatePageSize()
-      // onUpdateComplete()
     }
-
+    
     const handleResized = debounce((event?: Event) => {
       setPageObserver()
+      context.oniPDF.emit(EVENTS.REFLOW)
     }, 350)
 
-    // context.oniPDF.on(EVENTS.RESIZE, () => {
-    //   console.log(1123)
-    // })
-    // context.oniPDF.on(EVENTS.RESIZED, handleResized) // 왜 여러번 실행되는거지?
-    window.addEventListener('resize', handleResize)
-    window.addEventListener('resize', handleResized)
+    context.oniPDF.on(EVENTS.RESIZE, handleResize)
+    context.oniPDF.on(EVENTS.RESIZED, handleResized)
     return () => {
-      // context.oniPDF.off(EVENTS.RESIZE, handleResize)
-      // context.oniPDF.off(EVENTS.RESIZED, handleResized)
-      window.removeEventListener('resize', handleResize)
-      window.removeEventListener('resize', handleResized)
+      context.oniPDF.off(EVENTS.RESIZE, handleResize)
+      context.oniPDF.off(EVENTS.RESIZED, handleResized)
     }
   }, [])
 
@@ -253,9 +246,8 @@ const createClasses = (
 ) => ({
   PageSection: css`
     position: relative;
-    /* width, height 지정 안해주는게 좀 더 빠른 것 같기도... */
-    /* width: var(--page-width) !important;
-    height: var(--page-height) !important; */
+    width: var(--page-width) !important;
+    height: var(--page-height) !important;
     display: flex;
     align-items: center;
     justify-content: center;
