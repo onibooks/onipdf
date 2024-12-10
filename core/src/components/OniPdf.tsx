@@ -44,17 +44,16 @@ const OniPDF = ({
   
   useEffect(() => {
     const { oniPDF, rootElement, documentElement, sangte, presentation } = context
-    const dimElement = oniDimRef.current as Element
-    console.log(dimElement)
+    // const dimElement = oniDimRef.current as Element
 
     const setResizeState = () => {
       sangte.setState({ isResize: true })
-      addClass(dimElement, 'is-resize')
+      addClass(documentElement, 'is-resize')
     }
 
     const unsetResizeState = () => {
       sangte.setState({ isResize: false })
-      removeClass(dimElement, 'is-resize')
+      removeClass(documentElement, 'is-resize')
     }
 
     const handleResize = (event?: Event) => {      
@@ -168,10 +167,10 @@ const OniPDF = ({
       class={clsx('oni-document', classes.OniDocument)}
       ref={oniDocumentRef}
     >
-      <div 
+      {/* <div 
         class={clsx('oni-dim', classes.OniDim)}
         ref={oniDimRef}
-      / >
+      / > */}
 
       <div
         className={clsx('oni-container', classes.OniContainer)}
@@ -232,7 +231,7 @@ const createClasses = (
     z-index: 10;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, .75);
+    background-color: rgba(250, 250, 250, 0.5);
     pointer-events: auto;
     opacity: 0;
     transition: opacity 0.45s;

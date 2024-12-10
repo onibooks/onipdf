@@ -44,8 +44,7 @@ export const createLocate = () => provider((context) => {
 
   const moveToPage = (pageNumber: number) => {
     const currentPage = getValidPageNumber(pageNumber)
-    console.log('moveToPage', currentPage)
-
+    
     const { presentation, documentElement } = context
     const {
       flow,
@@ -107,7 +106,7 @@ export const createLocate = () => provider((context) => {
   }
 
   const handleRelocate = (event?: Event) => {
-    // 강제 레이아웃일 때는 타지 않도록..?
+    // setFlow -> forceReflow 일 때는 해당 로직이 실행되지 않도록 한다.
     const { isForceReflow } = event as Event & { isForceReflow: boolean }
     if (isForceReflow) return
 
@@ -115,7 +114,6 @@ export const createLocate = () => provider((context) => {
     if (!isRendered) return
 
     const currentPage = getCurrentPage()
-    console.log('currentPage: ', currentPage)
     locate.setState({
       currentPage
     })
@@ -129,13 +127,10 @@ export const createLocate = () => provider((context) => {
     const { isResize, isRendered } = context.sangte.getState()
     if (isResize || !isRendered) return
     
-    console.log('handleScroll')
-    
     const currentPage = getCurrentPage()
     locate.setState({
       currentPage
     })
-    console.log('currentPage: ', currentPage)
     
     if (event) {
       context.oniPDF.emit(EVENTS.SCROLL)

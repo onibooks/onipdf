@@ -29,7 +29,7 @@ const PageView = ({
   pageRender,
   onUpdateComplete
 }: PageViewProps) => {
-  const { worker } = context
+  const { oniPDF, options, worker, presentation, documentElement, pageSizes } = context
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   
   const observerRef = useRef<IntersectionObserver | null>(null)
@@ -102,21 +102,36 @@ const PageView = ({
     return Promise.resolve()
   }
 
+  const setPagePosition = () => {
+    const { currentPage } = context.presentation.locate()
+    const { rootWidth, flow } = presentation.layout()
+    const scrollValue =
+      flow === 'paginated'
+        ? currentPage! * rootWidth
+        : pageSizes[currentPage!]?.top
+
+    if (flow === 'paginated') {
+      documentElement.scrollLeft = scrollValue
+    } else {
+      documentElement.scrollTop = scrollValue
+    }
+  }
+
   const updatePageSize = () => {
     const {
       flow,
       rootWidth,
       rootHeight
-    } = context.presentation.layout()
+    } = presentation.layout()
     
     if (flow === 'scrolled') {
       const pageWidth = rootWidth * aspectRatioRef.current!
       const pageHeight = (pageWidth / pageSize.width) * pageSize.height
       
-      const previousPage = context.pageSizes[pageIndex - 1]
+      const previousPage = pageSizes[pageIndex - 1]
       const top = previousPage ? previousPage.top + previousPage.height : 0
 
-      context.pageSizes[pageIndex] = {
+      pageSizes[pageIndex] = {
         top: Math.round(top) * 10 / 10,
         width: pageWidth,
         height: pageHeight
@@ -141,7 +156,7 @@ const PageView = ({
       const pageWidth = pageSize.width * rootScale
       const pageHeight = pageSize.height * rootScale
 
-      context.pageSizes[pageIndex] = {
+      pageSizes[pageIndex] = {
         top: 0,
         width: pageWidth,
         height: pageHeight
@@ -165,7 +180,7 @@ const PageView = ({
   }
 
   const setPageSize = () => {
-    const { flow } = context.presentation.layout()
+    const { flow } = presentation.layout()
     if (flow === 'scrolled') {
       const maxWidth = pageMaxSize.width
       const baseWidth = pageSize.width
@@ -181,7 +196,7 @@ const PageView = ({
   }
 
   const preRender = () => {
-    const { currentPage } = context.options.locate!
+    const { currentPage } = options.locate!
     if (currentPage === pageIndex) {
       drawPageAsPixmap()
     }
@@ -193,18 +208,19 @@ const PageView = ({
       setPageUnobserver()
 
       updatePageSize()
+      .then(() => setPagePosition())
     }
     
     const handleResized = debounce((event?: Event) => {
       setPageObserver()
-      context.oniPDF.emit(EVENTS.REFLOW)
+      oniPDF.emit(EVENTS.REFLOW)
     }, 350)
 
-    context.oniPDF.on(EVENTS.RESIZE, handleResize)
-    context.oniPDF.on(EVENTS.RESIZED, handleResized)
+    oniPDF.on(EVENTS.RESIZE, handleResize)
+    oniPDF.on(EVENTS.RESIZED, handleResized)
     return () => {
-      context.oniPDF.off(EVENTS.RESIZE, handleResize)
-      context.oniPDF.off(EVENTS.RESIZED, handleResized)
+      oniPDF.off(EVENTS.RESIZE, handleResize)
+      oniPDF.off(EVENTS.RESIZED, handleResized)
     }
   }, [])
 

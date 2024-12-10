@@ -63,25 +63,22 @@ const Single = ({
   }, [])
 
   useEffect(() => {
-    let count = 0
-    
-    context.oniPDF.on(EVENTS.REFLOW, (event?: Event) => {
-      const { totalPages, currentPage } = context.presentation.locate()
-      count++
-
-      if (count === totalPages) {
-        const { rootWidth, flow } = context.presentation.layout()
-        if (flow === 'paginated') {
-          context.documentElement.scrollLeft = currentPage! * rootWidth
-        } else {
-          context.documentElement.scrollTop = context.pageSizes[currentPage!]?.top
-        }
-
-        count = 0
-
+    let reflowCount = 0
+  
+    const handleReflow = (event?: Event) => {
+      const { totalPages } = context.presentation.locate()
+      reflowCount++
+  
+      if (reflowCount === totalPages) {
+        reflowCount = 0
         context.oniPDF.emit(EVENTS.RELOCATE)
       }
-    })
+    }
+  
+    context.oniPDF.on(EVENTS.REFLOW, handleReflow)
+    return () => {
+      context.oniPDF.off(EVENTS.REFLOW, handleReflow)
+    }
   }, [])
 
   return (
@@ -96,6 +93,8 @@ const createClasses = (
   css: Emotion['css'],
 ) => ({
   OniBody: css`
+    transition: opacity 0.45s;
+
     .paginated & {
       display : flex;
     }
