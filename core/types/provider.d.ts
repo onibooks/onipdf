@@ -15,6 +15,10 @@ type Size = {
     width: number;
     height: number;
 };
+type PageView = {
+    cached: boolean;
+    size: Size;
+};
 export type GlobalContext = {
     oniPDF: OniPDF;
     worker: MuPDFWorker;
@@ -23,7 +27,7 @@ export type GlobalContext = {
     rootElement: HTMLElement;
     documentElement: HTMLElement;
     options: Options;
-    pageSizes: Size[];
+    pageViews: PageView[];
     presentation: Presentation;
     uid: number;
 };

@@ -1,3 +1,4 @@
+export * from './debounce';
 export * from './throttle';
 export * from './addStyles';
 export * from './removeStyles';

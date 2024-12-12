@@ -17,6 +17,7 @@ const Single = ({
 }: SingleProps) => {
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   const oniBodyRef = useRef<HTMLDivElement>(null)
+  const scrollPositionRef = useRef({ leftRatio: 0, topRatio: 0 })
 
   useEffect(() => {
     ;(async () => {
@@ -27,14 +28,14 @@ const Single = ({
         ))
 
       const pageSizes = await Promise.all(promises)
-      context.pageView = pageSizes.map(() => ({
+      context.pageViews = pageSizes.map(() => ({
         cached: false,
         size: { top: 0, width: 0, height: 0 }
       }))
 
       const pageMaxSize = {
         width: Math.round(Math.max(...pageSizes.map(p => p.width)) * 10) / 10,
-        height: Math.round(Math.max(...pageSizes.map(p => p.height)) * 10) / 10,
+        height: Math.round(Math.max(...pageSizes.map(p => p.height)) * 10) / 10
       }
       
       const rendered = pageSizes.map((pageSize, pageIndex) => (
@@ -66,21 +67,35 @@ const Single = ({
   }, [])
 
   useEffect(() => {
-    let reflowCount = 0
-  
-    const handleReflow = (event?: Event) => {
-      const { totalPages } = context.presentation.locate()
-      reflowCount++
-  
-      if (reflowCount === totalPages) {
-        reflowCount = 0
-        context.oniPDF.emit(EVENTS.RELOCATE)
+    const updateScrollPosition = () => {
+      const oniBody = oniBodyRef.current
+      if (!oniBody) return
+      
+      const { scrollLeft, scrollTop, scrollWidth, scrollHeight } = context.documentElement
+      scrollPositionRef.current = {
+        leftRatio: scrollLeft / scrollWidth || 0,
+        topRatio: scrollTop / scrollHeight || 0
       }
     }
+
+    const handleResize = () => {
+      updateScrollPosition()
   
-    context.oniPDF.on(EVENTS.REFLOW, handleReflow)
+      context.oniPDF.emit(EVENTS.FORCERESIZE, scrollPositionRef.current)
+    }
+
+    const handleResized = () => {
+      const oniBody = oniBodyRef.current
+      if (!oniBody) return
+  
+      context.oniPDF.emit(EVENTS.FORCERESIZED, scrollPositionRef.current)
+    }
+  
+    context.oniPDF.on(EVENTS.RESIZE, handleResize)
+    context.oniPDF.on(EVENTS.RESIZED, handleResized)
     return () => {
-      context.oniPDF.off(EVENTS.REFLOW, handleReflow)
+      context.oniPDF.off(EVENTS.RESIZE, handleResize)
+      context.oniPDF.off(EVENTS.RESIZED, handleResized)
     }
   }, [])
 

@@ -29,7 +29,7 @@ const PageView = ({
   pageRender,
   onUpdateComplete
 }: PageViewProps) => {
-  const { oniPDF, options, worker, presentation, documentElement, pageView } = context
+  const { oniPDF, options, worker, presentation, documentElement, pageViews } = context
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   
   const observerRef = useRef<IntersectionObserver | null>(null)
@@ -43,21 +43,19 @@ const PageView = ({
   let canvasContext: CanvasRenderingContext2D | null
 
   const renderPage = () => {
-    if (pageView[pageIndex]?.cached) {
+    if (pageViews[pageIndex]?.cached) {
       restoreCanvasSize()
-      console.log('캐싱 데이터 사용')
     } else {
       drawPageAsPixmap()
-      console.log('새 페이지 렌더링')
     }
   }
 
-  const drawPageAsPixmap = async (page = pageIndex) => {
+  const drawPageAsPixmap = async () => {
     if (isRendered.current) return
-    if (pageView[pageIndex].cached) return
+    if (pageViews[pageIndex].cached) return
     
     try {    
-      canvasPixels = await worker.getCanvasPixels(page, 96 * devicePixelRatio)
+      canvasPixels = await worker.getCanvasPixels(pageIndex, 96 * devicePixelRatio)
       const canvasNode = canvasRef.current!
       canvasContext = canvasRef.current?.getContext('2d')!
       
@@ -65,7 +63,8 @@ const PageView = ({
       canvasNode.height = canvasPixels.height
       canvasContext?.putImageData(canvasPixels, 0, 0)
   
-      context.pageView[pageIndex].cached = true
+      context.pageViews[pageIndex].cached = true
+
       isRendered.current = true
     } catch (error) {
       console.error('Error rendering to canvas:', error)
@@ -122,18 +121,15 @@ const PageView = ({
     return Promise.resolve()
   }
 
-  const setPagePosition = () => {
-    const { currentPage } = context.presentation.locate()
-    const { rootWidth, flow } = presentation.layout()
-    const scrollValue =
-      flow === 'paginated'
-        ? currentPage! * rootWidth
-        : pageView[currentPage!]?.size.top
+  const setPagePosition = (event?: Event) => {
+    const { leftRatio, topRatio } = (event as Event & { leftRatio: 0, topRatio: 0 })
+    const { documentElement, presentation } = context
+    const { flow } = presentation.layout()
 
     if (flow === 'paginated') {
-      documentElement.scrollLeft = scrollValue
+      documentElement.scrollLeft = documentElement.scrollWidth * leftRatio
     } else {
-      documentElement.scrollTop = scrollValue
+      documentElement.scrollTop = documentElement.scrollHeight * topRatio
     }
   }
 
@@ -148,10 +144,10 @@ const PageView = ({
       const pageWidth = rootWidth * aspectRatioRef.current!
       const pageHeight = (pageWidth / pageSize.width) * pageSize.height
       
-      const previousPage = pageView[pageIndex - 1]?.size
+      const previousPage = pageViews[pageIndex - 1]?.size
       const top = previousPage ? previousPage.top + previousPage.height : 0
 
-      context.pageView[pageIndex].size = {
+      pageViews[pageIndex].size = {
         top: Math.round(top) * 10 / 10,
         width: pageWidth,
         height: pageHeight
@@ -176,7 +172,7 @@ const PageView = ({
       const pageWidth = pageSize.width * rootScale
       const pageHeight = pageSize.height * rootScale
 
-      pageView[pageIndex].size = {
+      pageViews[pageIndex].size = {
         top: 0,
         width: pageWidth,
         height: pageHeight
@@ -193,7 +189,7 @@ const PageView = ({
       }
 
       setCssVariables(sectionVariables, pageSectionRef.current!)
-      setCssVariables(containerVariables, pageContainerRef.current!)
+      setCssVariables(containerVariables, pageContainerRef.current!)  
     }
 
     return Promise.resolve()
@@ -204,7 +200,6 @@ const PageView = ({
     if (flow === 'scrolled') {
       const maxWidth = pageMaxSize.width
       const baseWidth = pageSize.width
-      // 현재 pdf에서 몇 퍼센트를 차지하고 있는지
       aspectRatioRef.current = baseWidth / maxWidth
 
       updatePageSize()
@@ -224,23 +219,21 @@ const PageView = ({
 
   useEffect(() => {
     const handleResize = (event?: Event) => {
-      isRendered.current = false
       setPageUnobserver()
 
       updatePageSize()
-      .then(() => setPagePosition())
+        .then(() => setPagePosition(event))
     }
     
     const handleResized = debounce((event?: Event) => {
       setPageObserver()
-      oniPDF.emit(EVENTS.REFLOW)
     }, 350)
 
-    oniPDF.on(EVENTS.RESIZE, handleResize)
-    oniPDF.on(EVENTS.RESIZED, handleResized)
+    context.oniPDF.on(EVENTS.FORCERESIZE, handleResize)
+    context.oniPDF.on(EVENTS.FORCERESIZED, handleResized)
     return () => {
-      oniPDF.off(EVENTS.RESIZE, handleResize)
-      oniPDF.off(EVENTS.RESIZED, handleResized)
+      context.oniPDF.off(EVENTS.FORCERESIZE, handleResize)
+      context.oniPDF.off(EVENTS.FORCERESIZED, handleResized)
     }
   }, [])
 

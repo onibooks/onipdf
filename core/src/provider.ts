@@ -18,7 +18,7 @@ type Size = {
 }
 
 type PageView = {
-  cached?: boolean,
+  cached: boolean
   size: Size
 }
 
@@ -30,8 +30,7 @@ export type GlobalContext = {
   rootElement: HTMLElement
   documentElement: HTMLElement
   options: Options
-  pageView: PageView[]
-  renderedPages: Set<ImageData>
+  pageViews: PageView[]
   presentation: Presentation
   uid: number
 }
@@ -49,8 +48,7 @@ export const createContext = () => {
     rootElement: null as any,
     documentElement: null as any,
     options: null as any,
-    pageView: [] as PageView[],
-    renderedPages: new Set() as Set<ImageData>,
+    pageViews: [] as PageView[],
     presentation: null as any,
     uid,
   }

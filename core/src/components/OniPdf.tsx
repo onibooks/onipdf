@@ -23,7 +23,6 @@ const OniPDF = ({
   const { presentation, options } = context
   const classes = useMemo(() => createClasses(context.emotion.css, options), [options])
 
-  const oniDimRef = useRef<HTMLDivElement>(null)
   const oniDocumentRef = useRef<HTMLDivElement>(null)
   const oniContainerRef = useRef<HTMLDivElement>(null)
   
@@ -44,7 +43,6 @@ const OniPDF = ({
   
   useEffect(() => {
     const { oniPDF, rootElement, documentElement, sangte, presentation } = context
-    // const dimElement = oniDimRef.current as Element
 
     const setResizeState = () => {
       sangte.setState({ isResize: true })
@@ -56,7 +54,7 @@ const OniPDF = ({
       removeClass(documentElement, 'is-resize')
     }
 
-    const handleResize = (event?: Event) => {      
+    const handleResize = (event?: Event) => {
       const {
         rootWidth,
         rootHeight
@@ -138,7 +136,7 @@ const OniPDF = ({
       }
     }
     
-    const handleScrolled = debounce((event?: Event) => {      
+    const handleScrolled = debounce((event?: Event) => {
       if (event) {
         sangte.setState({ isScroll: false })
         oniPDF.emit(EVENTS.SCROLLED)
@@ -150,9 +148,8 @@ const OniPDF = ({
     oniPDF.on(EVENTS.READY, handleReady)
     window.addEventListener(EVENTS.KEYDOWN, handleArrowKey)
     oniPDF.on(EVENTS.RENDER, handleRender)
-    documentElement.addEventListener(EVENTS.SCROLL, handleScroll)
-    documentElement.addEventListener(EVENTS.SCROLL, handleScrolled)
-
+    documentElement.addEventListener('scroll', handleScroll)
+    documentElement.addEventListener('scroll', handleScrolled)
     return () => {
       window.removeEventListener(EVENTS.RESIZE, handleResize)
       oniPDF.off(EVENTS.READY, handleReady)
@@ -167,11 +164,6 @@ const OniPDF = ({
       class={clsx('oni-document', classes.OniDocument)}
       ref={oniDocumentRef}
     >
-      {/* <div 
-        class={clsx('oni-dim', classes.OniDim)}
-        ref={oniDimRef}
-      / > */}
-
       <div
         className={clsx('oni-container', classes.OniContainer)}
         ref={oniContainerRef}
@@ -221,23 +213,6 @@ const createClasses = (
   
     .scrolled & {
       margin: 0 auto;
-    }
-  `,
-
-  OniDim: css`
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 10;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(250, 250, 250, 0.5);
-    pointer-events: auto;
-    opacity: 0;
-    transition: opacity 0.45s;
-
-    &.is-resize {
-      opacity: 1;
     }
   `
 })

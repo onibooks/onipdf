@@ -44,7 +44,6 @@ export const createLocate = () => provider((context) => {
 
   const moveToPage = (pageNumber: number) => {
     const currentPage = getValidPageNumber(pageNumber)
-    
     const { presentation, documentElement } = context
     const {
       flow,
@@ -56,14 +55,14 @@ export const createLocate = () => provider((context) => {
     } else if (flow === 'scrolled') {
       const { isScroll, isResize } = context.sangte.getState()
       if (!isScroll && !isResize) {
-        documentElement.scrollTop = context.pageView[currentPage]?.size.top
+        documentElement.scrollTop = context.pageViews[currentPage]?.size.top
       }
     }
   }
 
   const getCurrentPage = () => {
     const { flow } = context.presentation.layout()
-  
+
     return flow === 'paginated'
       ? getPaginatedCurrentPage()
       : getScrolledCurrentPage()
@@ -87,7 +86,7 @@ export const createLocate = () => provider((context) => {
     const { documentElement } = context
     const { scrollTop } = documentElement
     const { totalPages } = locate.getState()
-    const pageSizes = context.pageView
+    const pageSizes = context.pageViews
     
     for (let i = 0; i < pageSizes.length; i++) {
       const currentPageTop = pageSizes[i]?.size.top !== undefined 
@@ -106,8 +105,7 @@ export const createLocate = () => provider((context) => {
   }
 
   const handleRelocate = (event?: Event) => {
-    // setFlow -> forceReflow 일 때는 해당 로직이 실행되지 않도록 한다.
-    const { isForceReflow } = event as Event & { isForceReflow: boolean }
+    const isForceReflow = event && (event as Event & { isForceReflow?: boolean }).isForceReflow
     if (isForceReflow) return
 
     const { isRendered } = context.sangte.getState()
@@ -117,10 +115,6 @@ export const createLocate = () => provider((context) => {
     locate.setState({
       currentPage
     })
-
-    if (event) {
-      context.oniPDF.emit(EVENTS.RELOCATE)
-    }
   }
 
   const handleScroll = (event?: Event) => {
@@ -131,10 +125,6 @@ export const createLocate = () => provider((context) => {
     locate.setState({
       currentPage
     })
-    
-    if (event) {
-      context.oniPDF.emit(EVENTS.SCROLL)
-    }
   }
   
   const handleResize = (event?: Event) => {
@@ -146,9 +136,6 @@ export const createLocate = () => provider((context) => {
 
   context.oniPDF.on(EVENTS.RESIZE, handleResize)
   context.oniPDF.on(EVENTS.SCROLL, handleScroll)
-  context.oniPDF.on(EVENTS.RELOCATE, (event) => {
-    console.log('EVENTS.RELOCATE')
-  })
 
   const configure = (
     options: Locate
