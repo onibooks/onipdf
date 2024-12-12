@@ -218,22 +218,41 @@ const PageView = ({
   }
 
   useEffect(() => {
-    const handleResize = (event?: Event) => {
+    const handleResize = () => {
+      updatePageSize()
+        .then(() => {
+          const { currentPage } = context.presentation.locate()
+          const { rootWidth, flow } = presentation.layout()
+          const scrollValue =
+            flow === 'paginated'
+              ? currentPage! * rootWidth
+              : pageViews[currentPage!]?.size.top
+
+          if (flow === 'paginated') {
+            documentElement.scrollLeft = scrollValue
+          } else {
+            documentElement.scrollTop = scrollValue
+          }
+        })
+    }
+
+    const handleForceResize = (event?: Event) => {
       setPageUnobserver()
 
       updatePageSize()
         .then(() => setPagePosition(event))
     }
     
-    const handleResized = debounce((event?: Event) => {
+    const handleForceResized = debounce((event?: Event) => {
       setPageObserver()
     }, 350)
 
-    context.oniPDF.on(EVENTS.FORCERESIZE, handleResize)
-    context.oniPDF.on(EVENTS.FORCERESIZED, handleResized)
+    context.oniPDF.on(EVENTS.RESIZE, handleResize)
+    context.oniPDF.on(EVENTS.FORCERESIZE, handleForceResize)
+    context.oniPDF.on(EVENTS.FORCERESIZED, handleForceResized)
     return () => {
-      context.oniPDF.off(EVENTS.FORCERESIZE, handleResize)
-      context.oniPDF.off(EVENTS.FORCERESIZED, handleResized)
+      context.oniPDF.off(EVENTS.FORCERESIZE, handleForceResize)
+      context.oniPDF.off(EVENTS.FORCERESIZED, handleForceResized)
     }
   }, [])
 
