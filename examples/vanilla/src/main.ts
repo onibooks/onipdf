@@ -11,7 +11,7 @@ const renderOptions = {
     currentPage: 2,
   },
   layout: {
-    flow: 'scrolled' as FlowType,
+    flow: 'paginated' as FlowType,
     spread: 'single' as SpreadType,
     zoom: 1
   }
@@ -49,7 +49,19 @@ async function initializePdfViewer(): Promise<OniPDF> {
 }
 
 function setupEventHandlers(): void {
+  const menu = document.querySelector('.menu') 
+  const menuItems = document.querySelector('.menu-items') 
   const radios = document.querySelectorAll('.switch-field input[type="radio"]')
+
+  document?.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement
+
+    if (menu?.contains(target) || menuItems?.contains(target)) {
+      menuItems?.classList.toggle('active')
+    } else {
+      menuItems?.classList.remove('active')
+    }
+  })
   
   radios.forEach((radio) =>
     radio.addEventListener('change', ({ target }) => {
