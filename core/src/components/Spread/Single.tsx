@@ -70,32 +70,33 @@ const Single = ({
     const updateScrollPosition = () => {
       const oniBody = oniBodyRef.current
       if (!oniBody) return
-      
-      const { scrollLeft, scrollTop, scrollWidth, scrollHeight } = context.documentElement
-      scrollPositionRef.current = {
-        leftRatio: scrollLeft / scrollWidth || 0,
-        topRatio: scrollTop / scrollHeight || 0
+
+      const { flow } = context.presentation.layout()
+      if (flow === 'scrolled') {
+        const { scrollTop, scrollHeight } = context.documentElement
+        scrollPositionRef.current = {
+          leftRatio: 0,
+          topRatio: scrollTop / scrollHeight || 0
+        }
+      } else {
+        const { scrollLeft, scrollWidth } = context.documentElement
+        scrollPositionRef.current = {
+          leftRatio: scrollLeft / scrollWidth || 0,
+          topRatio: 0
+        }
       }
     }
 
     const handleResize = () => {
+      const { flow } = context.presentation.layout()
       updateScrollPosition()
-  
-      context.oniPDF.emit(EVENTS.FORCERESIZE, scrollPositionRef.current)
-    }
 
-    const handleResized = () => {
-      const oniBody = oniBodyRef.current
-      if (!oniBody) return
-  
-      context.oniPDF.emit(EVENTS.FORCERESIZED, scrollPositionRef.current)
+      context.oniPDF.emit(EVENTS.FORCERESIZE, scrollPositionRef.current)
     }
   
     context.oniPDF.on(EVENTS.RESIZE, handleResize)
-    context.oniPDF.on(EVENTS.RESIZED, handleResized)
     return () => {
       context.oniPDF.off(EVENTS.RESIZE, handleResize)
-      context.oniPDF.off(EVENTS.RESIZED, handleResized)
     }
   }, [])
 

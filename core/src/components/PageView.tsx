@@ -29,13 +29,14 @@ const PageView = ({
   pageRender,
   onUpdateComplete
 }: PageViewProps) => {
-  const { oniPDF, options, worker, presentation, documentElement, pageViews } = context
+  const { options, worker, presentation, documentElement, pageViews } = context
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   
   const observerRef = useRef<IntersectionObserver | null>(null)
   const pageSectionRef = useRef<HTMLDivElement | null>(null)
   const pageContainerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const isObserver = useRef<boolean>(false)
   const isRendered = useRef<boolean>(false)
   const aspectRatioRef = useRef<number>(-1)
 
@@ -111,12 +112,16 @@ const PageView = ({
 
   const setPageObserver = () => {
     observerRef.current?.observe(pageSectionRef.current!)
+
+    isObserver.current = true
     
     return Promise.resolve()
   }
   
   const setPageUnobserver = () => {
     observerRef.current?.disconnect()
+
+    isObserver.current = false
 
     return Promise.resolve()
   }
@@ -128,7 +133,8 @@ const PageView = ({
 
     if (flow === 'paginated') {
       documentElement.scrollLeft = documentElement.scrollWidth * leftRatio
-    } else {
+    } 
+    else {
       documentElement.scrollTop = documentElement.scrollHeight * topRatio
     }
   }
@@ -218,7 +224,14 @@ const PageView = ({
   }
 
   useEffect(() => {
-    const handleResize = () => {
+    const handleForceReflow = (event?: Event) => {
+      const isForceReflow = event && (event as Event & { isForceReflow?: boolean }).isForceReflow
+      if (!isForceReflow) return
+
+      if (isObserver.current) {
+        setPageUnobserver()
+      }
+
       updatePageSize()
         .then(() => {
           const { currentPage } = context.presentation.locate()
@@ -237,22 +250,27 @@ const PageView = ({
     }
 
     const handleForceResize = (event?: Event) => {
-      setPageUnobserver()
+      if (isObserver.current) {
+        setPageUnobserver()
+      }
 
       updatePageSize()
         .then(() => setPagePosition(event))
     }
     
-    const handleForceResized = debounce((event?: Event) => {
-      setPageObserver()
+    const handleResized = debounce((event?: Event) => {
+      if (!isObserver.current) {
+        setPageObserver()
+      }
     }, 350)
 
-    context.oniPDF.on(EVENTS.RESIZE, handleResize)
+    context.oniPDF.on(EVENTS.RESIZE, handleForceReflow)
     context.oniPDF.on(EVENTS.FORCERESIZE, handleForceResize)
-    context.oniPDF.on(EVENTS.FORCERESIZED, handleForceResized)
+    context.oniPDF.on(EVENTS.RESIZED, handleResized)
     return () => {
+      context.oniPDF.on(EVENTS.RESIZE, handleForceReflow)
       context.oniPDF.off(EVENTS.FORCERESIZE, handleForceResize)
-      context.oniPDF.off(EVENTS.FORCERESIZED, handleForceResized)
+      context.oniPDF.off(EVENTS.FORCERESIZED, handleResized)
     }
   }, [])
 

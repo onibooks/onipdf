@@ -198,6 +198,7 @@ const createClasses = (
     box-sizing: border-box;
     width: var(--root-width) !important;
     height: var(--root-height) !important;
+    font-size: 0;
 
     &.scrolled {
       overflow: auto;

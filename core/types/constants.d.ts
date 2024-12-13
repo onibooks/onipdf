@@ -6,6 +6,8 @@ export declare const EVENTS: {
     RELOCATE: string;
     RESIZE: string;
     RESIZED: string;
+    FORCERESIZE: string;
+    FORCERESIZED: string;
     RENDER: string;
     RENDERED: string;
     KEYDOWN: string;

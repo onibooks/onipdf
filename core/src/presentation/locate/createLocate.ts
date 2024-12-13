@@ -51,7 +51,10 @@ export const createLocate = () => provider((context) => {
     } = presentation.layout()
     
     if (flow === 'paginated') {
-      documentElement.scrollLeft = currentPage * rootWidth
+      const { isResize } = context.sangte.getState()
+      if (!isResize) {
+        documentElement.scrollLeft = currentPage * rootWidth
+      }
     } else if (flow === 'scrolled') {
       const { isScroll, isResize } = context.sangte.getState()
       if (!isScroll && !isResize) {
