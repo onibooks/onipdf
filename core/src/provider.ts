@@ -11,7 +11,7 @@ import type { MuPDFWorker } from './workers/createWorker'
 import type { Options } from './commands/render'
 import type { Presentation } from './presentation'
 
-type Size = {
+type PageRect = {
   top: number
   width: number
   height: number
@@ -19,7 +19,7 @@ type Size = {
 
 type PageView = {
   cached: boolean
-  size: Size
+  rect: PageRect
 }
 
 export type GlobalContext = {

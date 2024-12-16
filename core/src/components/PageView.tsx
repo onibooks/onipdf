@@ -43,8 +43,10 @@ const PageView = ({
   let canvasPixels: ImageData
   let canvasContext: CanvasRenderingContext2D | null
 
+  const currentPageView = pageViews[pageIndex]
+
   const renderPage = () => {
-    if (pageViews[pageIndex]?.cached) {
+    if (currentPageView?.cached) {
       restoreCanvasSize()
     } else {
       drawPageAsPixmap()
@@ -53,7 +55,7 @@ const PageView = ({
 
   const drawPageAsPixmap = async () => {
     if (isRendered.current) return
-    if (pageViews[pageIndex].cached) return
+    if (currentPageView.cached) return
     
     try {    
       canvasPixels = await worker.getCanvasPixels(pageIndex, 96 * devicePixelRatio)
@@ -64,7 +66,7 @@ const PageView = ({
       canvasNode.height = canvasPixels.height
       canvasContext?.putImageData(canvasPixels, 0, 0)
   
-      context.pageViews[pageIndex].cached = true
+      currentPageView.cached = true
 
       isRendered.current = true
     } catch (error) {
@@ -139,78 +141,93 @@ const PageView = ({
     }
   }
 
-  const updatePageSize = () => {
+  const setScrolledRect = () => {
+    const { rootWidth } = presentation.layout()
+
+    const pageWidth = rootWidth * aspectRatioRef.current!
+    const pageHeight = (pageWidth / pageSize.width) * pageSize.height
+    const previousPage = pageViews[pageIndex - 1]?.rect
+    const top = previousPage ? previousPage.top + previousPage.height : 0
+
+    currentPageView.rect = {
+      top: Math.round(top) * 10 / 10,
+      width: pageWidth,
+      height: pageHeight
+    }
+
+    const sectionVariables = {
+      pageWidth: `${rootWidth}px`,
+      pageHeight: `${pageHeight}px`
+    }
+    const containerVariables = {
+      pageWidth: `${pageWidth}px`,
+      pageHeight: `${pageHeight}px`
+    }
+
+    setCssVariables(sectionVariables, pageSectionRef.current!)
+    setCssVariables(containerVariables, pageContainerRef.current!)
+  }
+
+  const setPaginatedRect = () => {
     const {
-      flow,
       rootWidth,
       rootHeight
     } = presentation.layout()
-    
+
+    const widthRatio = rootWidth / pageSize.width
+    const heightRatio = rootHeight / pageSize.height
+    const rootScale = Math.min(widthRatio, heightRatio)
+
+    const pageWidth = pageSize.width * rootScale
+    const pageHeight = pageSize.height * rootScale
+
+    pageViews[pageIndex].rect = {
+      top: 0,
+      width: pageWidth,
+      height: pageHeight
+    }
+
+    const sectionVariables = {
+      pageWidth: `${rootWidth}px`,
+      pageHeight: `${rootHeight}px`
+    }
+
+    const containerVariables = {
+      pageWidth: `${pageWidth}px`,
+      pageHeight: `${pageHeight}px`
+    }
+
+    setCssVariables(sectionVariables, pageSectionRef.current!)
+    setCssVariables(containerVariables, pageContainerRef.current!)  
+  }
+
+  const updatePageSize = () => {
+    const { flow } = presentation.layout()
+
     if (flow === 'scrolled') {
-      const pageWidth = rootWidth * aspectRatioRef.current!
-      const pageHeight = (pageWidth / pageSize.width) * pageSize.height
-      
-      const previousPage = pageViews[pageIndex - 1]?.size
-      const top = previousPage ? previousPage.top + previousPage.height : 0
-
-      pageViews[pageIndex].size = {
-        top: Math.round(top) * 10 / 10,
-        width: pageWidth,
-        height: pageHeight
-      }
-
-      const sectionVariables = {
-        pageWidth: `${rootWidth}px`,
-        pageHeight: `${pageHeight}px`
-      }
-      const containerVariables = {
-        pageWidth: `${pageWidth}px`,
-        pageHeight: `${pageHeight}px`
-      }
-  
-      setCssVariables(sectionVariables, pageSectionRef.current!)
-      setCssVariables(containerVariables, pageContainerRef.current!)
+      setScrolledRect()
     } else if (flow === 'paginated') {
-      const widthRatio = rootWidth / pageSize.width
-      const heightRatio = rootHeight / pageSize.height
-      const rootScale = Math.min(widthRatio, heightRatio)
-
-      const pageWidth = pageSize.width * rootScale
-      const pageHeight = pageSize.height * rootScale
-
-      pageViews[pageIndex].size = {
-        top: 0,
-        width: pageWidth,
-        height: pageHeight
-      }
-
-      const sectionVariables = {
-        pageWidth: `${rootWidth}px`,
-        pageHeight: `${rootHeight}px`
-      }
-
-      const containerVariables = {
-        pageWidth: `${pageWidth}px`,
-        pageHeight: `${pageHeight}px`
-      }
-
-      setCssVariables(sectionVariables, pageSectionRef.current!)
-      setCssVariables(containerVariables, pageContainerRef.current!)  
+      setPaginatedRect()
     }
 
     return Promise.resolve()
   }
 
-  const setPageSize = () => {
-    const { flow } = presentation.layout()
-    if (flow === 'scrolled') {
-      const maxWidth = pageMaxSize.width
-      const baseWidth = pageSize.width
-      aspectRatioRef.current = baseWidth / maxWidth
+  const initalizePageRect = () => {
+    const maxWidth = pageMaxSize.width
+    const baseWidth = pageSize.width
+    aspectRatioRef.current = baseWidth / maxWidth
 
-      updatePageSize()
-    } else if (flow === 'paginated') {
-      updatePageSize()
+    setScrolledRect()
+
+    return Promise.resolve()
+  }
+
+  const setPageSize = () => {
+    
+    const { flow } = presentation.layout()
+    if (flow === 'paginated') {
+      setPaginatedRect()
     }
 
     return Promise.resolve()
@@ -237,10 +254,10 @@ const PageView = ({
           const { currentPage } = context.presentation.locate()
           const { rootWidth, flow } = presentation.layout()
           const scrollValue =
-            flow === 'paginated'
-              ? currentPage! * rootWidth
-              : pageViews[currentPage!]?.size.top
-
+          flow === 'paginated'
+            ? currentPage! * rootWidth
+            : pageViews[currentPage!]?.rect.top
+          
           if (flow === 'paginated') {
             documentElement.scrollLeft = scrollValue
           } else {
@@ -275,7 +292,8 @@ const PageView = ({
   }, [])
 
   useEffect(() => {
-    setPageSize()
+    initalizePageRect()
+      .then(() => setPageSize())
       .then(() => pageRender(null))
       .then(() => preRender())
   }, [])

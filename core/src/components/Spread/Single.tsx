@@ -88,7 +88,6 @@ const Single = ({
     }
 
     const handleResize = () => {
-      const { flow } = context.presentation.layout()
       updateScrollPosition()
 
       context.oniPDF.emit(EVENTS.FORCERESIZE, scrollPositionRef.current)
