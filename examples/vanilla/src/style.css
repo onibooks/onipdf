@@ -23,8 +23,8 @@ button {
 
 .menu {
   position: relative;
-  width: 3em;
-  height: 3em;
+  width: 4.8em;
+  height: 4.8em;
   overflow: hidden;
   cursor: pointer;
 }
@@ -40,7 +40,7 @@ button {
 
 nav.menu-items {
   position: absolute;
-  top: 44px;
+  top: 64px;
   left: 0;
   display: flex;
   flex-direction: column;
@@ -64,7 +64,7 @@ nav.menu-items.active {
   height: 100%;
   display: flex;
   overflow: hidden;
-  border: 1px solid #fbe0f1;
+  border: 1px solid #e4deea;
   border-radius: 4px;
 }
 
@@ -95,8 +95,8 @@ nav.menu-items.active {
 }
 
 .switch-field label[for="double"] {
-  border-left: 1px solid #fbe0f1;
-  border-right: 1px solid #fbe0f1;
+  border-left: 1px solid #e4deea;
+  border-right: 1px solid #e4deea;
 }
 
 .switch-field label:hover {
@@ -104,8 +104,8 @@ nav.menu-items.active {
 }
 
 .switch-field input:checked+label {
-  background-color: #fbe0f1;
-  color: #232022;
+  background-color: #e4deea;
+  color: #373539;
   box-shadow: none;
 }
 
