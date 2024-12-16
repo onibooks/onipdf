@@ -32,10 +32,6 @@ export const createLocate = () => provider((context) => {
       moveToPage(pageNumber!)
     }
   )
-
-  const getCurrentRect = (currentPage: number) => {
-    return context.pageViews[currentPage]?.rect
-  }
   
   const getValidPageNumber = (pageNumber: number) => {
     const { totalPages } = locate.getState()
@@ -53,7 +49,6 @@ export const createLocate = () => provider((context) => {
       flow,
       rootWidth
     } = presentation.layout()
-    const currentRect = getCurrentRect(currentPage)
     
     if (flow === 'paginated') {
       const { isResize } = context.sangte.getState()
@@ -63,7 +58,7 @@ export const createLocate = () => provider((context) => {
     } else if (flow === 'scrolled') {
       const { isScroll, isResize } = context.sangte.getState()
       if (!isScroll && !isResize) {
-        documentElement.scrollTop = currentRect.top
+        documentElement.scrollTop = context.pageView[currentPage]?.rect.top
       }
     }
   }
@@ -91,24 +86,25 @@ export const createLocate = () => provider((context) => {
   }
   
   const getScrolledCurrentPage = () => {
-    const { documentElement, pageViews } = context
+    const { documentElement } = context
     const { scrollTop } = documentElement
     const { totalPages } = locate.getState()
+    const pageSizes = context.pageView
     
-    for (let i = 0; i < pageViews.length; i++) {
-      const currentPageTop = getCurrentRect(i).top !== undefined 
-      ? Math.round(getCurrentRect(i).top * 10) / 10
+    for (let i = 0; i < pageSizes.length; i++) {
+      const currentPageTop = pageSizes[i]?.rect.top !== undefined 
+      ? Math.round(pageSizes[i].rect.top * 10) / 10
       : 0
-      const nextPageTop = getCurrentRect(i + 1).top !== undefined
-      ? Math.round(getCurrentRect(i + 1).top * 10) / 10
-      : Math.round(getCurrentRect(totalPages! - 1).top * 10) / 10
+      const nextPageTop = pageSizes[i + 1]?.rect.top !== undefined
+      ? Math.round(pageSizes[i + 1].rect.top * 10) / 10
+      : Math.round(pageSizes[totalPages! - 1].rect.top * 10) / 10
       
       if (scrollTop >= currentPageTop && scrollTop < nextPageTop) {
         return i
       }
     }
 
-    return pageViews.length - 1
+    return pageSizes.length - 1
   }
 
   const handleRelocate = (event?: Event) => {
@@ -127,12 +123,11 @@ export const createLocate = () => provider((context) => {
   const handleScroll = (event?: Event) => {
     const { isResize, isRendered } = context.sangte.getState()
     if (isResize || !isRendered) return
-  
+    
     const currentPage = getCurrentPage()
     locate.setState({
       currentPage
     })
-    console.log(1)
   }
   
   const handleResize = (event?: Event) => {

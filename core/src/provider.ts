@@ -11,16 +11,19 @@ import type { MuPDFWorker } from './workers/createWorker'
 import type { Options } from './commands/render'
 import type { Presentation } from './presentation'
 
-type PageRect = {
+export type PageRect = {
   top: number
   width: number
   height: number
 }
 
-type PageView = {
+export type PageView = {
   cached: boolean
   rect: PageRect
+  pageIndex?: number
 }
+
+export type SpreadPage = PageView[]
 
 export type GlobalContext = {
   oniPDF: OniPDF
@@ -30,7 +33,8 @@ export type GlobalContext = {
   rootElement: HTMLElement
   documentElement: HTMLElement
   options: Options
-  pageViews: PageView[]
+  pageView: PageView[]
+  pageViews: SpreadPage[]
   presentation: Presentation
   uid: number
 }
@@ -48,7 +52,8 @@ export const createContext = () => {
     rootElement: null as any,
     documentElement: null as any,
     options: null as any,
-    pageViews: [] as PageView[],
+    pageView: [] as PageView[],
+    pageViews: [] as SpreadPage[],
     presentation: null as any,
     uid,
   }
