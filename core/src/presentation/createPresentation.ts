@@ -1,6 +1,6 @@
 import { provider } from '../provider'
 import { createLayout, type Layout, type LayoutOptions } from './layout/createLayout'
-import { createLocate, type Locate, type LocateOptions } from './locate/createLocate'
+import { createLocate, type Locate, type LocateOptions } from './locate/createLocate2'
 
 export type Presentation = {
   layout: (options?: LayoutOptions) => Layout

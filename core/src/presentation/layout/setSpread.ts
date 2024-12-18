@@ -1,5 +1,4 @@
 import { addClass, removeClass } from '../../utils'
-import { EVENTS } from '../../constants'
 
 import type { GlobalContext } from '../../provider'
 import type { LayoutOptions } from './createLayout'
@@ -11,6 +10,6 @@ export const setSpread = (context: GlobalContext) => (value: LayoutOptions['spre
   removeClass(documentElement, 'double') 
   removeClass(documentElement, 'coverFacing') 
   addClass(documentElement, value!)
- 
-  oniPDF.emit(EVENTS.RESIZE)
+
+  // oniPDF.forceLayout()
 }

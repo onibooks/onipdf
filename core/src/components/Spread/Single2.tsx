@@ -3,9 +3,9 @@ import { render as prender } from 'preact'
 import { useEffect, useRef, useMemo } from 'preact/hooks'
 import { EVENTS } from '../../constants'
 
-import PageView from '../PageView'
+import PageView from '../PageView2'
 
-import type { GlobalContext, PageView as PageViewType } from '../../provider'
+import type { GlobalContext, SpreadPage } from '../../provider'
 import type { Emotion } from '@emotion/css/types/create-instance'
 
 type SingleProps = {
@@ -29,30 +29,39 @@ const Single = ({
         ))
 
       const pageSizes = await Promise.all(promises)
-      context.pageView = pageSizes.map(() => ({
+      context.pageViews = pageSizes.map<SpreadPage>((size, index) => ({
+        index,
         cached: false,
-        rect: { top: 0, width: 0, height: 0 }
-      })) as PageViewType[]
+        rect: { ...size, top: 0 },
+        pages: [
+          {
+            rect: { ...size, top: 0 },
+            pageIndex: index
+          },
+        ],
+      }))
 
       const pageMaxSize = {
         width: Math.round(Math.max(...pageSizes.map(p => p.width)) * 10) / 10,
         height: Math.round(Math.max(...pageSizes.map(p => p.height)) * 10) / 10
       }
       
-      const rendered = pageSizes.map((pageSize, pageIndex) => (
+      const rendered = context.pageViews.map(({ pages }) => (
         new Promise((resolve, reject) => {
           const fragment = document.createElement('div')
-
-          prender(
-            <PageView
-              context={context}
-              pageMaxSize={pageMaxSize}
-              pageSize={pageSize}
-              pageIndex={pageIndex}
-              pageRender={resolve}
-            />,
-            fragment
-          )
+          
+          {pages.map(({ rect, pageIndex }) => (
+            prender(
+              <PageView
+                context={context}
+                pageMaxSize={pageMaxSize}
+                pageSize={rect}
+                pageIndex={pageIndex!}
+                pageRender={resolve}
+              />,
+              fragment
+            )
+          ))}
 
           oniBodyRef.current?.appendChild(
             fragment.firstChild as HTMLElement

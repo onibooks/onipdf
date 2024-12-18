@@ -5,11 +5,6 @@ import { createStore } from 'zustand/vanilla'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { EVENTS } from '../../constants'
 
-type Size = {
-  width: number
-  height: number
-}
-
 export type LocateOptions = {
   currentPage?: number
   totalPages?: number
@@ -133,7 +128,7 @@ export const createLocate = () => provider((context) => {
   const handleResize = (event?: Event) => {
     const { isRendered } = context.sangte.getState()
     if (!isRendered) return
-    
+
     handleRelocate(event)
   }
 

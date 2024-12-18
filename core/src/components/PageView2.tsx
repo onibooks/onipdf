@@ -27,7 +27,7 @@ const PageView = ({
   pageIndex,
   pageRender
 }: PageViewProps) => {
-  const { options, worker, presentation, documentElement, pageView } = context
+  const { oniPDF, options, worker, presentation, documentElement, pageViews } = context
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   
   const observerRef = useRef<IntersectionObserver | null>(null)
@@ -41,10 +41,11 @@ const PageView = ({
   let canvasPixels: ImageData
   let canvasContext: CanvasRenderingContext2D | null
 
-  const currentPageView = pageView[pageIndex]
+  const currentSpread = pageViews.find((s) => s.pages.some((page) => page.pageIndex === pageIndex))
+  const currentSpreadIndex = currentSpread  ? currentSpread.index : pageIndex
 
   const renderPage = () => {
-    if (currentPageView?.cached) {
+    if (currentSpread?.cached) {
       restoreCanvasSize()
     } else {
       drawPageAsPixmap()
@@ -53,7 +54,7 @@ const PageView = ({
 
   const drawPageAsPixmap = async () => {
     if (isRendered.current) return
-    if (currentPageView.cached) return
+    if (currentSpread?.cached) return
     
     try {    
       canvasPixels = await worker.getCanvasPixels(pageIndex, 96 * devicePixelRatio)
@@ -64,8 +65,7 @@ const PageView = ({
       canvasNode.height = canvasPixels.height
       canvasContext?.putImageData(canvasPixels, 0, 0)
   
-      currentPageView.cached = true
-
+      currentSpread!.cached = true
       isRendered.current = true
     } catch (error) {
       console.error('Error rendering to canvas:', error)
@@ -110,15 +110,21 @@ const PageView = ({
     setPageObserver()
   }
 
-  const setPageObserver = () => {
-    observerRef.current?.observe(pageSectionRef.current!)
-
-    isObserver.current = true
-    
+  const setPageObserver = (): Promise<void> => {
+    const parentElement = pageSectionRef.current?.parentElement
+    const targetElement = parentElement?.classList.contains('spread')
+      ? parentElement
+      : pageSectionRef.current
+  
+    if (targetElement && observerRef.current) {
+      observerRef.current.observe(targetElement)
+      isObserver.current = true
+    }
+  
     return Promise.resolve()
   }
-  
-  const setPageUnobserver = () => {
+
+  const setPageUnobserver = (): Promise<void> => {
     observerRef.current?.disconnect()
 
     isObserver.current = false
@@ -128,7 +134,6 @@ const PageView = ({
 
   const setPagePosition = (event?: Event) => {
     const { leftRatio, topRatio } = (event as Event & { leftRatio: 0, topRatio: 0 })
-    const { documentElement, presentation } = context
     const { flow } = presentation.layout()
 
     if (flow === 'paginated') {
@@ -139,23 +144,24 @@ const PageView = ({
   }
 
   const setScrolledRect = () => {
-    const { rootWidth } = presentation.layout()
+    const { rootWidth, divisor } = presentation.layout()
 
-    const pageWidth = rootWidth * aspectRatioRef.current!
+    const pageWidth = (rootWidth / divisor) * aspectRatioRef.current!
     const pageHeight = (pageWidth / pageSize.width) * pageSize.height
-    const previousPage = pageView[pageIndex - 1]?.rect
-    const top = previousPage ? previousPage.top + previousPage.height : 0
+    const previousSpread = pageViews[currentSpreadIndex! - 1]?.rect
+    const top = previousSpread ? previousSpread.top + previousSpread.height : 0
     
-    currentPageView.rect = {
-      top: Math.round(top) * 10 / 10,
+    currentSpread!.rect = {
+      top: Math.round(top * 10) / 10,
       width: pageWidth,
       height: pageHeight
     }
 
     const sectionVariables = {
-      pageWidth: `${rootWidth}px`,
+      pageWidth: `${rootWidth / divisor}px`,
       pageHeight: `${pageHeight}px`
     }
+
     const containerVariables = {
       pageWidth: `${pageWidth}px`,
       pageHeight: `${pageHeight}px`
@@ -178,7 +184,7 @@ const PageView = ({
     const pageWidth = pageSize.width * rootScale
     const pageHeight = pageSize.height * rootScale
 
-    pageView[pageIndex].rect = {
+    currentSpread!.rect = {
       top: 0,
       width: pageWidth,
       height: pageHeight
@@ -219,8 +225,8 @@ const PageView = ({
 
     return Promise.resolve()
   }
-
-  const setPageSize = () => {
+  
+  const setPageSize = (): Promise<void> => {
     const { flow } = presentation.layout()
     if (flow === 'paginated') {
       setPaginatedRect()
@@ -231,7 +237,7 @@ const PageView = ({
 
   const preRender = () => {
     const { currentPage } = options.locate!
-    if (currentPage === pageIndex) {
+    if (currentPage === currentSpreadIndex) {
       drawPageAsPixmap()
     }
   }
@@ -251,7 +257,7 @@ const PageView = ({
           const { rootWidth, flow } = presentation.layout()
           const scrollValue = flow === 'paginated'
             ? currentPage! * rootWidth
-            : pageView[currentPage!]?.rect.top
+            : pageViews[currentPage!]?.rect.top
           
           if (flow === 'paginated') {
             documentElement.scrollLeft = scrollValue

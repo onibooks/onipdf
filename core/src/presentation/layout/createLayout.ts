@@ -4,11 +4,14 @@ import { subscribeWithSelector } from 'zustand/middleware'
 import * as commands from './index'
 import { provider } from '../../provider'
 
+export type Flow = 'paginated' | 'scrolled'
+export type Spread = 'single' | 'double' | 'coverFacing'
+
 export type LayoutOptions = {
   width?: number
   height?: number
-  flow?: 'paginated' | 'scrolled'
-  spread?: 'single' | 'double' | 'coverFacing' 
+  flow?: Flow
+  spread?: Spread
   zoom?: number
 }
 

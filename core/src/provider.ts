@@ -20,10 +20,20 @@ export type PageRect = {
 export type PageView = {
   cached: boolean
   rect: PageRect
-  pageIndex?: number
+  pageIndex: number
 }
 
-export type SpreadPage = PageView[]
+export type PageViews = {
+  rect: PageRect
+  pageIndex: number
+}
+
+export type SpreadPage = {
+  index: number
+  cached: boolean
+  rect: PageRect
+  pages: PageViews[]
+}
 
 export type GlobalContext = {
   oniPDF: OniPDF

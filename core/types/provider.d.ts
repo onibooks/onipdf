@@ -10,14 +10,14 @@ import type { Sangte } from './sangte';
 import type { MuPDFWorker } from './workers/createWorker';
 import type { Options } from './commands/render';
 import type { Presentation } from './presentation';
-type Size = {
+export type PageRect = {
     top: number;
     width: number;
     height: number;
 };
-type PageView = {
+export type PageView = {
     cached: boolean;
-    size: Size;
+    rect: PageRect;
 };
 export type GlobalContext = {
     oniPDF: OniPDF;
@@ -38,4 +38,3 @@ export declare const createContext: () => GlobalContext;
  * consumer의 매개변수로 context를 넣어주면 현재 context를 return하게된다.
  */
 export declare const provider: <T>(consumer: (context: GlobalContext) => T) => T;
-export {};

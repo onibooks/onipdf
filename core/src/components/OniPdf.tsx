@@ -4,7 +4,7 @@ import { EVENTS } from '../constants'
 import { setCssVariables } from '../helpers'
 import { debounce, addClass, removeClass } from '../utils'
 
-import Single from './Spread/Single'
+import Single from './Spread/Single2'
 import Double from './Spread/Double'
 
 import type { Emotion } from '@emotion/css/types/create-instance'
@@ -27,6 +27,9 @@ const OniPDF = ({
   const oniContainerRef = useRef<HTMLDivElement>(null)
   
   const [spread, setSpread] = useState('')
+  
+  const isSingle = spread === 'single'
+  const isDouble = spread === 'double' || spread === 'coverFacing'
 
   useEffect(() => {
     // DOM 준비
@@ -42,7 +45,13 @@ const OniPDF = ({
   }, [])
   
   useEffect(() => {
-    const { oniPDF, rootElement, documentElement, sangte, presentation } = context
+    const { 
+      oniPDF,
+      sangte,
+      presentation,
+      rootElement,
+      documentElement
+    } = context
 
     const setResizeState = () => {
       sangte.setState({ isResize: true })
@@ -168,10 +177,8 @@ const OniPDF = ({
         className={clsx('oni-container', classes.OniContainer)}
         ref={oniContainerRef}
         >
-        {spread === 'single'
-          ? (<Single context={context} />)
-          : <Double context={context} />
-        }
+        {isSingle && <Single context={context} />}
+        {isDouble && <Double context={context} />}
       </div>
     </div>
   )
