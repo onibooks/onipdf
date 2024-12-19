@@ -104,7 +104,9 @@ export const createLocate = () => provider((context) => {
 
   const handleRelocate = (event?: Event) => {
     const isForceReflow = event && (event as Event & { isForceReflow?: boolean }).isForceReflow
+    const isForceLayout = event && (event as Event & { isForceLayout?: boolean }).isForceLayout 
     if (isForceReflow) return
+    // if (isForceReflow || isForceLayout) return
 
     const { isRendered } = context.sangte.getState()
     if (!isRendered) return
@@ -114,16 +116,6 @@ export const createLocate = () => provider((context) => {
       currentPage
     })
   }
-
-  const handleScroll = (event?: Event) => {
-    const { isResize, isRendered } = context.sangte.getState()
-    if (isResize || !isRendered) return
-    
-    // const currentPage = getCurrentPage()
-    // locate.setState({
-    //   currentPage
-    // })
-  }
   
   const handleResize = (event?: Event) => {
     const { isRendered } = context.sangte.getState()
@@ -132,8 +124,38 @@ export const createLocate = () => provider((context) => {
     handleRelocate(event)
   }
 
+  const handleLayout = (event?: Event) => {
+    // Double 일 때, 
+    // 뷰포트 크기 작게 줄였을 때
+    // 업데이트 후 갱신된 currentPage보다 하나 작게 currentPage를 가지고 오는 버그 있음...
+    // 원인은 아마 handleRelocate에서 getCurrentPage() 계산되는 부분인 것 같은데..
+    
+    const { currentPage: prevPage } = locate.getState()
+    const { spread } = context.presentation.layout()
+
+    if (spread !== 'single') {
+      locate.setState({
+        currentPage: Math.floor(prevPage! / 2)
+      })
+    } else {
+      locate.setState({
+        currentPage: Math.floor(prevPage! * 2)
+      })
+    }
+
+    const { currentPage } = locate.getState()
+    console.log('업데이트 후', currentPage!)
+
+    if (event) {
+      context.oniPDF.emit(EVENTS.RENDER)
+    }
+  }
+
   context.oniPDF.on(EVENTS.RESIZE, handleResize)
-  context.oniPDF.on(EVENTS.SCROLL, handleScroll)
+  context.oniPDF.on(EVENTS.LAYOUT, handleLayout)
+  // EVENTS.SCROLL 이벤트일 때 handleRelocate 실행하고 싶은데
+  // getCurrentPage() 자체는 올바른 currentPage를 가지고 오지만, currentPage가 갱신되면서 moveToPage가 실행될 때 뭔가 꼬이는지 망함
+  // 근데 scroll 될 때마다 현재 페이지 갱신되게 해야하는데 이게 진짜 노답이라 죽겠음
 
   const configure = (
     options: Locate

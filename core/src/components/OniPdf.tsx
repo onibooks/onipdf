@@ -70,8 +70,6 @@ const OniPDF = ({
       if (isForceLayout) {
         const { spread } = context.presentation.layout()
         setSpread(spread!)
-
-        // return
       }
 
       const {
@@ -162,27 +160,6 @@ const OniPDF = ({
       }
     }, debounceTimeoutDelay)
 
-    const handleLayout = (event?: Event) => {
-      const { currentPage } = presentation.locate()
-      const { spread } = context.presentation.layout()
-      
-      if (spread === 'single') {
-        const currentSpread = context.pageViews.find((s) => s.pages.some((page) => page.pageIndex === currentPage))
-        presentation.locate({
-          currentPage: currentSpread?.index! * 2
-        })
-      } else {
-        const currentSpread = context.pageViews.find((s) => s.pages.some((page) => page.pageIndex === currentPage))
-        presentation.locate({
-          currentPage: currentSpread?.index
-        })
-      }
-
-      if (event) {
-        oniPDF.emit(EVENTS.RENDER)
-      }
-    }
-
     window.addEventListener('resize', handleResize)
     window.addEventListener('resize', handleResized)
     window.addEventListener(EVENTS.KEYDOWN, handleArrowKey)
@@ -190,8 +167,7 @@ const OniPDF = ({
     documentElement.addEventListener('scroll', handleScrolled)
 
     oniPDF.once(EVENTS.READY, handleReady)
-    oniPDF.on(EVENTS.RENDER, handleRender)  
-    oniPDF.on(EVENTS.LAYOUT, handleLayout)  
+    oniPDF.on(EVENTS.RENDER, handleRender)
     return () => {
       window.removeEventListener(EVENTS.RESIZE, handleResize)
       window.removeEventListener(EVENTS.KEYDOWN, handleArrowKey)
