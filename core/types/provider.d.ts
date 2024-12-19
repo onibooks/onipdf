@@ -18,6 +18,17 @@ export type PageRect = {
 export type PageView = {
     cached: boolean;
     rect: PageRect;
+    pageIndex: number;
+};
+export type PageViews = {
+    rect: PageRect;
+    pageIndex: number;
+};
+export type SpreadPage = {
+    index: number;
+    cached: boolean;
+    rect: PageRect;
+    pages: PageViews[];
 };
 export type GlobalContext = {
     oniPDF: OniPDF;
@@ -27,7 +38,8 @@ export type GlobalContext = {
     rootElement: HTMLElement;
     documentElement: HTMLElement;
     options: Options;
-    pageViews: PageView[];
+    pageView: PageView[];
+    pageViews: SpreadPage[];
     presentation: Presentation;
     uid: number;
 };

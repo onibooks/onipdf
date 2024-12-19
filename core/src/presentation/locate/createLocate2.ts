@@ -47,14 +47,14 @@ export const createLocate = () => provider((context) => {
     
     if (flow === 'paginated') {
       const { isResize } = context.sangte.getState()
-      if (!isResize) {
-        documentElement.scrollLeft = currentPage * rootWidth
-      }
+      // if (!isResize) {
+        documentElement.scrollLeft = currentPage * rootWidth 
+      // }
     } else if (flow === 'scrolled') {
       const { isScroll, isResize } = context.sangte.getState()
-      if (!isScroll && !isResize) {
+      // if (!isScroll && !isResize) {
         documentElement.scrollTop = context.pageViews[currentPage]?.rect.top
-      }
+      // }
     }
   }
 
@@ -119,10 +119,10 @@ export const createLocate = () => provider((context) => {
     const { isResize, isRendered } = context.sangte.getState()
     if (isResize || !isRendered) return
     
-    const currentPage = getCurrentPage()
-    locate.setState({
-      currentPage
-    })
+    // const currentPage = getCurrentPage()
+    // locate.setState({
+    //   currentPage
+    // })
   }
   
   const handleResize = (event?: Event) => {

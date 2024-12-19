@@ -11,5 +11,5 @@ export const setSpread = (context: GlobalContext) => (value: LayoutOptions['spre
   removeClass(documentElement, 'coverFacing') 
   addClass(documentElement, value!)
 
-  // oniPDF.forceLayout()
+  oniPDF.forceLayout()
 }

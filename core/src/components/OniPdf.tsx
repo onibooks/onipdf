@@ -3,13 +3,15 @@ import { useState, useRef, useMemo, useEffect } from 'preact/hooks'
 import { EVENTS } from '../constants'
 import { setCssVariables } from '../helpers'
 import { debounce, addClass, removeClass } from '../utils'
+import { useForceUpdate } from '../hooks/useForceUpdate'
 
-import Single from './Spread/Single2'
+import Single from './Spread/Single3'
 import Double from './Spread/Double'
 
 import type { Emotion } from '@emotion/css/types/create-instance'
 import type { GlobalContext } from '../provider'
 import type { Options } from '../commands/render'
+import type { Spread } from '../presentation/layout/createLayout'
 
 type OniPDFProps = {
   context: GlobalContext
@@ -26,10 +28,10 @@ const OniPDF = ({
   const oniDocumentRef = useRef<HTMLDivElement>(null)
   const oniContainerRef = useRef<HTMLDivElement>(null)
   
-  const [spread, setSpread] = useState('')
-  
+  const [spread, setSpread] = useState<Spread>() // Spread 컴포넌트 변경을 위한 상태
   const isSingle = spread === 'single'
   const isDouble = spread === 'double' || spread === 'coverFacing'
+  console.log('render onipdf')
 
   useEffect(() => {
     // DOM 준비
@@ -64,6 +66,14 @@ const OniPDF = ({
     }
 
     const handleResize = (event?: Event) => {
+      const isForceLayout = event && (event as Event & { isForceLayout?: boolean }).isForceLayout 
+      if (isForceLayout) {
+        const { spread } = context.presentation.layout()
+        setSpread(spread!)
+
+        // return
+      }
+
       const {
         rootWidth,
         rootHeight
@@ -94,7 +104,7 @@ const OniPDF = ({
     }, debounceTimeoutDelay)
     
     const handleReady = (event?: Event) => {
-      sangte.setState({ isResize: false })
+      sangte.setState({ isResize: false, isReady: true })
 
       presentation.locate({
         ...options.locate
@@ -152,17 +162,40 @@ const OniPDF = ({
       }
     }, debounceTimeoutDelay)
 
+    const handleLayout = (event?: Event) => {
+      const { currentPage } = presentation.locate()
+      const { spread } = context.presentation.layout()
+      
+      if (spread === 'single') {
+        const currentSpread = context.pageViews.find((s) => s.pages.some((page) => page.pageIndex === currentPage))
+        presentation.locate({
+          currentPage: currentSpread?.index! * 2
+        })
+      } else {
+        const currentSpread = context.pageViews.find((s) => s.pages.some((page) => page.pageIndex === currentPage))
+        presentation.locate({
+          currentPage: currentSpread?.index
+        })
+      }
+
+      if (event) {
+        oniPDF.emit(EVENTS.RENDER)
+      }
+    }
+
     window.addEventListener('resize', handleResize)
     window.addEventListener('resize', handleResized)
-    oniPDF.on(EVENTS.READY, handleReady)
     window.addEventListener(EVENTS.KEYDOWN, handleArrowKey)
-    oniPDF.on(EVENTS.RENDER, handleRender)
     documentElement.addEventListener('scroll', handleScroll)
     documentElement.addEventListener('scroll', handleScrolled)
+
+    oniPDF.once(EVENTS.READY, handleReady)
+    oniPDF.on(EVENTS.RENDER, handleRender)  
+    oniPDF.on(EVENTS.LAYOUT, handleLayout)  
     return () => {
       window.removeEventListener(EVENTS.RESIZE, handleResize)
-      oniPDF.off(EVENTS.READY, handleReady)
       window.removeEventListener(EVENTS.KEYDOWN, handleArrowKey)
+
       oniPDF.off(EVENTS.RENDER, handleRender)
       documentElement.removeEventListener(EVENTS.SCROLL, handleScroll)
     }

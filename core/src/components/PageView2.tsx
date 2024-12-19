@@ -20,6 +20,8 @@ type PageViewProps = {
   pageRender: (value: unknown) => void
 }
 
+const debounceTimeoutDelay = 350
+
 const PageView = ({
   context,
   pageMaxSize,
@@ -27,7 +29,7 @@ const PageView = ({
   pageIndex,
   pageRender
 }: PageViewProps) => {
-  const { oniPDF, options, worker, presentation, documentElement, pageViews } = context
+  const { options, worker, presentation, documentElement, pageViews } = context
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   
   const observerRef = useRef<IntersectionObserver | null>(null)
@@ -204,7 +206,7 @@ const PageView = ({
     setCssVariables(containerVariables, pageContainerRef.current!)  
   }
 
-  const updatePageSize = () => {
+  const updatePageSize = (): Promise<void> => {
     const { flow } = presentation.layout()
 
     if (flow === 'scrolled') {
@@ -216,7 +218,7 @@ const PageView = ({
     return Promise.resolve()
   }
 
-  const initalizePageRect = () => {
+  const initalizePageRect = (): Promise<void> => {
     const maxWidth = pageMaxSize.width
     const baseWidth = pageSize.width
     aspectRatioRef.current = baseWidth / maxWidth
@@ -237,6 +239,7 @@ const PageView = ({
 
   const preRender = () => {
     const { currentPage } = options.locate!
+
     if (currentPage === currentSpreadIndex) {
       drawPageAsPixmap()
     }
@@ -280,8 +283,8 @@ const PageView = ({
       if (!isObserver.current) {
         setPageObserver()
       }
-    }, 350)
-
+    }, debounceTimeoutDelay)
+    
     context.oniPDF.on(EVENTS.RESIZE, handleForceReflow)
     context.oniPDF.on(EVENTS.FORCERESIZE, handleForceResize)
     context.oniPDF.on(EVENTS.RESIZED, handleResized)
@@ -291,14 +294,14 @@ const PageView = ({
       context.oniPDF.off(EVENTS.FORCERESIZED, handleResized)
     }
   }, [])
-
+  
   useEffect(() => {
     initalizePageRect()
-      .then(() => setPageSize())
-      .then(() => pageRender(null))
-      .then(() => preRender())
+    .then(() => setPageSize())
+    .then(() => pageRender(null))
+    .then(() => preRender())
   }, [])
-
+  
   useEffect(() => {
     const handleReady = () => {
       setupIntersectionObserver()

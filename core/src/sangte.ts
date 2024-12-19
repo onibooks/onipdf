@@ -1,11 +1,10 @@
 import { createStore } from 'zustand/vanilla'
 
-import { subscribeWithSelector } from 'zustand/middleware'
-
 export type Sangte = {
   isLoad: boolean
   isResize: boolean
   isScroll: boolean
+  isReady: boolean
   isRendered: boolean
   scale: number
 }
@@ -15,6 +14,7 @@ export const createSangte = () => {
     isLoad: false,
     isResize: false,
     isScroll: false,
+    isReady: false,
     isRendered: false,
     scale: 1
   }))

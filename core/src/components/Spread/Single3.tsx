@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { render as prender } from 'preact'
-import { memo } from 'preact/compat'
-import { useEffect, useRef, useMemo } from 'preact/hooks'
+import { useMemo, useRef, useEffect } from 'preact/hooks'
 import { EVENTS } from '../../constants'
+import { updateScrollPosition } from '../../utils/updateScrollPosition'
 
 import PageView from '../PageView2'
 
@@ -13,7 +13,7 @@ type SingleProps = {
   context: GlobalContext
 }
 
-const Single = memo(({
+const Single = ({
   context
 }: SingleProps) => {
   const { oniPDF, presentation } = context
@@ -23,30 +23,28 @@ const Single = memo(({
 
   useEffect(() => {
     ;(async () => {
-      const { totalPages } = context.presentation.locate()
-      const promises = Array.from({ length: totalPages! })
-        .map((_, pageIndex) => (
-          context.worker.getPageSize(pageIndex)
-        ))
-
+      const { totalPages } = presentation.locate()
+      const promises = Array.from({ length: totalPages! }).map((_, pageIndex) =>
+        context.worker.getPageSize(pageIndex)
+      )
       const pageSizes = await Promise.all(promises)
       context.pageViews = pageSizes.map<SpreadPage>((size, index) => ({
         index,
         cached: false,
-        rect: { ...size, top: 0 },
+        rect: { top: 0, width: 0, height: 0 },
         pages: [
           {
             rect: { ...size, top: 0 },
-            pageIndex: index
+            pageIndex: index,
           },
         ],
       }))
-
+  
       const pageMaxSize = {
-        width: Math.round(Math.max(...pageSizes.map(p => p.width)) * 10) / 10,
-        height: Math.round(Math.max(...pageSizes.map(p => p.height)) * 10) / 10
+        width: Math.round(Math.max(...pageSizes.map((p) => p.width)) * 10) / 10,
+        height: Math.round(Math.max(...pageSizes.map((p) => p.height)) * 10) / 10,
       }
-      
+
       const rendered = context.pageViews.map(({ pages }) => (
         new Promise((resolve, reject) => {
           const fragment = document.createElement('div')
@@ -69,37 +67,37 @@ const Single = memo(({
           )
         })
       ))
-
+  
       await Promise.all(rendered)
 
       // PDF 렌더링 준비 완료
-      oniPDF.emit(EVENTS.READY, oniBodyRef.current)
+      const { isReady: isReadyOnce } = context.sangte.getState()
+      const eventName = isReadyOnce ? EVENTS.LAYOUT : EVENTS.READY
+      context.oniPDF.emit(eventName, oniBodyRef.current)
     })()
   }, [])
 
   useEffect(() => {
-    const updateScrollPosition = () => {
-      const oniBody = oniBodyRef.current
-      if (!oniBody) return
+    // const updateScrollPosition = () => {
+    //   const { flow } = presentation.layout()
 
-      const { flow } = presentation.layout()
-      if (flow === 'scrolled') {
-        const { scrollTop, scrollHeight } = context.documentElement
-        scrollPositionRef.current = {
-          leftRatio: 0,
-          topRatio: scrollTop / scrollHeight || 0
-        }
-      } else {
-        const { scrollLeft, scrollWidth } = context.documentElement
-        scrollPositionRef.current = {
-          leftRatio: scrollLeft / scrollWidth || 0,
-          topRatio: 0
-        }
-      }
-    }
+    //   if (flow === 'scrolled') {
+    //     const { scrollTop, scrollHeight } = context.documentElement
+    //     scrollPositionRef.current = {
+    //       leftRatio: 0,
+    //       topRatio: scrollTop / scrollHeight || 0
+    //     }
+    //   } else {
+    //     const { scrollLeft, scrollWidth } = context.documentElement
+    //     scrollPositionRef.current = {
+    //       leftRatio: scrollLeft / scrollWidth || 0,
+    //       topRatio: 0
+    //     }
+    //   }
+    // }
 
     const handleResize = () => {
-      updateScrollPosition()
+      scrollPositionRef.current = updateScrollPosition()
 
       oniPDF.emit(EVENTS.FORCERESIZE, scrollPositionRef.current)
     }
@@ -116,7 +114,7 @@ const Single = memo(({
       ref={oniBodyRef}
     />
   )
-})
+}
 
 const createClasses = (
   css: Emotion['css'],

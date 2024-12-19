@@ -13,4 +13,5 @@ export declare const EVENTS: {
     KEYDOWN: string;
     SCROLL: string;
     SCROLLED: string;
+    LAYOUT: string;
 };

@@ -1,8 +1,10 @@
+export type Flow = 'paginated' | 'scrolled';
+export type Spread = 'single' | 'double' | 'coverFacing';
 export type LayoutOptions = {
     width?: number;
     height?: number;
-    flow?: 'paginated' | 'scrolled';
-    spread?: 'single' | 'double' | 'coverFacing';
+    flow?: Flow;
+    spread?: Spread;
     zoom?: number;
 };
 export type Layout = LayoutOptions & {
