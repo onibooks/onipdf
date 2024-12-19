@@ -157,6 +157,11 @@ const createClasses = (
 
   OniSpread: css`
     display: flex;
+
+    /* .paginated & {
+      width: 100vw;
+      height: 100vh;
+    } */
   `
 })
 

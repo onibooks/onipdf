@@ -47,9 +47,10 @@ export const createLocate = () => provider((context) => {
     
     if (flow === 'paginated') {
       const { isResize } = context.sangte.getState()
-      // if (!isResize) {
+      if (!isResize) { // 이거 조건 제거하고 싶은데 제거하면 리사이즈할 때 덜덜거림 ;;;
+      console.log(rootWidth)
         documentElement.scrollLeft = currentPage * rootWidth 
-      // }
+      }
     } else if (flow === 'scrolled') {
       const { isScroll, isResize } = context.sangte.getState()
       // if (!isScroll && !isResize) {
