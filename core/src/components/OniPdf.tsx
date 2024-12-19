@@ -103,9 +103,12 @@ const OniPDF = ({
     
     const handleReady = (event?: Event) => {
       sangte.setState({ isResize: false, isReady: true })
+      const { divisor } = presentation.layout()
+      const currentPage = options.locate?.currentPage || 0
 
       presentation.locate({
-        ...options.locate
+        ...options.locate,
+        currentPage: currentPage / divisor
       })
 
       if (event) {

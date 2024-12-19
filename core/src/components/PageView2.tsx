@@ -176,11 +176,12 @@ const PageView = ({
   const setPaginatedRect = () => {
     const {
       rootWidth,
-      rootHeight
+      rootHeight,
+      divisor
     } = presentation.layout()
 
-    const widthRatio = rootWidth / pageSize.width
-    const heightRatio = rootHeight / pageSize.height
+    const widthRatio = rootWidth / ( pageSize.width * divisor)
+    const heightRatio = rootHeight / (pageSize.height)
     const rootScale = Math.min(widthRatio, heightRatio)
 
     const pageWidth = pageSize.width * rootScale
@@ -188,12 +189,12 @@ const PageView = ({
 
     currentSpread!.rect = {
       top: 0,
-      width: pageWidth,
+      width: pageWidth * divisor,
       height: pageHeight
     }
 
     const sectionVariables = {
-      pageWidth: `${rootWidth}px`,
+      pageWidth: `${rootWidth / divisor}px`,
       pageHeight: `${rootHeight}px`
     }
 
@@ -347,6 +348,15 @@ const createClasses = (
 
     .paginated & {
       flex-shrink: 0;
+    }
+
+    .double & {
+      &:first-child {
+        justify-content: flex-end;
+      }
+      &:last-child {
+        justify-content: flex-start;
+      }
     }
   `,
 
