@@ -11,7 +11,7 @@ const renderOptions = {
     currentPage: 10,
   },
   layout: {
-    flow: 'paginated' as FlowType,
+    flow: 'scrolled' as FlowType,
     spread: 'double' as SpreadType,
     zoom: 1
   }

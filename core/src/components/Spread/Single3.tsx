@@ -2,7 +2,6 @@ import clsx from 'clsx'
 import { render as prender } from 'preact'
 import { useMemo, useRef, useEffect } from 'preact/hooks'
 import { EVENTS } from '../../constants'
-import { updateScrollPosition } from '../../utils/updateScrollPosition'
 
 import PageView from '../PageView2'
 
@@ -16,10 +15,9 @@ type SingleProps = {
 const Single = ({
   context
 }: SingleProps) => {
-  const { oniPDF, presentation } = context
+  const { presentation } = context
   const classes = useMemo(() => createClasses(context.emotion.css), [])
   const oniBodyRef = useRef<HTMLDivElement>(null)
-  const scrollPositionRef = useRef({ leftRatio: 0, topRatio: 0 })
 
   useEffect(() => {
     ;(async () => {
@@ -75,37 +73,6 @@ const Single = ({
       const eventName = isReadyOnce ? EVENTS.LAYOUT : EVENTS.READY
       context.oniPDF.emit(eventName, oniBodyRef.current)
     })()
-  }, [])
-
-  useEffect(() => {
-    // const updateScrollPosition = () => {
-    //   const { flow } = presentation.layout()
-
-    //   if (flow === 'scrolled') {
-    //     const { scrollTop, scrollHeight } = context.documentElement
-    //     scrollPositionRef.current = {
-    //       leftRatio: 0,
-    //       topRatio: scrollTop / scrollHeight || 0
-    //     }
-    //   } else {
-    //     const { scrollLeft, scrollWidth } = context.documentElement
-    //     scrollPositionRef.current = {
-    //       leftRatio: scrollLeft / scrollWidth || 0,
-    //       topRatio: 0
-    //     }
-    //   }
-    // }
-
-    const handleResize = () => {
-      scrollPositionRef.current = updateScrollPosition()
-
-      oniPDF.emit(EVENTS.FORCERESIZE, scrollPositionRef.current)
-    }
-  
-    oniPDF.on(EVENTS.RESIZE, handleResize)
-    return () => {
-      oniPDF.off(EVENTS.RESIZE, handleResize)
-    }
   }, [])
 
   return (

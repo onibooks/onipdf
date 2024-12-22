@@ -14,4 +14,5 @@ export const EVENTS = {
   SCROLL: 'scroll',
   SCROLLED: 'scrolled',
   LAYOUT: 'layout',
+  UPDATEPAGESIZE: 'updatepagesize',
 }

@@ -139,7 +139,7 @@ const PageView = ({
     const { flow } = presentation.layout()
 
     if (flow === 'paginated') {
-      documentElement.scrollLeft = documentElement.scrollWidth * leftRatio
+      // documentElement.scrollLeft = documentElement.scrollWidth * leftRatio
     } else {
       documentElement.scrollTop = documentElement.scrollHeight * topRatio
     }
@@ -241,7 +241,8 @@ const PageView = ({
   const preRender = () => {
     const { currentPage } = options.locate!
 
-    if (currentPage === currentSpreadIndex) {
+    if ((currentPage! / 2) - currentSpreadIndex <= 1) {
+    // if ((currentPage! / 2) === currentSpreadIndex) {
       drawPageAsPixmap()
     }
   }
@@ -257,27 +258,27 @@ const PageView = ({
 
       updatePageSize()
         .then(() => {
-          const { currentPage } = context.presentation.locate()
-          const { rootWidth, flow } = presentation.layout()
-          const scrollValue = flow === 'paginated'
-            ? currentPage! * rootWidth
-            : pageViews[currentPage!]?.rect.top
+          // const { currentPage } = context.presentation.locate()
+          // const { rootWidth, flow } = presentation.layout()
+          // const scrollValue = flow === 'paginated'
+          //   ? currentPage! * rootWidth
+          //   : pageViews[currentPage!]?.rect.top
           
-          if (flow === 'paginated') {
-            documentElement.scrollLeft = scrollValue
-          } else {
-            documentElement.scrollTop = scrollValue
-          }
+          // if (flow === 'paginated') {
+          //   documentElement.scrollLeft = scrollValue
+          // } else {
+          //   documentElement.scrollTop = scrollValue
+          // }
         })
     }
 
-    const handleForceResize = (event?: Event) => {
+    const handleResize = (event?: Event) => {
       if (isObserver.current) {
         setPageUnobserver()
       }
 
       updatePageSize()
-        .then(() => setPagePosition(event))
+        .then(() => context.oniPDF.emit(EVENTS.UPDATEPAGESIZE))
     }
     
     const handleResized = debounce((event?: Event) => {
@@ -286,13 +287,11 @@ const PageView = ({
       }
     }, debounceTimeoutDelay)
     
-    context.oniPDF.on(EVENTS.RESIZE, handleForceReflow)
-    context.oniPDF.on(EVENTS.FORCERESIZE, handleForceResize)
+    context.oniPDF.on(EVENTS.RESIZE, handleResize)
     context.oniPDF.on(EVENTS.RESIZED, handleResized)
     return () => {
-      context.oniPDF.off(EVENTS.RESIZE, handleForceReflow)
-      context.oniPDF.off(EVENTS.FORCERESIZE, handleForceResize)
-      context.oniPDF.off(EVENTS.FORCERESIZED, handleResized)
+      context.oniPDF.off(EVENTS.RESIZE, handleResize)
+      context.oniPDF.off(EVENTS.RESIZED, handleResized)
     }
   }, [])
   
