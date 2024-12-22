@@ -6,8 +6,6 @@ export const EVENTS = {
   RELOCATE: 'relocate',
   RESIZE: 'resize',
   RESIZED: 'resized',
-  FORCERESIZE: 'forceresize',
-  FORCERESIZED: 'forceresized',
   RENDER: 'render',
   RENDERED: 'rendered',
   KEYDOWN: 'keydown',
