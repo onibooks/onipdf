@@ -1,1 +1,0 @@
-// initializePinch, destroyPinch

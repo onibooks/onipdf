@@ -1,1 +1,0 @@
-// isPinch, getDistance
